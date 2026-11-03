@@ -1,0 +1,22 @@
+{
+  "wordmark": "Английский по-американски",
+  "handle": "@esl_teacher_bro",
+  "size": [1080, 1350],
+  "margin": 72,
+  "colors": {
+    "ink": "#13213C",
+    "paper": "#FBF8F1",
+    "red": "#E4483F",
+    "teal": "#1F8A70",
+    "sun": "#FFC857",
+    "mist": "#E9EEF5",
+    "muted": "#5E6B80",
+    "white": "#FFFFFF"
+  },
+  "fonts": {
+    "display": "brand/fonts/Inter-ExtraBold.ttf",
+    "bold": "brand/fonts/Inter-Bold.ttf",
+    "semibold": "brand/fonts/Inter-SemiBold.ttf",
+    "medium": "brand/fonts/Inter-Medium.ttf"
+  }
+}

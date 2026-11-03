@@ -1,0 +1,150 @@
+[
+  {
+    "id": "2026-11-09-intro",
+    "publish_at": "2026-11-09T05:45:00Z",
+    "kind": "intro",
+    "topic": "Знакомство: кто ведёт аккаунт и что здесь будет (закрепить)",
+    "topic_tag": "Английский язык",
+    "text": "👋 Привет! Это «Английский по-американски».\n\nПреподаю английский онлайн с 2016 года. За плечами — больше 15 лет в США, поэтому здесь будет английский, на котором там реально говорят.\n\nКаждый день:\n🧩 утром — квиз или задание, разбор на следующий день\n📚 вечером — живые фразы, грамматика и типичные ошибки русскоговорящих\n\nПодписывайся 🙌\nИ напиши в комментариях: что в английском даётся тебе труднее всего?"
+  },
+  {
+    "id": "2026-11-09-p1-look-forward-to",
+    "publish_at": "2026-11-09T06:00:00Z",
+    "kind": "quiz",
+    "topic": "look forward to + -ing",
+    "topic_tag": "Английский язык",
+    "text": "🧩 Проверь себя\n\nI'm really looking forward ___ you on Friday.\n\nA) to see\nB) to seeing\nC) seeing\nD) see\n\nПиши в комментариях букву — и почему выбрал(а) именно её 👇\nРазбор — завтра утром.",
+    "answer": "B"
+  },
+  {
+    "id": "2026-11-09-p2-how-are-you",
+    "publish_at": "2026-11-09T16:00:00Z",
+    "kind": "lesson",
+    "topic": "How are you? textbook vs real life",
+    "topic_tag": "Английский язык",
+    "text": "📚 Учебник vs 🇺🇸 Америка\n\nВ учебнике:\n— How are you?\n— I'm fine, thank you. And you?\n\nВ жизни:\n— Hey, how's it going?\n— Pretty good, you? / Not bad! / Can't complain.\n\n💡 В Америке How are you? — чаще всего просто приветствие, а не вопрос о самочувствии. Подробного рассказа о делах никто не ждёт.\n\nА ты что обычно отвечаешь? 👇",
+    "image": "media/2026-11-09-how-are-you.png",
+    "alt_text": "Карточка «Учебник vs Америка». В учебнике: How are you? — I'm fine, thank you. And you? В жизни: How's it going? — Pretty good, you? Not bad! Can't complain."
+  },
+  {
+    "id": "2026-11-10-r-look-forward-to",
+    "publish_at": "2026-11-10T06:15:00Z",
+    "kind": "reveal",
+    "reply_to": "2026-11-09-p1-look-forward-to",
+    "text": "✅ Разбор вчерашнего квиза\n\nI'm really looking forward ___ you on Friday.\nПравильно — B) to seeing.\n\nВ look forward to слово to — это предлог, а не частица перед инфинитивом. А после предлога глагол идёт с -ing.\n\n✔️ I'm looking forward to hearing from you.\n✔️ We look forward to working with you.\n❌ I'm looking forward to see you.\n\nТа же ловушка в be used to: I'm used to waking up early."
+  },
+  {
+    "id": "2026-11-10-p1-explain-to-me",
+    "publish_at": "2026-11-10T06:00:00Z",
+    "kind": "quiz",
+    "topic": "explain something to someone",
+    "topic_tag": "Английский язык",
+    "text": "🔥 Только одно предложение правильное:\n\nA) He explained me the rule.\nB) He explained the rule to me.\nC) He explained me about the rule.\n\nПиши в комментариях A, B или C 👇\nРазбор — завтра утром.",
+    "answer": "B"
+  },
+  {
+    "id": "2026-11-10-p2-figure-out",
+    "publish_at": "2026-11-10T16:00:00Z",
+    "kind": "lesson",
+    "topic": "figure out",
+    "topic_tag": "Английский язык",
+    "text": "📌 Выражение дня: figure out\n\n🔊 [ˈfɪɡjər aʊt]\n🇷🇺 разобраться, понять, найти решение\n\nI can't figure out how this app works.\n— Не могу разобраться, как работает это приложение.\n\nDon't worry, we'll figure it out.\n— Не переживай, разберёмся.\n\n⚠️ Местоимение ставим в середину: figure it out ✔️ figure out it ❌\n\n✍️ Переведи: «Я пытаюсь понять, что пошло не так». Пиши в комментариях 👇"
+  },
+  {
+    "id": "2026-11-11-r-explain-to-me",
+    "publish_at": "2026-11-11T06:15:00Z",
+    "kind": "reveal",
+    "reply_to": "2026-11-10-p1-explain-to-me",
+    "text": "✅ Разбор вчерашнего квиза\n\nПравильно — B) He explained the rule to me.\n\nПосле explain нельзя сразу поставить человека. Explain me — одна из самых частых ошибок русскоговорящих: мы ведь говорим «объясни мне».\n\nСхема: explain something to someone\n✔️ Can you explain this to me?\n✔️ Let me explain.\n❌ Explain me, please.\n\nТак же работают describe и suggest: describe it to me, suggest it to your boss."
+  },
+  {
+    "id": "2026-11-11-p1-pp-vs-ps",
+    "publish_at": "2026-11-11T06:00:00Z",
+    "kind": "quiz",
+    "topic": "Present Perfect vs Past Simple",
+    "topic_tag": "Английский язык",
+    "text": "🧩 Present Perfect или Past Simple?\n\nI ___ to New York three times, but I ___ there last year.\n\nA) have been / didn't go\nB) was / haven't gone\nC) have been / haven't gone\n\nПиши в комментариях A, B или C 👇\nРазбор — завтра утром ☕️",
+    "image": "media/2026-11-11-quiz-pp-vs-ps.png",
+    "alt_text": "Карточка-квиз «Present Perfect или Past Simple?»: I ___ to New York three times, but I ___ there last year. Варианты: A) have been / didn't go, B) was / haven't gone, C) have been / haven't gone.",
+    "answer": "A"
+  },
+  {
+    "id": "2026-11-11-p2-five-mistakes",
+    "publish_at": "2026-11-11T16:00:00Z",
+    "kind": "lesson",
+    "topic": "5 typical Russian-speaker mistakes",
+    "topic_tag": "Английский язык",
+    "text": "👀 Эти 5 ошибок выдают русскоговорящего с первой фразы\n\n1. I am agree → I agree\n2. I have 30 years → I'm 30\n3. I very like it → I really like it\n4. Make a photo → Take a photo\n5. It depends of → It depends on\n\nСохрани, чтобы не забыть 📌\nПризнавайся: какую из них ты делал(а) раньше? 👇",
+    "image": "media/2026-11-11-five-mistakes.png",
+    "alt_text": "Инфографика «5 ошибок русскоговорящих»: I am agree → I agree; I have 30 years → I'm 30; I very like it → I really like it; Make a photo → Take a photo; It depends of → It depends on."
+  },
+  {
+    "id": "2026-11-11-r-figure-out-task",
+    "publish_at": "2026-11-11T16:15:00Z",
+    "kind": "reveal",
+    "reply_to": "2026-11-10-p2-figure-out",
+    "text": "✍️ Вчерашнее задание: перевести «Я пытаюсь понять, что пошло не так».\n\n✅ I'm trying to figure out what went wrong.\n\nI'm trying to understand what went wrong — тоже правильно, но figure out звучит разговорнее."
+  },
+  {
+    "id": "2026-11-12-r-pp-vs-ps",
+    "publish_at": "2026-11-12T06:15:00Z",
+    "kind": "reveal",
+    "reply_to": "2026-11-11-p1-pp-vs-ps",
+    "text": "✅ Разбор вчерашнего квиза: Present Perfect или Past Simple?\n\nПравильно — A) have been / didn't go.\nI have been to New York three times, but I didn't go there last year.\n\n• three times — опыт за всю жизнь, без конкретного времени → Present Perfect\n• last year — конкретный момент в прошлом → Past Simple\n\n🚩 С yesterday, last week, in 2019, two days ago Present Perfect не используем:\n❌ I have seen him yesterday.\n✔️ I saw him yesterday."
+  },
+  {
+    "id": "2026-11-12-p1-translate-used-to",
+    "publish_at": "2026-11-12T06:00:00Z",
+    "kind": "challenge",
+    "topic": "used to (translation)",
+    "topic_tag": "Английский язык",
+    "text": "🇷🇺 → 🇺🇸 Как сказать по-английски:\n\n«Раньше я жил в Чикаго, а теперь живу в Нью-Йорке».\n\nПиши свой перевод в комментариях 👇\nБез переводчика — так интереснее 😉\nСамый естественный вариант покажу завтра."
+  },
+  {
+    "id": "2026-11-12-p2-about-lessons",
+    "publish_at": "2026-11-12T16:00:00Z",
+    "kind": "promo",
+    "topic": "about the teacher",
+    "topic_tag": "Английский язык",
+    "text": "👋 Немного о том, кто ведёт этот аккаунт\n\nПреподаю английский онлайн с 2016 года. За плечами — больше 15 лет жизни в США, поэтому учу тому английскому, на котором там реально говорят.\n\nС чем помогаю:\n• разговорный английский и уверенность в речи\n• американское произношение\n• грамматика понятными словами\n• английский для работы и собеседований\n\nЗанятия индивидуальные, онлайн, на платформе ProgressMe.\n\nХочешь свободно говорить на английском? Напиши мне в личные сообщения — расскажу про занятия."
+  },
+  {
+    "id": "2026-11-13-r-translate-used-to",
+    "publish_at": "2026-11-13T06:15:00Z",
+    "kind": "reveal",
+    "reply_to": "2026-11-12-p1-translate-used-to",
+    "text": "✅ Вчерашний перевод: «Раньше я жил в Чикаго, а теперь живу в Нью-Йорке».\n\nСамый естественный вариант:\nI used to live in Chicago, but now I live in New York.\n\n💡 «Раньше (а теперь уже нет)» = used to + глагол.\n✔️ We used to go there every summer.\n\nI lived in Chicago before… — тоже понятно, но used to звучит естественнее.\n\n⚠️ Не путай с be used to — «быть привыкшим»: I'm used to it. — Я к этому привык."
+  },
+  {
+    "id": "2026-11-13-p1-articles-a-an",
+    "publish_at": "2026-11-13T06:00:00Z",
+    "kind": "quiz",
+    "topic": "a / an by sound",
+    "topic_tag": "Английский язык",
+    "text": "🧩 Артикли: a или an?\n\nIt was ___ honest mistake — he's just ___ university student.\n\nA) a / a\nB) an / an\nC) an / a\nD) a / an\n\nПиши букву в комментариях 👇\nПодсказка: подвох не в грамматике, а в произношении 😉",
+    "answer": "C"
+  },
+  {
+    "id": "2026-11-13-p2-for-here-or-to-go",
+    "publish_at": "2026-11-13T16:00:00Z",
+    "kind": "quiz",
+    "topic": "For here or to go?",
+    "topic_tag": "Английский язык",
+    "text": "☕️ Ты в американской кофейне. Заказываешь латте, а бариста спрашивает:\n\n«For here or to go?»\n\nЧто он хочет узнать?\nA) Вы местный или турист?\nB) Здесь или с собой?\nC) Оплата сейчас или потом?\nD) Большой или маленький?\n\nПиши букву в комментариях 👇 Разбор — завтра вечером.",
+    "answer": "B"
+  },
+  {
+    "id": "2026-11-14-r-articles-a-an",
+    "publish_at": "2026-11-14T06:15:00Z",
+    "kind": "reveal",
+    "reply_to": "2026-11-13-p1-articles-a-an",
+    "text": "✅ Разбор вчерашнего квиза: a или an?\n\nПравильно — C) an / a.\nIt was an honest mistake — he's just a university student.\n\nАртикль выбираем по первому звуку, а не по букве:\n• honest [ˈɑːnɪst] — h не читается, слово начинается с гласного звука → an\n• university [ˌjuːnɪˈvɜːrsəti] — начинается со звука [j] → a\n\nЕщё примеры:\nan hour, an MBA\na European country, a one-way ticket"
+  },
+  {
+    "id": "2026-11-14-r-for-here-or-to-go",
+    "publish_at": "2026-11-14T16:15:00Z",
+    "kind": "reveal",
+    "reply_to": "2026-11-13-p2-for-here-or-to-go",
+    "text": "✅ Разбор вчерашнего вопроса: «For here or to go?»\n\nПравильно — B) «Здесь или с собой?»\n\nFor here — выпить или поесть на месте, to go — забрать с собой. Отвечать можно коротко: For here, please. / To go, please.\n\nЕщё фразы для кафе:\n• Can I get a medium latte? — Можно средний латте?\n• Can I get the check, please? — Можно счёт? (в США — check, в Британии — bill)\n\n💡 Can I get… — самый естественный способ что-то заказать."
+  }
+]

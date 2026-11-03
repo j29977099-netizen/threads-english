@@ -1,0 +1,34 @@
+[
+  {
+    "out": "media/2026-11-09-how-are-you.png",
+    "template": "versus",
+    "label": "УЧЕБНИК VS АМЕРИКА",
+    "title": "How are you?",
+    "textbook": ["— How are you?", "— I'm fine, thank you. And you?"],
+    "real_question": "— Hey, how's it going?",
+    "real_answers": ["Pretty good, you?", "Not bad!", "Can't complain."],
+    "note": "How are you? в США — чаще приветствие, чем вопрос о самочувствии"
+  },
+  {
+    "out": "media/2026-11-11-quiz-pp-vs-ps.png",
+    "template": "quiz",
+    "label": "ПРОВЕРЬ СЕБЯ",
+    "title": "Present Perfect\nили Past Simple?",
+    "sentence": "I ___ to New York three times, but I ___ there last year.",
+    "options": ["have been / didn't go", "was / haven't gone", "have been / haven't gone"],
+    "prompt": "Ответ пиши в комментариях"
+  },
+  {
+    "out": "media/2026-11-11-five-mistakes.png",
+    "template": "mistakes",
+    "label": "ОШИБКИ, КОТОРЫЕ НАС ВЫДАЮТ",
+    "title": "5 ошибок, которые выдают русскоговорящего",
+    "items": [
+      {"wrong": "I am agree", "right": "I agree", "note": "agree — это глагол, am не нужен"},
+      {"wrong": "I have 30 years", "right": "I'm 30", "note": "возраст говорим через to be"},
+      {"wrong": "I very like it", "right": "I really like it", "note": "very не ставят перед глаголом"},
+      {"wrong": "Make a photo", "right": "Take a photo", "note": "фото «берут»: take a photo / a picture"},
+      {"wrong": "It depends of", "right": "It depends on", "note": "после depend — всегда on"}
+    ]
+  }
+]

@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.DS_Store
+run-summary.md
+issue.md
+private/
+.claude/
