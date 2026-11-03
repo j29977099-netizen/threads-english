@@ -10,6 +10,10 @@ on:
         description: "Only show what is due, publish nothing"
         type: boolean
         default: false
+      check_connection:
+        description: "Only confirm the key reaches the Threads account, publish nothing"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -41,15 +45,18 @@ jobs:
           # Images are served from this exact commit, so a later edit can't change a post mid-flight.
           MEDIA_BASE_URL: https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/
           DRY_RUN: ${{ inputs.dry_run }}
+          CHECK_CONNECTION: ${{ inputs.check_connection }}
         run: |
-          if [ "$DRY_RUN" = "true" ]; then
+          if [ "$CHECK_CONNECTION" = "true" ]; then
+            python tools/publish.py --check --summary-file run-summary.md
+          elif [ "$DRY_RUN" = "true" ]; then
             python tools/publish.py --dry-run --summary-file run-summary.md
           else
             python tools/publish.py --summary-file run-summary.md
           fi
 
       - name: Save the publication log
-        if: always() && !inputs.dry_run
+        if: always() && !inputs.dry_run && !inputs.check_connection
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"

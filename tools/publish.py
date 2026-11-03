@@ -498,8 +498,8 @@ class ZernioPublisher(Publisher):
                         zernio_id=zernio_id)
 
 
-def summarize(report, now, dry_run):
-    title = "Dry run" if dry_run else "Publish run"
+def summarize(report, now, dry_run, check=False):
+    title = "Connection check" if check else "Dry run" if dry_run else "Publish run"
     lines = ["## %s at %s UTC" % (title, stamp(now)), ""]
     if not report:
         lines.append("Nothing was due.")
@@ -514,6 +514,8 @@ def main(argv=None):
     parser.add_argument("--now", help="pretend the current UTC time is this (ISO, ends in Z)")
     parser.add_argument("--max-posts", type=int, default=MAX_PER_RUN)
     parser.add_argument("--summary-file", help="also write the markdown summary here")
+    parser.add_argument("--check", action="store_true",
+                        help="only confirm the key works and which Threads account it reaches; publish nothing")
     args = parser.parse_args(argv)
 
     now = parse_time(args.now) if args.now else utcnow().replace(microsecond=0)
@@ -528,7 +530,15 @@ def main(argv=None):
         publisher = Publisher(ThreadsApi(key), Log(), media_base_url)
     code = 0
     try:
-        report = publisher.run(load_queue(), now, dry_run=args.dry_run, max_posts=args.max_posts)
+        if args.check:
+            if BACKEND == "zernio":
+                account = publisher.api.threads_account()
+                detail = "@%s via Zernio, %s followers" % (account.get("username"), account.get("followersCount", "?"))
+            else:
+                detail = "@%s via the Threads API" % publisher.api.me().get("username")
+            report = [("(connection)", "ok", detail)]
+        else:
+            report = publisher.run(load_queue(), now, dry_run=args.dry_run, max_posts=args.max_posts)
         if any(outcome in ("failed", "skipped") for _, outcome, _ in report):
             code = 1
     except ApiError as exc:
@@ -536,7 +546,7 @@ def main(argv=None):
                                       % (exc, secret))]
         code = 2
 
-    summary = summarize(report, now, args.dry_run)
+    summary = summarize(report, now, args.dry_run, args.check)
     print(summary)
     for path in filter(None, [args.summary_file, os.environ.get("GITHUB_STEP_SUMMARY")]):
         with open(path, "a", encoding="utf-8") as fh:
