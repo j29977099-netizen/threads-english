@@ -7,8 +7,10 @@ Zernio is reached through the cloud environment's network secret: the proxy adds
 ## 0. Set up
 
 ```bash
-pip install -r requirements.txt
+python -m pip install -q -r requirements.txt
 ```
+
+Use `python -m pip`, not plain `pip`: in the cloud environment `pip` belongs to a different Python than `python`.
 
 ## 1. Read
 

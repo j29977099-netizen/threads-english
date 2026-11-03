@@ -5,8 +5,10 @@ Instructions for the Claude cloud routine that keeps the queue filled. It runs e
 ## 0. Set up
 
 ```bash
-pip install -r requirements.txt
+python -m pip install -q -r requirements.txt
 ```
+
+Use `python -m pip`, not plain `pip`: in the cloud environment `pip` belongs to a different Python than `python`.
 
 Today means the current UTC date (`date -u +%F`).
 
