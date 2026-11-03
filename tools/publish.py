@@ -39,6 +39,9 @@ from qc import BACKEND, LOG_PATH, check_post, load_queue, normalize, parse_time 
 
 API_BASE = os.environ.get("THREADS_API_BASE", "https://graph.threads.com/v1.0")
 ZERNIO_API_BASE = os.environ.get("ZERNIO_API_BASE", "https://zernio.com/api/v1")
+# In a Claude cloud environment the key is a network secret: the proxy adds the
+# Authorization header itself, so the session runs with ZERNIO_API_KEY=proxy.
+ZERNIO_VIA_PROXY = "proxy"
 ZERNIO_IN_FLIGHT = {"pending", "processing", "uploading"}
 # Zernio errorCategory values worth another try on a later run.
 ZERNIO_TRANSIENT = {"platform_error", "platform_rate_limit", "quota_exhausted", "system_error", "unknown"}
@@ -145,7 +148,7 @@ class ZernioApi:
     def _call(self, method, path, body=None, params=None, idempotency_key=None):
         if not self.key:
             raise ApiError("ZERNIO_API_KEY is not set", status=401)
-        headers = {"Authorization": "Bearer " + self.key}
+        headers = {} if self.key == ZERNIO_VIA_PROXY else {"Authorization": "Bearer " + self.key}
         if idempotency_key:
             headers["Idempotency-Key"] = idempotency_key
         url = "%s/%s" % (self.base, path.lstrip("/"))
@@ -204,6 +207,28 @@ class ZernioApi:
     def follower_stats(self, account_id, since, until):
         return self._call("GET", "accounts/follower-stats",
                           params={"accountIds": account_id, "fromDate": since, "toDate": until})
+
+    def commented_posts(self, account_id, since):
+        """The account's Threads posts since `since` (YYYY-MM-DD), with comment counts."""
+        posts, cursor = [], None
+        while True:
+            params = {"platform": "threads", "accountId": account_id, "since": since, "limit": 50}
+            if cursor:
+                params["cursor"] = cursor
+            body = self._call("GET", "inbox/comments", params=params)
+            posts.extend(body.get("data", []))
+            cursor = (body.get("pagination") or {}).get("nextCursor")
+            if not cursor:
+                return posts
+
+    def post_comments(self, post_id, account_id):
+        return self._call("GET", "inbox/comments/%s" % post_id,
+                          params={"accountId": account_id, "limit": 100}).get("comments", [])
+
+    def reply_to_comment(self, post_id, account_id, comment_id, text, idempotency_key=None):
+        body = {"accountId": account_id, "message": text, "commentId": comment_id}
+        return self._call("POST", "inbox/comments/%s" % post_id, body=body,
+                          idempotency_key=idempotency_key).get("data") or {}
 
 
 def threads_target(zpost):

@@ -1,0 +1,36 @@
+name: Comments that need you
+
+on:
+  push:
+    branches: [main]
+    paths: ["log/comments.jsonl"]
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Open an issue listing newly escalated comments so the owner gets an email
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BEFORE: ${{ github.event.before }}
+        run: |
+          git diff "$BEFORE" HEAD -- log/comments.jsonl | sed -n 's/^+{/{/p' > added.jsonl
+          python3 - <<'PY' > issue.md
+          import json
+          rows = [json.loads(line) for line in open("added.jsonl", encoding="utf-8") if line.strip()]
+          rows = [r for r in rows if r.get("event") == "escalated"]
+          for r in rows:
+              print("- **%s**: %s" % (r.get("reason"), r.get("url") or "post %s, comment %s" % (r.get("post_id"), r.get("comment_id"))))
+          PY
+          if [ -s issue.md ]; then
+            printf '\nThese comments got no automatic reply. Open each link and answer on Threads.\n' >> issue.md
+            gh issue create --title "Threads comments need you $(date -u +%F)" --body-file issue.md
+          fi

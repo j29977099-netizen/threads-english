@@ -21,13 +21,16 @@ The Zernio API key lives only in GitHub Secrets. Claude never sees it, and the r
 | `strategy/STRATEGY.md` | Positioning, voice, series, mix, schedule, visual identity, QC rules. Source of truth |
 | `strategy/calendar-30d.json` | Rolling 30-day plan |
 | `strategy/ROUTINE.md` | What the weekly Claude cloud routine does: report, fill the queue, check, push |
+| `strategy/COMMENTS.md` | What the 3×/day comment routine does: reply, escalate or skip each new comment |
 | `brand/` | Colours, fonts, and the profile picture (`avatar.json` → `avatar.png`) |
 | `content/queue/*.json` | Scheduled posts (UTC `publish_at`), including answer reveals |
 | `content/cards/*.json` | Specs for graphics; `tools/render_cards.py` turns them into `media/*.png` |
 | `log/publications.jsonl` | Append-only record of every publish attempt, retry, failure, skip |
+| `log/comments.jsonl` | One decision per comment (replied, escalated, skipped): ids and our reply text, never what others wrote |
 | `reports/` | Weekly metrics (`insights-*.json`) and the weekly report (`weekly-*.md`, emailed to you as a GitHub issue) |
 | `tools/qc.py` | Mechanical checks: lengths, route limits, images, reveal linkage, duplicates |
 | `tools/publish.py` | Publisher with duplicate guard, limited retries, stale-post skipping |
+| `tools/comments.py` | Comment inbox, reply (with checks and a daily cap), escalate, skip |
 
 ## Post format
 
