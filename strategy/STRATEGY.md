@@ -22,7 +22,7 @@ Never invent personal stories, students, results, testimonials, prices, discount
 - Russian explanations, English examples. Increase the share of English slowly over months.
 - Short lines, lots of white space. One idea per post.
 - Address the reader as «ты». Use gender-neutral forms for the reader: выбрал(а), делал(а).
-- The teacher's own first-person past-tense verbs are gendered in Russian (прожил / прожила). Until the teacher confirms, write first-person lines in the present tense or impersonally («Преподаю с 2016 года», «За плечами — 15 лет в США»).
+- The teacher's own first-person past-tense verbs are masculine (confirmed 2026-11-03): «прожил», «преподавал». The reader-facing forms stay neutral (выбрал(а)). Personal facts stay limited to those in §1.
 - Avoid: generic motivation quotes, «В современном мире...», «Давайте разберёмся», «Это не просто X, это Y», piles of hashtags, more than 4 emojis in a block of text, any unnatural English.
 
 ## 3. Recurring series (rubrics)

@@ -41,7 +41,7 @@ For every date from max(tomorrow, 2026-11-09) through today + 12 days that has n
   - A reveal is its own post, not a reply. It restates the question, then gives `Правильно — <letter>) …` and the explanation.
 - **Every post:** `topic_tag: "Английский язык"`. The id has the form `YYYY-MM-DD-p1-short-slug`, `YYYY-MM-DD-p2-…` or `YYYY-MM-DD-r-…`.
 - **Mini-tasks:** a lesson or tip that asks readers to translate, fill in or answer something also gets a next-day reveal, the same way a quiz does.
-- **Russian:** the teacher's gender is unknown, so no gendered first-person past-tense verbs.
+- **Russian:** the teacher's own first-person past tense is masculine («прожил», «преподавал»). Forms for the reader stay neutral.
   - Address the reader as «ты» throughout, never «вы».
   - Prefer wording that needs no gender at all («самостоятельно», «как прошёл день»). Use a form like выбрал(а) only when nothing neutral fits.
   - Grammar must be correct: agreement («во 2-м и 3-м пунктах»), and no деепричастие without its own subject («Слушая, …» followed by «нужно …» is wrong).
