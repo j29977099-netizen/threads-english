@@ -20,6 +20,7 @@ The Zernio API key lives only in GitHub Secrets. Claude never sees it, and the r
 |---|---|
 | `strategy/STRATEGY.md` | Positioning, voice, series, mix, schedule, visual identity, QC rules. Source of truth |
 | `strategy/calendar-30d.json` | Rolling 30-day plan |
+| `strategy/ROUTINE.md` | What the weekly Claude cloud routine does: report, fill the queue, check, push |
 | `brand/` | Colours, fonts, and the profile picture (`avatar.json` → `avatar.png`) |
 | `content/queue/*.json` | Scheduled posts (UTC `publish_at`), including answer reveals |
 | `content/cards/*.json` | Specs for graphics; `tools/render_cards.py` turns them into `media/*.png` |
