@@ -23,6 +23,7 @@ Never invent personal stories, students, results, testimonials, prices, discount
 - Short lines, lots of white space. One idea per post.
 - Address the reader as «ты». Use gender-neutral forms for the reader: выбрал(а), делал(а).
 - The teacher's own first-person past-tense verbs are masculine (confirmed 2026-11-03): «прожил», «преподавал». The reader-facing forms stay neutral (выбрал(а)). Personal facts stay limited to those in §1.
+- Posts never name the teacher (decided 2026-11-03). Write in the first person («Преподаю…») or under the brand «Английский по-американски»; the profile name field is enough.
 - Avoid: generic motivation quotes, «В современном мире...», «Давайте разберёмся», «Это не просто X, это Y», piles of hashtags, more than 4 emojis in a block of text, any unnatural English.
 
 ## 3. Recurring series (rubrics)

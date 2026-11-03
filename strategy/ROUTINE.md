@@ -48,6 +48,7 @@ For every date from max(tomorrow, 2026-11-09) through today + 12 days that has n
 - **Series markers:** use only the markers from STRATEGY.md §3. Questions to the audience use 🗣.
 - **No promises the system can't keep:** comments are not read automatically yet, so never write that answers will be collected, turned into posts or replied to.
 - **Examples:** don't reuse an example sentence that already appeared in the last 30 days.
+- **No name:** posts never name the teacher. Use the first person or the brand «Английский по-американски».
 - **Facts only:** never invent stories, students, results, testimonials, prices, discounts, free trials or vote counts. If a calendar topic needs a fact about the teacher that STRATEGY.md doesn't give, replace it with another topic from the same series.
 - **English:** it must be correct, natural American English, and each quiz has exactly one defensible answer. If you are not sure an item is correct, choose a different item.
 - **No repeats:** don't reuse a topic from the last 30 days of the queue or the log.
