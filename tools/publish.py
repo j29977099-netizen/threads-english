@@ -73,6 +73,8 @@ class ThreadsApi:
         self.session = session or requests.Session()
 
     def _call(self, method, path, **params):
+        if not self.token:
+            raise ApiError("THREADS_ACCESS_TOKEN is not set", status=401)
         params["access_token"] = self.token
         url = "%s/%s" % (self.base, path.lstrip("/"))
         try:
@@ -141,6 +143,8 @@ class ZernioApi:
         self.session = session or requests.Session()
 
     def _call(self, method, path, body=None, params=None, idempotency_key=None):
+        if not self.key:
+            raise ApiError("ZERNIO_API_KEY is not set", status=401)
         headers = {"Authorization": "Bearer " + self.key}
         if idempotency_key:
             headers["Idempotency-Key"] = idempotency_key
@@ -513,12 +517,10 @@ def main(argv=None):
     args = parser.parse_args(argv)
 
     now = parse_time(args.now) if args.now else utcnow().replace(microsecond=0)
+    # A missing key only matters once something is due: the first API call then
+    # fails as an auth error, which stops the run with exit code 2.
     secret = "ZERNIO_API_KEY" if BACKEND == "zernio" else "THREADS_ACCESS_TOKEN"
     key = os.environ.get(secret, "")
-    if not args.dry_run and not key:
-        print("%s is not set" % secret, file=sys.stderr)
-        return 2
-
     media_base_url = os.environ.get("MEDIA_BASE_URL", "")
     if BACKEND == "zernio":
         publisher = ZernioPublisher(ZernioApi(key), Log(), media_base_url)
@@ -530,7 +532,8 @@ def main(argv=None):
         if any(outcome in ("failed", "skipped") for _, outcome, _ in report):
             code = 1
     except ApiError as exc:
-        report = publisher.report + [("(run)", "stopped", "%s rejected or account disconnected: %s" % (secret, exc))]
+        report = publisher.report + [("(run)", "stopped", "%s (check the %s secret and the account connection)"
+                                      % (exc, secret))]
         code = 2
 
     summary = summarize(report, now, args.dry_run)

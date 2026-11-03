@@ -333,6 +333,14 @@ class ZernioApiTest(unittest.TestCase):
                 api.get_post("z1")
             self.assertEqual((ctx.exception.transient, ctx.exception.auth), (transient, auth), status)
 
+    def test_missing_key_matters_only_when_something_is_due(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            pub = ZernioPublisher(ZernioApi("", session=FakeSession([])), Log(os.path.join(tmp, "log.jsonl")))
+            self.assertEqual(pub.run([ZQUIZ], parse_time("2026-11-08T06:00:00Z")), [])
+            with self.assertRaises(ApiError) as ctx:
+                pub.run([ZQUIZ], parse_time("2026-11-09T06:05:00Z"))
+            self.assertTrue(ctx.exception.auth)
+
     def test_disconnected_account_is_an_auth_error(self):
         body = {"accounts": [{"_id": "a1", "platform": "threads", "username": "u", "needsReconnection": True}]}
         api = ZernioApi("sk_test", session=FakeSession([FakeResponse(200, body)]))
