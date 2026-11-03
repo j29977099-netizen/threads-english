@@ -24,7 +24,7 @@ The Zernio API key lives only in GitHub Secrets. Claude never sees it, and the r
 | `content/queue/*.json` | Scheduled posts (UTC `publish_at`), including answer reveals |
 | `content/cards/*.json` | Specs for graphics; `tools/render_cards.py` turns them into `media/*.png` |
 | `log/publications.jsonl` | Append-only record of every publish attempt, retry, failure, skip |
-| `reports/` | Weekly metrics (views, likes, comments, shares, followers) |
+| `reports/` | Weekly metrics (`insights-*.json`) and the weekly report (`weekly-*.md`, emailed to you as a GitHub issue) |
 | `tools/qc.py` | Mechanical checks: lengths, route limits, images, reveal linkage, duplicates |
 | `tools/publish.py` | Publisher with duplicate guard, limited retries, stale-post skipping |
 

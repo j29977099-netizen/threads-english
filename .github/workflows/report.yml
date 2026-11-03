@@ -1,0 +1,27 @@
+name: Weekly report
+
+on:
+  push:
+    branches: [main]
+    paths: ["reports/weekly-*.md"]
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Open an issue with each new weekly report so the owner gets it by email
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BEFORE: ${{ github.event.before }}
+        run: |
+          git diff --name-only --diff-filter=A "$BEFORE" HEAD -- 'reports/weekly-*.md' | while read -r f; do
+            gh issue create --title "Weekly Threads report $(basename "$f" .md | sed 's/^weekly-//')" --body-file "$f"
+          done
