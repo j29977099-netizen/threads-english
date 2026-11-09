@@ -1,0 +1,30 @@
+[
+  {
+    "out": "media/2026-11-18-living-here-mistakes.png",
+    "template": "mistakes",
+    "label": "ОШИБКИ, КОТОРЫЕ НАС ВЫДАЮТ",
+    "title": "Ошибки со временем",
+    "items": [
+      {
+        "wrong": "I'm living here 5 years",
+        "right": "I've been living here for 5 years",
+        "note": "длится до сих пор: Present Perfect"
+      },
+      {
+        "wrong": "I live here since 2020",
+        "right": "I've lived here since 2020",
+        "note": "с since — не Present Simple"
+      },
+      {
+        "wrong": "I know him five years",
+        "right": "I've known him for five years",
+        "note": "состояние до сих пор: have known"
+      },
+      {
+        "wrong": "How long are you here?",
+        "right": "How long have you been here?",
+        "note": "вопрос «как давно» — Present Perfect"
+      }
+    ]
+  }
+]
