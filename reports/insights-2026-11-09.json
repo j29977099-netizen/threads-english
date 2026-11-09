@@ -1,0 +1,75 @@
+{
+  "generated": "2026-11-09T12:58:39Z",
+  "since": "2026-11-02T12:58:39Z",
+  "backend": "zernio",
+  "account": {
+    "followers": 0,
+    "follower_growth": 0
+  },
+  "posts": [
+    {
+      "id": "2026-11-09-intro",
+      "published": "2026-11-09T10:53:43Z",
+      "kind": "intro",
+      "topic": "Знакомство: кто ведёт аккаунт и что здесь будет (закрепить)",
+      "permalink": "https://www.threads.com/@esl_teacher_bro/post/DfhKYvmjqcd",
+      "metrics": {
+        "impressions": 0,
+        "reach": 0,
+        "likes": 0,
+        "comments": 0,
+        "shares": 0,
+        "saves": 0,
+        "clicks": 0,
+        "views": 0,
+        "igReelsAvgWatchTime": 0,
+        "igReelsVideoViewTotalTime": 0,
+        "reelsSkipRate": 0,
+        "reposts": 0,
+        "completionRate": 0,
+        "profileViews": 0,
+        "websiteClicks": 0,
+        "impressionSources": {},
+        "audienceTypes": {},
+        "audienceCountries": {},
+        "retentionCurve": {},
+        "replays": 0,
+        "engagementRate": 0,
+        "lastUpdated": null
+      },
+      "note": "Analytics are being synced from the platform. Please try again in a few moments."
+    },
+    {
+      "id": "2026-11-09-p1-look-forward-to",
+      "published": "2026-11-09T10:53:51Z",
+      "kind": "quiz",
+      "topic": "look forward to + -ing",
+      "permalink": "https://www.threads.com/@esl_teacher_bro/post/DfhKZyxjmDA",
+      "metrics": {
+        "impressions": 0,
+        "reach": 0,
+        "likes": 0,
+        "comments": 0,
+        "shares": 0,
+        "saves": 0,
+        "clicks": 0,
+        "views": 0,
+        "igReelsAvgWatchTime": 0,
+        "igReelsVideoViewTotalTime": 0,
+        "reelsSkipRate": 0,
+        "reposts": 0,
+        "completionRate": 0,
+        "profileViews": 0,
+        "websiteClicks": 0,
+        "impressionSources": {},
+        "audienceTypes": {},
+        "audienceCountries": {},
+        "retentionCurve": {},
+        "replays": 0,
+        "engagementRate": 0,
+        "lastUpdated": null
+      },
+      "note": "Analytics are being synced from the platform. Please try again in a few moments."
+    }
+  ]
+}
