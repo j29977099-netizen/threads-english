@@ -122,3 +122,11 @@ Posts published, views, likes, replies, reposts, quotes, shares, follower growth
 - Every post keeps the topic tag «Английский язык», the main way a 0-follower account is found.
 - Growth comes from the content and from the teacher's own genuine replies in English-learning conversations. No automated replies on other people's posts.
 - Judge formats on views and replies per post, not on follower count, until the account has about 100 followers.
+
+## 12. Instagram (@esl_teacher_bro)
+
+- **One post a day at 18:00 MSK (15:00 UTC).** Publishing goes through Zernio like Threads, scheduled ahead, with its own queue (`content/instagram/`) and log (`log/instagram.jsonl`).
+- **Format:** carousels of 1080×1350 JPEG slides in the brand style. A quiz shows the question on slide 1 («Листай → ответ на следующем слайде») and the answer with a short why on slide 2. A phrase or lesson takes 2–3 slides. `versus` and `mistakes` cards work as single images. No emoji in the images.
+- **Content:** adapted from that day's Threads posts, never a copy of the Threads text. The caption is a hook, then where the answer is, then one useful sentence, then one question for the comments.
+- **Hashtags:** 4–6 per post, drawn from #английскийязык #американскийанглийский #английскийонлайн #учиманглийский #грамматикаанглийского #разговорныйанглийский #произношение #английскийдляпутешествий #ошибкиванглийском.
+- **Comments:** answered by the same routine and rules as Threads. The answer is always public on Instagram, because it is on slide 2.

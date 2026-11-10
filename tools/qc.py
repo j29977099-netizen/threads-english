@@ -23,6 +23,15 @@ from datetime import datetime, timedelta, timezone
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 QUEUE_GLOB = os.path.join(ROOT, "content", "queue", "*.json")
 LOG_PATH = os.path.join(ROOT, "log", "publications.jsonl")
+# Each platform has its own queue and its own publication log.
+QUEUES = {"threads": QUEUE_GLOB, "instagram": os.path.join(ROOT, "content", "instagram", "*.json")}
+LOGS = {"threads": LOG_PATH, "instagram": os.path.join(ROOT, "log", "instagram.jsonl")}
+# Instagram (via Zernio): JPEG only, 1-10 slides here (Instagram allows 20), 4:5 up to 1.91:1,
+# caption <= 2,200 characters, <= 30 hashtags.
+IG_MAX_CAPTION = 2200
+IG_MAX_HASHTAGS = 30
+IG_MAX_SLIDES = 10
+IG_KINDS = {"quiz", "lesson", "tip", "promo", "intro"}
 
 MAX_TEXT = 500
 MAX_POLL_OPTION = 25
@@ -78,8 +87,60 @@ def png_or_jpeg_width(path):
     return None
 
 
-def check_post(post, root=ROOT, backend=None):
+def check_instagram_post(post, root=ROOT):
+    """Problems that make an Instagram post unpublishable."""
+    from PIL import Image
+
+    errors = []
+    pid = post.get("id") or ""
+    if not re.fullmatch(r"ig-[a-z0-9][a-z0-9-]*", pid):
+        errors.append("id must start with ig- and use lowercase letters, digits and dashes")
+    if post.get("kind") not in IG_KINDS:
+        errors.append("kind must be one of %s (answers go on a later slide, not in a reveal post)" % sorted(IG_KINDS))
+    try:
+        parse_time(post.get("publish_at"))
+    except ValueError as exc:
+        errors.append(str(exc))
+    text = post.get("text") or ""
+    if not text.strip():
+        errors.append("caption is empty")
+    if len(text) > IG_MAX_CAPTION:
+        errors.append("caption is %d characters (max %d)" % (len(text), IG_MAX_CAPTION))
+    if len(re.findall(r"#\w", text)) > IG_MAX_HASHTAGS:
+        errors.append("more than %d hashtags" % IG_MAX_HASHTAGS)
+    for field in ("poll", "reply_to", "topic_tag", "image"):
+        if post.get(field) is not None:
+            errors.append("%s is a Threads field; Instagram posts use images and alt_text lists" % field)
+
+    images, alts = post.get("images") or [], post.get("alt_text") or []
+    if not 1 <= len(images) <= IG_MAX_SLIDES:
+        errors.append("needs 1-%d images" % IG_MAX_SLIDES)
+    if not isinstance(alts, list) or len(alts) != len(images) or not all(a.strip() for a in alts):
+        errors.append("alt_text must be a list with one description per image")
+    sizes = set()
+    for image in images:
+        path = os.path.join(root, image)
+        if not os.path.isfile(path):
+            errors.append("image %s not found" % image)
+            continue
+        with Image.open(path) as im:
+            if im.format != "JPEG":
+                errors.append("%s must be JPEG (Instagram takes only JPEG)" % image)
+            width, height = im.size
+        sizes.add((width, height))
+        if os.path.getsize(path) > MAX_IMAGE_BYTES:
+            errors.append("%s is larger than 8 MB" % image)
+        if not 0.8 <= width / height <= 1.91:
+            errors.append("%s is %dx%d; Instagram feed needs 4:5 up to 1.91:1" % (image, width, height))
+    if len(sizes) > 1:
+        errors.append("all slides of a carousel must be the same size")
+    return errors
+
+
+def check_post(post, root=ROOT, backend=None, platform="threads"):
     """Problems that make a single post unpublishable."""
+    if platform == "instagram":
+        return check_instagram_post(post, root)
     backend = backend or BACKEND
     if backend not in CAN:
         return ["unknown PUBLISH_BACKEND %r (use one of %s)" % (backend, sorted(CAN))]
@@ -155,7 +216,7 @@ def check_post(post, root=ROOT, backend=None):
     return errors
 
 
-def check_queue(posts, published=None, backend=None):
+def check_queue(posts, published=None, backend=None, platform="threads"):
     """Cross-post problems: duplicates, reveal linkage, spoilers.
 
     published maps post id -> text for everything already in the log.
@@ -164,7 +225,7 @@ def check_queue(posts, published=None, backend=None):
     by_id = {}
     for post in posts:
         pid = post.get("id")
-        for problem in check_post(post, backend=backend):
+        for problem in check_post(post, backend=backend, platform=platform):
             errors.append("%s: %s" % (pid, problem))
         if pid in by_id:
             errors.append("%s: duplicate id" % pid)
@@ -200,7 +261,7 @@ def check_queue(posts, published=None, backend=None):
             errors.append("%s: reveal does not mention the answer %r" % (post["id"], answer))
 
     for post in posts:
-        if post.get("kind") in NEEDS_REVEAL and post["id"] not in revealed:
+        if platform == "threads" and post.get("kind") in NEEDS_REVEAL and post["id"] not in revealed:
             errors.append("%s: quiz has no reveal" % post["id"])
     return errors
 
@@ -219,15 +280,18 @@ def published_from_log(path=LOG_PATH):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--queue", default=QUEUE_GLOB, help="glob of queue files")
+    parser.add_argument("--platform", choices=sorted(QUEUES), help="check one platform (default: all)")
     args = parser.parse_args(argv)
 
-    posts = load_queue(args.queue)
-    errors = check_queue(posts, published_from_log())
-    for line in errors:
-        print("ERROR", line)
-    print("%d posts checked, %d problems" % (len(posts), len(errors)))
-    return 1 if errors else 0
+    failed = False
+    for platform in [args.platform] if args.platform else sorted(QUEUES, reverse=True):
+        posts = load_queue(QUEUES[platform])
+        errors = check_queue(posts, published_from_log(LOGS[platform]), platform=platform)
+        for line in errors:
+            print("ERROR", platform, line)
+        print("%s: %d posts checked, %d problems" % (platform, len(posts), len(errors)))
+        failed = failed or bool(errors)
+    return 1 if failed else 0
 
 
 if __name__ == "__main__":

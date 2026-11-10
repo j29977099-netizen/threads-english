@@ -39,7 +39,7 @@ from datetime import datetime, timedelta, timezone
 import requests
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from qc import BACKEND, LOG_PATH, check_post, load_queue, normalize, parse_time  # noqa: E402
+from qc import BACKEND, LOG_PATH, LOGS, QUEUES, check_post, load_queue, normalize, parse_time  # noqa: E402
 
 API_BASE = os.environ.get("THREADS_API_BASE", "https://graph.threads.com/v1.0")
 ZERNIO_API_BASE = os.environ.get("ZERNIO_API_BASE", "https://zernio.com/api/v1")
@@ -183,43 +183,49 @@ class ZernioApi:
             )
         return data
 
-    def threads_account(self):
-        accounts = [a for a in self._call("GET", "accounts", params={"platform": "threads"}).get("accounts", [])
-                    if a.get("platform") == "threads" and a.get("isActive", True) and a.get("enabled", True)]
+    def account(self, platform="threads"):
+        accounts = [a for a in self._call("GET", "accounts", params={"platform": platform}).get("accounts", [])
+                    if a.get("platform") == platform and a.get("isActive", True) and a.get("enabled", True)]
         if not accounts:
-            raise ApiError("no active Threads account is connected in Zernio", code="auth_expired")
+            raise ApiError("no active %s account is connected in Zernio" % platform.title(), code="auth_expired")
         if accounts[0].get("needsReconnection"):
-            raise ApiError("Threads @%s needs reconnecting in Zernio" % accounts[0].get("username"),
+            raise ApiError("%s @%s needs reconnecting in Zernio" % (platform.title(), accounts[0].get("username")),
                            code="auth_expired")
         return accounts[0]
 
-    def create_post(self, account_id, post, image_url=None, idempotency_key=None, scheduled_for=None):
-        """Publish now, or at scheduled_for (ISO UTC) when given."""
-        target = {"platform": "threads", "accountId": account_id}
-        if post.get("topic_tag"):
-            target["platformSpecificData"] = {"topic_tag": post["topic_tag"]}
+    def threads_account(self):
+        return self.account("threads")
+
+    def create_post(self, account_id, post, image_url=None, idempotency_key=None, scheduled_for=None,
+                    platform="threads"):
+        """Publish now, or at scheduled_for (ISO UTC) when given. image_url may be a list (a carousel)."""
+        target = {"platform": platform, "accountId": account_id}
+        extra = {"topic_tag": post.get("topic_tag")} if platform == "threads" else {"firstComment": post.get("first_comment")}
+        extra = {k: v for k, v in extra.items() if v}
+        if extra:
+            target["platformSpecificData"] = extra
         body = {"content": post["text"], "platforms": [target]}
         if scheduled_for:
             body["scheduledFor"] = scheduled_for
         else:
             body["publishNow"] = True
         if image_url:
-            body["mediaItems"] = [{"type": "image", "url": image_url, "altText": post["alt_text"]}]
+            body["mediaItems"] = media_items(post, image_url)
         return self._call("POST", "posts", body=body, idempotency_key=idempotency_key)
 
     def update_post(self, zernio_id, post, image_url=None, scheduled_for=None):
-        """Change a post that is still scheduled: its text, image and time."""
+        """Change a post that is still scheduled: its text, images and time."""
         body = {"content": post["text"], "scheduledFor": scheduled_for}
         if image_url:
-            body["mediaItems"] = [{"type": "image", "url": image_url, "altText": post["alt_text"]}]
+            body["mediaItems"] = media_items(post, image_url)
         return self._call("PUT", "posts/%s" % zernio_id, body=body)
 
     def get_post(self, zernio_id):
         return self._call("GET", "posts/%s" % zernio_id).get("post") or {}
 
-    def find_published(self, account_id, text):
+    def find_published(self, account_id, text, platform="threads"):
         """The published Zernio post with exactly this text, if any."""
-        params = {"accountId": account_id, "platform": "threads", "status": "published",
+        params = {"accountId": account_id, "platform": platform, "status": "published",
                   "search": text[:80], "limit": 20}
         for item in self._call("GET", "posts", params=params).get("posts", []):
             if normalize(item.get("content")) == normalize(text):
@@ -233,11 +239,11 @@ class ZernioApi:
         return self._call("GET", "accounts/follower-stats",
                           params={"accountIds": account_id, "fromDate": since, "toDate": until})
 
-    def commented_posts(self, account_id, since):
-        """The account's Threads posts since `since` (YYYY-MM-DD), with comment counts."""
+    def commented_posts(self, account_id, since, platform="threads"):
+        """The account's posts on `platform` since `since` (YYYY-MM-DD), with comment counts."""
         posts, cursor = [], None
         while True:
-            params = {"platform": "threads", "accountId": account_id, "since": since, "limit": 50}
+            params = {"platform": platform, "accountId": account_id, "since": since, "limit": 50}
             if cursor:
                 params["cursor"] = cursor
             body = self._call("GET", "inbox/comments", params=params)
@@ -256,9 +262,17 @@ class ZernioApi:
                           idempotency_key=idempotency_key).get("data") or {}
 
 
-def threads_target(zpost):
+def media_items(post, image_url):
+    """Zernio mediaItems for one image (Threads) or a carousel (Instagram)."""
+    urls = image_url if isinstance(image_url, list) else [image_url]
+    alts = post["alt_text"] if isinstance(post["alt_text"], list) else [post["alt_text"]]
+    return [{"type": "image", "url": url, "altText": alt} for url, alt in zip(urls, alts)]
+
+
+def threads_target(zpost, platform=None):
+    """The post's entry for its platform (each post here targets exactly one)."""
     for target in zpost.get("platforms") or []:
-        if target.get("platform") == "threads":
+        if platform is None or target.get("platform") == platform:
             return target
     return {}
 
@@ -267,7 +281,7 @@ def zernio_error(target, body):
     category = target.get("errorCategory")
     message = target.get("errorMessage")
     for result in body.get("platformResults") or []:
-        if result.get("platform") == "threads" and result.get("error"):
+        if result.get("error"):
             message = message or result["error"]
     message = message or body.get("error") or body.get("message") or "Zernio did not publish the post"
     return ApiError("%s (%s)" % (message, category) if category else message,
@@ -330,6 +344,7 @@ class Publisher:
     """Publishes through Meta's Threads API (backend "threads")."""
 
     backend = "threads"
+    platform = "threads"
     replies = True  # a reveal is posted as a reply under its quiz
     horizon = timedelta(0)  # how far ahead of its time a post is handed over
     max_per_run = MAX_PER_RUN
@@ -395,7 +410,7 @@ class Publisher:
                     self.note(pid, "waiting", "for %s" % parent_id)
                     continue
 
-            problems = check_post(post, backend=self.backend)
+            problems = check_post(post, backend=self.backend, platform=self.platform)
             if problems:
                 self._finish(pid, "failed", "; ".join(problems), dry_run)
                 continue
@@ -502,17 +517,20 @@ class ZernioPublisher(Publisher):
     horizon = ZERNIO_LOOKAHEAD
     max_per_run = 12
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, platform="threads", **kwargs):
         super().__init__(*args, **kwargs)
+        self.platform = platform
         self._account_id = None
 
     @property
     def account_id(self):
         if self._account_id is None:
-            self._account_id = self.api.threads_account()["_id"]
+            self._account_id = self.api.account(self.platform)["_id"]
         return self._account_id
 
     def _image_url(self, post):
+        if post.get("images"):
+            return [self.media_base_url + image for image in post["images"]]
         return self.media_base_url + post["image"] if post.get("image") else None
 
     def _publish_one(self, post, reply_to_id):
@@ -541,11 +559,12 @@ class ZernioPublisher(Publisher):
         scheduled_for = post["publish_at"] if when - self.clock() > SCHEDULE_MARGIN else None
         key = "%s.%d" % (pid, state["attempts"])
         try:
-            body = self.api.create_post(self.account_id, post, self._image_url(post), key, scheduled_for)
+            body = self.api.create_post(self.account_id, post, self._image_url(post), key, scheduled_for,
+                                        platform=self.platform)
         except ApiError as exc:
             if exc.status != 409:
                 raise
-            found = self.api.find_published(self.account_id, post["text"])
+            found = self.api.find_published(self.account_id, post["text"], platform=self.platform)
             if not found:
                 raise
             self._published_target(post, found["_id"], threads_target(found), "already on Threads, not posted again")
@@ -585,9 +604,9 @@ class ZernioPublisher(Publisher):
         self._published(post, target.get("platformPostId"), detail, target.get("platformPostUrl"),
                         zernio_id=zernio_id)
 
-def summarize(report, now, dry_run, check=False):
+def summarize(report, now, dry_run, check=False, platform="threads"):
     title = "Connection check" if check else "Dry run" if dry_run else "Publish run"
-    lines = ["## %s at %s UTC" % (title, stamp(now)), ""]
+    lines = ["## %s: %s at %s UTC" % (platform.title(), title, stamp(now)), ""]
     if not report:
         lines.append("Nothing was due.")
     for pid, outcome, detail in report:
@@ -602,6 +621,7 @@ def main(argv=None):
     parser.add_argument("--max-posts", type=int, default=None,
                         help="limit per run (default: 4 on threads, 12 on zernio)")
     parser.add_argument("--summary-file", help="also write the markdown summary here")
+    parser.add_argument("--platform", choices=sorted(QUEUES), default="threads")
     parser.add_argument("--check", action="store_true",
                         help="only confirm the key works and which Threads account it reaches; publish nothing")
     args = parser.parse_args(argv)
@@ -613,20 +633,24 @@ def main(argv=None):
     key = os.environ.get(secret, "")
     media_base_url = os.environ.get("MEDIA_BASE_URL", "")
     if BACKEND == "zernio":
-        publisher = ZernioPublisher(ZernioApi(key), Log(), media_base_url)
-    else:
+        publisher = ZernioPublisher(ZernioApi(key), Log(LOGS[args.platform]), media_base_url, platform=args.platform)
+    elif args.platform == "threads":
         publisher = Publisher(ThreadsApi(key), Log(), media_base_url)
+    else:
+        print("Instagram is published through Zernio only (PUBLISH_BACKEND=zernio)", file=sys.stderr)
+        return 2
     code = 0
     try:
         if args.check:
             if BACKEND == "zernio":
-                account = publisher.api.threads_account()
+                account = publisher.api.account(args.platform)
                 detail = "@%s via Zernio, %s followers" % (account.get("username"), account.get("followersCount", "?"))
             else:
                 detail = "@%s via the Threads API" % publisher.api.me().get("username")
             report = [("(connection)", "ok", detail)]
         else:
-            report = publisher.run(load_queue(), now, dry_run=args.dry_run, max_posts=args.max_posts)
+            report = publisher.run(load_queue(QUEUES[args.platform]), now, dry_run=args.dry_run,
+                                   max_posts=args.max_posts)
         if any(outcome in ("failed", "skipped") for _, outcome, _ in report):
             code = 1
     except ApiError as exc:
@@ -634,7 +658,7 @@ def main(argv=None):
                                       % (exc, secret))]
         code = 2
 
-    summary = summarize(report, now, args.dry_run, args.check)
+    summary = summarize(report, now, args.dry_run, args.check, args.platform)
     print(summary)
     for path in filter(None, [args.summary_file, os.environ.get("GITHUB_STEP_SUMMARY")]):
         with open(path, "a", encoding="utf-8") as fh:

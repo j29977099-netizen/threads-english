@@ -1,0 +1,163 @@
+[
+  {
+    "template": "quiz",
+    "out": "media/ig/2026-11-12-pp-vs-ps-1.jpg",
+    "label": "ПРОВЕРЬ СЕБЯ",
+    "title": "Present Perfect\nили Past Simple?",
+    "sentence": "I ___ to New York three times, but I ___ there last year.",
+    "options": [
+      "have been / didn't go",
+      "was / haven't gone",
+      "have been / haven't gone"
+    ],
+    "prompt": "Листай → ответ на следующем слайде"
+  },
+  {
+    "template": "answer",
+    "out": "media/ig/2026-11-12-pp-vs-ps-2.jpg",
+    "label": "ОТВЕТ",
+    "title": "Правильно — A",
+    "answer": "I have been to New York three times, but I didn't go there last year.",
+    "why": [
+      "three times — опыт за всю жизнь, без даты → Present Perfect",
+      "last year — точное время в прошлом → Past Simple"
+    ],
+    "examples": [
+      "I saw him yesterday.",
+      "!I have seen him yesterday."
+    ]
+  },
+  {
+    "template": "quiz",
+    "out": "media/ig/2026-11-13-articles-1.jpg",
+    "label": "ПРОВЕРЬ СЕБЯ",
+    "title": "Артикли: a или an?",
+    "sentence": "It was ___ honest mistake — he's just ___ university student.",
+    "options": [
+      "a / a",
+      "an / an",
+      "an / a",
+      "a / an"
+    ],
+    "prompt": "Листай → ответ на следующем слайде"
+  },
+  {
+    "template": "answer",
+    "out": "media/ig/2026-11-13-articles-2.jpg",
+    "label": "ОТВЕТ",
+    "title": "Правильно — C",
+    "answer": "It was an honest mistake — he's just a university student.",
+    "why": [
+      "Артикль зависит от первого звука, а не от буквы",
+      "honest — h не читается, первый звук гласный → an",
+      "university — первый звук [j] → a"
+    ],
+    "examples": [
+      "an hour, an MBA",
+      "a European country, a one-way ticket"
+    ]
+  },
+  {
+    "template": "phrase",
+    "out": "media/ig/2026-11-14-used-to-1.jpg",
+    "label": "ВЫРАЖЕНИЕ ДНЯ",
+    "phrase": "used to",
+    "ipa": "[ˈjuːst tə]",
+    "meaning": "раньше (а теперь уже нет)",
+    "examples": [
+      {
+        "en": "She used to work in a bank.",
+        "ru": "Раньше она работала в банке."
+      },
+      {
+        "en": "We used to go there every summer.",
+        "ru": "Раньше мы ездили туда каждое лето."
+      }
+    ],
+    "note": "То, что было раньше и уже закончилось."
+  },
+  {
+    "template": "list",
+    "out": "media/ig/2026-11-14-used-to-2.jpg",
+    "label": "НЕ ПЕРЕПУТАЙ",
+    "title": "used to ≠ be used to",
+    "items": [
+      {
+        "text": "used to + глагол",
+        "sub": "было раньше: I used to smoke."
+      },
+      {
+        "text": "be used to + -ing",
+        "sub": "уже привык(ла): I'm used to getting up early."
+      },
+      {
+        "text": "get used to + -ing",
+        "sub": "привыкаю: I'm getting used to the cold."
+      }
+    ],
+    "cta": "Сохрани, чтобы не перепутать"
+  },
+  {
+    "template": "quiz",
+    "out": "media/ig/2026-11-15-for-here-1.jpg",
+    "label": "КАК ГОВОРЯТ В США",
+    "title": "Бариста спрашивает:\n«For here or to go?»",
+    "sentence": "Что он хочет узнать?",
+    "options": [
+      "Вы местный или турист?",
+      "Здесь или с собой?",
+      "Оплата сейчас или потом?",
+      "Большой или маленький?"
+    ],
+    "prompt": "Листай → ответ на следующем слайде"
+  },
+  {
+    "template": "answer",
+    "out": "media/ig/2026-11-15-for-here-2.jpg",
+    "label": "ОТВЕТ",
+    "title": "Правильно — B",
+    "answer": "Здесь или с собой?",
+    "why": [
+      "for here — поесть или выпить на месте",
+      "to go — забрать с собой"
+    ],
+    "examples": [
+      "For here, please.",
+      "To go, please.",
+      "Can I get a medium latte?"
+    ]
+  },
+  {
+    "out": "media/ig/2026-11-16-five-mistakes-1.jpg",
+    "template": "mistakes",
+    "label": "ОШИБКИ, КОТОРЫЕ НАС ВЫДАЮТ",
+    "title": "5 ошибок, которые выдают русскоговорящего",
+    "items": [
+      {
+        "wrong": "I am agree",
+        "right": "I agree",
+        "note": "agree — это глагол, am не нужен"
+      },
+      {
+        "wrong": "I have 30 years",
+        "right": "I'm 30",
+        "note": "возраст говорим через to be"
+      },
+      {
+        "wrong": "I very like it",
+        "right": "I really like it",
+        "note": "very не ставят перед глаголом"
+      },
+      {
+        "wrong": "Make a photo",
+        "right": "Take a photo",
+        "note": "фото «берут»: take a photo / a picture"
+      },
+      {
+        "wrong": "It depends of",
+        "right": "It depends on",
+        "note": "после depend — всегда on"
+      }
+    ]
+  }
+]

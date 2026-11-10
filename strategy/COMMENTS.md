@@ -26,7 +26,8 @@ Each item has:
 
 - `comment_id`, `author`, `text`, `comment_url`
 - `post_id` and `post_text`
-- from the queue: `queue_id`, `kind`, `topic`, `answer`, `answer_published`
+- `platform` (`threads` or `instagram`)
+- from the queue: `queue_id`, `kind`, `topic`, `answer`, `answer_published`, and for Instagram `slides` (what each slide says; the answer slide included)
 
 An empty list means there is nothing to do. Stop there, without a commit.
 
@@ -35,9 +36,9 @@ An empty list means there is nothing to do. Stop there, without a commit.
 Every comment gets exactly one of these:
 
 ```bash
-ZERNIO_API_KEY=proxy python tools/comments.py reply    --post POST --comment ID --text "…"
-ZERNIO_API_KEY=proxy python tools/comments.py escalate --post POST --comment ID --reason REASON --url COMMENT_URL
-ZERNIO_API_KEY=proxy python tools/comments.py skip     --post POST --comment ID --reason "why"
+ZERNIO_API_KEY=proxy python tools/comments.py reply    --platform PLATFORM --post POST --comment ID --text "…"
+ZERNIO_API_KEY=proxy python tools/comments.py escalate --platform PLATFORM --post POST --comment ID --reason REASON --url COMMENT_URL
+ZERNIO_API_KEY=proxy python tools/comments.py skip     --platform PLATFORM --post POST --comment ID --reason "why"
 ```
 
 At most 20 replies per run. Leave the rest for the next run.
@@ -53,6 +54,7 @@ At most 20 replies per run. Leave the rest for the next run.
   - Never say or hint whether the answer is right.
   - Thank them and point to the answer post: «Спасибо! Разбор — завтра утром» for a morning post, «…завтра вечером» for an evening one.
   - A translation attempt is also only thanked, not corrected.
+- **Instagram:** the answer is already on a later slide, so `answer_published` is always true there. Read `slides` for it.
 - **Answer published** (`answer_published: true`):
   - A right answer: «Верно! …» plus a few words on why.
   - A wrong one: a kind correction with a one-line reason.

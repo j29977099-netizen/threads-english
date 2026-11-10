@@ -1,6 +1,6 @@
 """Render educational cards (1080x1350 PNG) from JSON specs in content/cards/.
 
-Templates: quiz, versus, mistakes, avatar. Every string is checked against the font's
+Templates: quiz, versus, mistakes, answer, phrase, list, avatar. Every string is checked against the font's
 character map first, so a card can never ship with missing-glyph boxes.
 
     python tools/render_cards.py content/cards/2026-11-09_week1.json
@@ -120,38 +120,66 @@ class Card:
         self.draw.rectangle([split, self.h - 14, self.w, self.h], fill=c["red"])
         return m + 52 + 56
 
+    def content_bottom(self):
+        """Lowest y body content may reach without touching the footer."""
+        return self.h - self.m - 70
+
     def save(self, out):
+        """PNG for Threads; .jpg for Instagram, which accepts only JPEG."""
         path = os.path.join(ROOT, out)
         os.makedirs(os.path.dirname(path), exist_ok=True)
-        self.img.save(path, "PNG", optimize=True)
+        if out.lower().endswith((".jpg", ".jpeg")):
+            self.img.save(path, "JPEG", quality=92, optimize=True)
+        else:
+            self.img.save(path, "PNG", optimize=True)
         return path
+
+    def check_mark(self, cx, cy, r, ok=True):
+        c = self.c
+        self.draw.ellipse([cx - r, cy - r, cx + r, cy + r], fill=c["teal"] if ok else c["red"])
+        if ok:
+            self.draw.line([(cx - r * 0.45, cy), (cx - r * 0.1, cy + r * 0.4), (cx + r * 0.5, cy - r * 0.35)],
+                           fill=c["white"], width=max(4, int(r * 0.28)))
+        else:
+            d = r * 0.4
+            for a, b in (((cx - d, cy - d), (cx + d, cy + d)), ((cx - d, cy + d), (cx + d, cy - d))):
+                self.draw.line([a, b], fill=c["white"], width=max(4, int(r * 0.28)))
 
 
 def render_quiz(card, spec):
     c, m = card.c, card.m
     inner = card.w - 2 * m
-    y = card.frame(spec["label"])
-    y = card.paragraph(m, y, spec["title"], card.font("display", 68), c["ink"], inner, 82) + 44
+    top = card.frame(spec["label"])
+    title_end = card.paragraph(m, top, spec["title"], card.font("display", 68), c["ink"], inner, 82) + 44
 
-    sent_font = card.font("semibold", 54)
+    # Shrink the sentence and option rows until everything clears the footer.
     pad = 52
-    sent_h = card.text_height(spec["sentence"], sent_font, inner - 2 * pad, 78)
+    for sent_size, leading, row, gap in ((54, 78, 108, 22), (48, 68, 96, 16), (44, 62, 88, 12)):
+        sent_font = card.font("semibold", sent_size)
+        sent_h = card.text_height(spec["sentence"], sent_font, inner - 2 * pad, leading)
+        bottom = title_end + sent_h + 2 * pad + 44 + len(spec["options"]) * (row + gap) + 22 + 44
+        if bottom <= card.content_bottom():
+            break
+    else:
+        raise ValueError("%s: quiz is too long for one card; shorten the sentence or options" % spec["out"])
+
+    y = title_end
     card.draw.rounded_rectangle([m, y, card.w - m, y + sent_h + 2 * pad - 8], radius=36, fill=c["mist"])
-    card.paragraph(m + pad, y + pad, spec["sentence"], sent_font, c["ink"], inner - 2 * pad, 78)
+    card.paragraph(m + pad, y + pad, spec["sentence"], sent_font, c["ink"], inner - 2 * pad, leading)
     y += sent_h + 2 * pad + 44
 
-    opt_font = card.font("semibold", 44)
+    opt_font = card.font("semibold", 44 if row > 90 else 40)
     letter_font = card.font("bold", 34)
     for i, option in enumerate(spec["options"]):
         letter = "ABCD"[i]
-        card.draw.rounded_rectangle([m, y, card.w - m, y + 108], radius=54, fill=c["white"],
+        card.draw.rounded_rectangle([m, y, card.w - m, y + row], radius=row // 2, fill=c["white"],
                                     outline=c["mist"], width=3)
-        cx, cy = m + 54, y + 54
+        cx, cy = m + 54, y + row // 2
         card.draw.ellipse([cx - 32, cy - 32, cx + 32, cy + 32], fill=c["ink"])
         lw = card.draw.textlength(letter, font=letter_font)
         card.draw.text((cx - lw / 2, cy - 22), letter, font=letter_font, fill=c["white"])
-        card.draw.text((m + 112, y + 27), option, font=opt_font, fill=c["ink"])
-        y += 108 + 22
+        card.draw.text((m + 112, cy - opt_font.size * 0.62), option, font=opt_font, fill=c["ink"])
+        y += row + gap
 
     card.draw.text((m, y + 22), spec["prompt"], font=card.font("bold", 36), fill=c["red"])
 
@@ -220,6 +248,78 @@ def render_mistakes(card, spec):
             card.draw.line([(text_x, top + row_h - 6), (card.w - m, top + row_h - 6)], fill=c["mist"], width=2)
 
 
+def render_answer(card, spec):
+    """Carousel answer slide: the right option, why, and examples marked ok / wrong."""
+    c, m = card.c, card.m
+    inner = card.w - 2 * m
+    y = card.frame(spec["label"])
+    y = card.paragraph(m, y, spec["title"], card.font("display", 64), c["ink"], inner, 76) + 34
+
+    pad = 48
+    ans_font = card.font("bold", 50)
+    ans_h = card.text_height(spec["answer"], ans_font, inner - 2 * pad, 66)
+    card.draw.rounded_rectangle([m, y, card.w - m, y + ans_h + 2 * pad - 12], radius=36, fill=c["teal"])
+    card.paragraph(m + pad, y + pad, spec["answer"], ans_font, c["white"], inner - 2 * pad, 66)
+    y += ans_h + 2 * pad + 30
+
+    why_font = card.font("medium", 38)
+    for line in spec.get("why", []):
+        card.draw.ellipse([m + 4, y + 18, m + 20, y + 34], fill=c["sun"])
+        y = card.paragraph(m + 40, y, line, why_font, c["ink"], inner - 40, 52) + 12
+    y += 18
+
+    ex_font = card.font("semibold", 40)
+    for example in spec.get("examples", []):
+        ok = not example.startswith("!")
+        text = example.lstrip("!").strip()
+        card.check_mark(m + 24, y + 26, 22, ok)
+        y = card.paragraph(m + 66, y, text, ex_font, c["ink"] if ok else c["red"], inner - 66, 56) + 14
+
+
+def render_phrase(card, spec):
+    """Phrase of the day: the phrase, how to say it, what it means, two examples."""
+    c, m = card.c, card.m
+    inner = card.w - 2 * m
+    y = card.frame(spec["label"])
+    y = card.paragraph(m, y + 10, spec["phrase"], card.font("display", 96), c["ink"], inner, 108) + 6
+    if spec.get("ipa"):
+        card.draw.text((m, y), spec["ipa"], font=card.font("medium", 40), fill=c["muted"])
+        y += 64
+    y = card.paragraph(m, y, spec["meaning"], card.font("bold", 48), c["teal"], inner, 62) + 40
+
+    pad = 44
+    en_font, ru_font = card.font("semibold", 42), card.font("medium", 34)
+    for ex in spec["examples"]:
+        h = card.text_height(ex["en"], en_font, inner - 2 * pad, 56) + card.text_height(ex["ru"], ru_font, inner - 2 * pad, 46)
+        card.draw.rounded_rectangle([m, y, card.w - m, y + h + 2 * pad - 6], radius=32, fill=c["mist"])
+        ty = card.paragraph(m + pad, y + pad, ex["en"], en_font, c["ink"], inner - 2 * pad, 56)
+        card.paragraph(m + pad, ty + 4, ex["ru"], ru_font, c["muted"], inner - 2 * pad, 46)
+        y += h + 2 * pad + 24
+    if spec.get("note"):
+        card.paragraph(m, y + 8, spec["note"], card.font("medium", 34), c["ink"], inner, 48)
+
+
+def render_list(card, spec):
+    """Title and numbered points: tips, word lists, a short promo."""
+    c, m = card.c, card.m
+    inner = card.w - 2 * m
+    y = card.frame(spec["label"])
+    y = card.paragraph(m, y, spec["title"], card.font("display", 64), c["ink"], inner, 76) + 40
+    head_font, sub_font, num_font = card.font("bold", 44), card.font("medium", 34), card.font("bold", 30)
+    for i, item in enumerate(spec["items"], 1):
+        head, sub = (item, None) if isinstance(item, str) else (item["text"], item.get("sub"))
+        cx, cy = m + 30, y + 30
+        card.draw.ellipse([cx - 30, cy - 30, cx + 30, cy + 30], fill=c["sun"])
+        nw = card.draw.textlength(str(i), font=num_font)
+        card.draw.text((cx - nw / 2, cy - 19), str(i), font=num_font, fill=c["ink"])
+        y = card.paragraph(m + 88, y + 2, head, head_font, c["ink"], inner - 88, 58)
+        if sub:
+            y = card.paragraph(m + 88, y, sub, sub_font, c["muted"], inner - 88, 46)
+        y += 30
+    if spec.get("cta"):
+        card.paragraph(m, y + 10, spec["cta"], card.font("bold", 38), c["red"], inner, 50)
+
+
 def render_avatar(card, spec):
     """Profile picture: a speech bubble on ink, kept inside the circle crop."""
     c = card.c
@@ -237,7 +337,8 @@ def render_avatar(card, spec):
     card.draw.text((tx, ty), spec["text"], font=font, fill=c["ink"])
 
 
-TEMPLATES = {"quiz": render_quiz, "versus": render_versus, "mistakes": render_mistakes, "avatar": render_avatar}
+TEMPLATES = {"quiz": render_quiz, "versus": render_versus, "mistakes": render_mistakes, "answer": render_answer,
+             "phrase": render_phrase, "list": render_list, "avatar": render_avatar}
 
 
 def render(spec, brand=None):

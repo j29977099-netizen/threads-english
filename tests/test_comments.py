@@ -24,16 +24,19 @@ def comment(cid, text, username="reader", owner=False, created="2026-11-09T10:00
 
 
 class FakeInboxApi:
-    def __init__(self, posts, threads):
+    def __init__(self, posts, threads, instagram_posts=None):
         self.posts = posts
         self.threads = threads
+        self.instagram_posts = instagram_posts
 
-    def threads_account(self):
-        return {"_id": "acc1"}
+    def account(self, platform):
+        if platform == "instagram" and self.instagram_posts is None:
+            raise comments.ApiError("no active Instagram account is connected in Zernio", code="auth_expired")
+        return {"_id": "acc-" + platform}
 
-    def commented_posts(self, account_id, since):
+    def commented_posts(self, account_id, since, platform="threads"):
         self.since = since
-        return self.posts
+        return self.posts if platform == "threads" else self.instagram_posts
 
     def post_comments(self, post_id, account_id):
         return self.threads.get(post_id, [])
@@ -51,7 +54,7 @@ class InboxTest(unittest.TestCase):
             comment("c2", "mine", owner=True),
             comment("c3", "A?", replies=[comment("c4", "thanks", owner=True)]),
         ]})
-        result = comments.inbox(api, [QUIZ, REVEAL], self.published("d1-quiz"), {}, NOW)
+        result = comments.inbox(api, [("threads", [QUIZ, REVEAL], self.published("d1-quiz"))], {}, NOW)
         self.assertEqual([c["comment_id"] for c in result["comments"]], ["c1"])
         first = result["comments"][0]
         self.assertEqual((first["queue_id"], first["answer"], first["answer_published"]), ("d1-quiz", "B", False))
@@ -59,7 +62,7 @@ class InboxTest(unittest.TestCase):
 
     def test_answer_counts_as_public_once_the_reveal_is_out(self):
         api = FakeInboxApi([{"id": "T1", "commentCount": 1}], {"T1": [comment("c1", "B")]})
-        result = comments.inbox(api, [QUIZ, REVEAL], self.published("d1-quiz", "d2-reveal"), {}, NOW)
+        result = comments.inbox(api, [("threads", [QUIZ, REVEAL], self.published("d1-quiz", "d2-reveal"))], {}, NOW)
         self.assertTrue(result["comments"][0]["answer_published"])
 
     def test_decided_and_old_comments_are_left_out(self):
@@ -67,8 +70,27 @@ class InboxTest(unittest.TestCase):
             comment("c1", "done already"),
             comment("c2", "old", created="2026-10-30T10:00:00+0000"),
         ]})
-        result = comments.inbox(api, [QUIZ], self.published("d1-quiz"), {"c1": {"event": "replied"}}, NOW)
+        result = comments.inbox(api, [("threads", [QUIZ], self.published("d1-quiz"))], {"c1": {"event": "replied"}}, NOW)
         self.assertEqual(result["comments"], [])
+
+
+class InstagramInboxTest(unittest.TestCase):
+    IG_POST = {"id": "ig-2026-11-12-quiz", "publish_at": "2026-11-12T15:00:00Z", "kind": "quiz", "text": "Caption",
+               "images": ["a.jpg", "b.jpg"], "alt_text": ["question", "answer B"]}
+
+    def test_instagram_comments_join_and_answers_count_as_public(self):
+        api = FakeInboxApi([], {"IG1": [comment("i1", "B?")]}, instagram_posts=[{"id": "IG1", "commentCount": 1}])
+        sources = [("threads", [QUIZ], {}),
+                   ("instagram", [self.IG_POST], {"ig-2026-11-12-quiz": {"id": "ig-2026-11-12-quiz", "media_id": "IG1"}})]
+        result = comments.inbox(api, sources, {}, NOW)
+        item = result["comments"][0]
+        self.assertEqual((item["platform"], item["queue_id"], item["answer_published"]), ("instagram", "ig-2026-11-12-quiz", True))
+        self.assertEqual(item["slides"], ["question", "answer B"])
+
+    def test_instagram_not_connected_is_left_out(self):
+        api = FakeInboxApi([], {})
+        result = comments.inbox(api, [("threads", [QUIZ], {}), ("instagram", [], {})], {}, NOW)
+        self.assertEqual(result, {"accounts": {"threads": "acc-threads"}, "comments": []})
 
 
 class ReplyCheckTest(unittest.TestCase):

@@ -3,6 +3,7 @@ import os
 import sys
 import tempfile
 import unittest
+from unittest import mock
 from datetime import timedelta
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "tools"))
@@ -174,10 +175,11 @@ class FakeZernioApi:
         self.keys = []
         self.updates = []
 
-    def threads_account(self):
-        return {"_id": "acc1", "username": "esl_teacher_bro"}
+    def account(self, platform="threads"):
+        return {"_id": "acc-" + platform, "username": "esl_teacher_bro"}
 
-    def create_post(self, account_id, post, image_url=None, idempotency_key=None, scheduled_for=None):
+    def create_post(self, account_id, post, image_url=None, idempotency_key=None, scheduled_for=None,
+                    platform="threads"):
         self.keys.append(idempotency_key)
         if idempotency_key in self.replies:
             return self.replies[idempotency_key]
@@ -195,7 +197,8 @@ class FakeZernioApi:
             elif outcome != "pending":
                 target.update(status="failed", errorCategory=outcome, errorMessage="it broke")
             zpost = {"_id": zid, "status": "published" if outcome == "published" else "publishing"}
-        zpost.update(content=post["text"], image_url=image_url, platforms=[target])
+        target["platform"] = platform
+        zpost.update(content=post["text"], image_url=image_url, platforms=[target], account=account_id)
         self.posts[zid] = zpost
         self.replies[idempotency_key] = {"post": zpost}
         return self.replies[idempotency_key]
@@ -215,7 +218,7 @@ class FakeZernioApi:
     def get_post(self, zid):
         return self.posts.get(zid, {})
 
-    def find_published(self, account_id, text):
+    def find_published(self, account_id, text, platform="threads"):
         for zpost in self.posts.values():
             if zpost["content"] == text and threads_target(zpost)["status"] == "published":
                 return zpost
@@ -339,6 +342,19 @@ class ZernioPublisherTest(Harness):
         self.assertEqual(report, [("d1-quiz", "would schedule", "for 2026-11-09T06:00:00Z")])
         self.assertEqual(self.api.posts, {})
 
+    def test_instagram_carousel_is_scheduled_on_its_own_account(self):
+        carousel = {"id": "ig-2026-11-12-quiz", "publish_at": "2026-11-12T15:00:00Z", "kind": "quiz",
+                    "text": "Caption", "images": ["media/ig/a-1.jpg", "media/ig/a-2.jpg"], "alt_text": ["q", "a"]}
+        pub = ZernioPublisher(self.api, Log(self.log_path), "https://raw.example/sha/", platform="instagram",
+                              clock=lambda: parse_time("2026-11-12T08:00:00Z"))
+        with mock.patch.object(publish, "check_post", return_value=[]):
+            report = pub.run([carousel], parse_time("2026-11-12T08:00:00Z"))
+        self.assertEqual(self.outcomes(report), {"ig-2026-11-12-quiz": "scheduled"})
+        zpost = self.api.posts["z1"]
+        self.assertEqual((zpost["account"], threads_target(zpost)["platform"]), ("acc-instagram", "instagram"))
+        self.assertEqual(zpost["image_url"], ["https://raw.example/sha/media/ig/a-1.jpg",
+                                              "https://raw.example/sha/media/ig/a-2.jpg"])
+
     def test_polls_are_rejected_before_any_request(self):
         report = self.run_at("2026-11-09T06:05:00Z", [QUIZ])
         self.assertEqual(self.outcomes(report), {"d1-quiz": "failed"})
@@ -389,6 +405,18 @@ class ZernioApiTest(unittest.TestCase):
         self.assertTrue(body["publishNow"])
         self.assertEqual(body["mediaItems"], [{"type": "image", "url": "https://example.org/media/a.png",
                                                "altText": "alt"}])
+
+    def test_instagram_carousel_request(self):
+        session = FakeSession([FakeResponse(201, {"post": {"_id": "z1"}})])
+        api = ZernioApi("sk_test", session=session)
+        carousel = {"id": "ig-x", "text": "Caption", "alt_text": ["question", "answer"], "first_comment": "Ответ на 2-м слайде"}
+        api.create_post("acc9", carousel, ["https://r/1.jpg", "https://r/2.jpg"], "ig-x.0", "2026-11-12T15:00:00Z",
+                        platform="instagram")
+        body = session.calls[0][2]
+        self.assertEqual(body["platforms"], [{"platform": "instagram", "accountId": "acc9",
+                                              "platformSpecificData": {"firstComment": "Ответ на 2-м слайде"}}])
+        self.assertEqual(body["mediaItems"], [{"type": "image", "url": "https://r/1.jpg", "altText": "question"},
+                                              {"type": "image", "url": "https://r/2.jpg", "altText": "answer"}])
 
     def test_scheduled_request_and_update(self):
         session = FakeSession([FakeResponse(201, {"post": {"_id": "z1"}}), FakeResponse(200, {"post": {"_id": "z1"}})])
@@ -463,9 +491,46 @@ class ThreadsApiTest(unittest.TestCase):
             self.assertEqual((ctx.exception.transient, ctx.exception.auth), (transient, auth), response._body)
 
 
+class InstagramCheckTest(unittest.TestCase):
+    def setUp(self):
+        from PIL import Image
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        for name, size, fmt in (("a.jpg", (1080, 1350), "JPEG"), ("b.jpg", (1080, 1350), "JPEG"),
+                                ("c.png", (1080, 1350), "PNG"), ("tall.jpg", (1080, 1920), "JPEG")):
+            Image.new("RGB", size, "white").save(os.path.join(self.tmp.name, name), fmt)
+        self.good = {"id": "ig-2026-11-12-quiz", "publish_at": "2026-11-12T15:00:00Z", "kind": "quiz",
+                     "text": "Caption #английский", "images": ["a.jpg", "b.jpg"], "alt_text": ["q", "a"]}
+
+    def check(self, **changes):
+        return check_post(dict(self.good, **changes), root=self.tmp.name, platform="instagram")
+
+    def test_good_carousel_passes(self):
+        self.assertEqual(self.check(), [])
+
+    def test_instagram_rules(self):
+        cases = {
+            "must be JPEG": dict(images=["a.jpg", "c.png"]),
+            "4:5": dict(images=["tall.jpg"], alt_text=["x"]),
+            "alt_text": dict(alt_text=["q"]),
+            "kind": dict(kind="reveal"),
+            "caption": dict(text="x" * 2201),
+            "hashtags": dict(text=" ".join("#t%d" % i for i in range(31))),
+            "Threads field": dict(topic_tag="Английский язык"),
+            "ig-": dict(id="2026-11-12-quiz"),
+        }
+        for expected, changes in cases.items():
+            problems = self.check(**changes)
+            self.assertTrue(any(expected in p for p in problems), (expected, problems))
+
+
 class QueueTest(unittest.TestCase):
     def test_committed_queue_passes_qc(self):
         self.assertEqual(check_queue(load_queue()), [])
+
+    def test_committed_instagram_queue_passes_qc(self):
+        from qc import QUEUES
+        self.assertEqual(check_queue(load_queue(QUEUES["instagram"]), platform="instagram"), [])
 
 
 if __name__ == "__main__":

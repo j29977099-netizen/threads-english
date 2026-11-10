@@ -47,20 +47,23 @@ jobs:
           DRY_RUN: ${{ inputs.dry_run }}
           CHECK_CONNECTION: ${{ inputs.check_connection }}
         run: |
-          if [ "$CHECK_CONNECTION" = "true" ]; then
-            python tools/publish.py --check --summary-file run-summary.md
-          elif [ "$DRY_RUN" = "true" ]; then
-            python tools/publish.py --dry-run --summary-file run-summary.md
-          else
-            python tools/publish.py --summary-file run-summary.md
-          fi
+          if [ "$CHECK_CONNECTION" = "true" ]; then flags="--check"
+          elif [ "$DRY_RUN" = "true" ]; then flags="--dry-run"
+          else flags=""; fi
+          # Both platforms always run; the job reports the worse exit code.
+          status=0
+          for platform in threads instagram; do
+            python tools/publish.py --platform "$platform" $flags --summary-file run-summary.md || {
+              code=$?; if [ "$code" -gt "$status" ]; then status=$code; fi; }
+          done
+          exit $status
 
       - name: Save the publication log
         if: always() && !inputs.dry_run && !inputs.check_connection
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add log/publications.jsonl
+          git add log/publications.jsonl log/instagram.jsonl
           if ! git diff --cached --quiet; then
             git commit -m "log: publish run $(date -u +%FT%TZ)"
             for attempt in 1 2 3; do git pull --rebase && git push && break; sleep 10; done

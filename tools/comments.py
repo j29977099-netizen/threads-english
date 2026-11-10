@@ -6,7 +6,7 @@ The comment routine (strategy/COMMENTS.md) uses it three times a day:
         New comments that still need a decision, as JSON, each with what is
         needed to answer it: the post, its quiz answer, and whether that
         answer has been revealed yet.
-    python tools/comments.py reply --post P --comment C --text "..."
+    python tools/comments.py reply --platform threads --post P --comment C --text "..."
     python tools/comments.py escalate --post P --comment C --reason pricing --url URL
     python tools/comments.py skip --post P --comment C --reason "emoji only"
 
@@ -26,7 +26,7 @@ from datetime import timedelta
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from publish import ApiError, ZernioApi, stamp, utcnow  # noqa: E402
-from qc import LINK_RE, LOG_PATH, ROOT, load_queue, normalize, parse_time  # noqa: E402
+from qc import LINK_RE, LOG_PATH, LOGS, QUEUES, ROOT, load_queue, normalize, parse_time  # noqa: E402
 
 COMMENTS_LOG = os.path.join(ROOT, "log", "comments.jsonl")
 MAX_AGE = timedelta(days=7)
@@ -76,8 +76,8 @@ def check_reply(text):
     return errors
 
 
-def post_context(queue, published):
-    """Map Threads post ids, links and texts to what the queue knows about each post."""
+def post_context(queue, published, platform="threads"):
+    """Map post ids, links and texts to what the queue knows about each post."""
     by_id = {p["id"]: p for p in queue}
     reveal_of = {p["reply_to"]: p["id"] for p in queue if p.get("kind") == "reveal" and p.get("reply_to")}
     index = {}
@@ -92,8 +92,12 @@ def post_context(queue, published):
             "topic": post.get("topic"),
             "answer": answer,
             # A reveal post is the answer; for a quiz, the answer is public once its reveal went out.
-            "answer_published": post.get("kind") == "reveal" or bool(reveal_id and reveal_id in published),
+            # On Instagram the answer is a later slide of the same carousel, so it is always public.
+            "answer_published": (platform == "instagram" or post.get("kind") == "reveal"
+                                 or bool(reveal_id and reveal_id in published)),
         }
+        if platform == "instagram":
+            info["slides"] = post.get("alt_text")  # what each slide says, answer slide included
         event = published.get(pid, {})
         for key in (event.get("media_id"), event.get("zernio_id"), event.get("permalink"), normalize(post.get("text"))):
             if key:
@@ -112,33 +116,41 @@ def owner_replied(comment):
     return any((r.get("from") or {}).get("isOwner") for r in comment.get("replies") or [])
 
 
-def inbox(api, queue, published, done, now):
-    account_id = api.threads_account()["_id"]
-    index = post_context(queue, published)
+def inbox(api, sources, done, now):
+    """New comments across platforms. sources: [(platform, queue, published), ...]; a platform
+    that isn't connected in Zernio is left out, except Threads, which must be connected."""
     since = (now - MAX_AGE).strftime("%Y-%m-%d")
-    found = []
-    for post in api.commented_posts(account_id, since):
-        if not post.get("commentCount"):
+    found, accounts = [], {}
+    for platform, queue, published in sources:
+        try:
+            account_id = api.account(platform)["_id"]
+        except ApiError as exc:
+            if platform == "threads" or not exc.auth:
+                raise
             continue
-        context = (index.get(post.get("id")) or index.get(post.get("permalink"))
-                   or index.get(normalize(post.get("content"))) or {"queue_id": None})
-        for comment in flatten(api.post_comments(post["id"], account_id)):
-            author = comment.get("from") or {}
-            if author.get("isOwner") or comment.get("id") in done or owner_replied(comment):
+        accounts[platform] = account_id
+        index = post_context(queue, published, platform)
+        for post in api.commented_posts(account_id, since, platform):
+            if not post.get("commentCount"):
                 continue
-            created = comment.get("createdTime")
-            try:
-                if created and now - parse_time(created[:19] + "Z") > MAX_AGE:
+            context = (index.get(post.get("id")) or index.get(post.get("permalink"))
+                       or index.get(normalize(post.get("content"))) or {"queue_id": None})
+            for comment in flatten(api.post_comments(post["id"], account_id)):
+                author = comment.get("from") or {}
+                if author.get("isOwner") or comment.get("id") in done or owner_replied(comment):
                     continue
-            except ValueError:
-                pass  # an unexpected date format shouldn't hide a comment
-            found.append(dict(context, post_id=post["id"], post_text=(post.get("content") or "")[:280],
-                              post_url=post.get("permalink"), comment_id=comment["id"],
-                              author=author.get("username"), text=comment.get("message"),
-                              created=created, comment_url=comment.get("url"),
-                              can_reply=comment.get("canReply", True)))
-    return {"account_id": account_id, "comments": found}
-
+                created = comment.get("createdTime")
+                try:
+                    if created and now - parse_time(created[:19] + "Z") > MAX_AGE:
+                        continue
+                except ValueError:
+                    pass  # an unexpected date format shouldn't hide a comment
+                found.append(dict(context, platform=platform, post_id=post["id"],
+                                  post_text=(post.get("content") or "")[:280], post_url=post.get("permalink"),
+                                  comment_id=comment["id"], author=author.get("username"),
+                                  text=comment.get("message"), created=created,
+                                  comment_url=comment.get("url"), can_reply=comment.get("canReply", True)))
+    return {"accounts": accounts, "comments": found}
 
 def published_events(path=LOG_PATH):
     """The publish log's 'published' events, with media ids and links."""
@@ -162,6 +174,7 @@ def main(argv=None):
     sub.add_parser("inbox")
     for name in ("reply", "escalate", "skip"):
         cmd = sub.add_parser(name)
+        cmd.add_argument("--platform", choices=sorted(QUEUES), default="threads", help="platform from the inbox output")
         cmd.add_argument("--post", required=True, help="post id from the inbox output")
         cmd.add_argument("--comment", required=True, help="comment id from the inbox output")
     sub.choices["reply"].add_argument("--text", required=True)
@@ -175,8 +188,10 @@ def main(argv=None):
     api = ZernioApi(os.environ.get("ZERNIO_API_KEY", ""))
     try:
         if args.command == "inbox":
-            published = {event["id"]: event for event in published_events()}
-            print(json.dumps(inbox(api, load_queue(), published, done, now), ensure_ascii=False, indent=2))
+            sources = [(platform, load_queue(QUEUES[platform]),
+                        {event["id"]: event for event in published_events(LOGS[platform])})
+                       for platform in ("threads", "instagram")]
+            print(json.dumps(inbox(api, sources, done, now), ensure_ascii=False, indent=2))
             return 0
 
         if args.comment in done:
@@ -190,16 +205,17 @@ def main(argv=None):
             if problems:
                 print("not sent: " + "; ".join(problems), file=sys.stderr)
                 return 1
-            account_id = api.threads_account()["_id"]
+            account_id = api.account(args.platform)["_id"]
             data = api.reply_to_comment(args.post, account_id, args.comment, args.text,
                                         idempotency_key="reply-%s" % args.comment)
-            record({"event": "replied", "comment_id": args.comment, "post_id": args.post,
+            record({"event": "replied", "platform": args.platform, "comment_id": args.comment, "post_id": args.post,
                     "reply_id": data.get("commentId"), "text": args.text})
         elif args.command == "escalate":
-            record({"event": "escalated", "comment_id": args.comment, "post_id": args.post,
+            record({"event": "escalated", "platform": args.platform, "comment_id": args.comment, "post_id": args.post,
                     "reason": args.reason, "url": args.url})
         else:
-            record({"event": "skipped", "comment_id": args.comment, "post_id": args.post, "reason": args.reason})
+            record({"event": "skipped", "platform": args.platform, "comment_id": args.comment, "post_id": args.post,
+                    "reason": args.reason})
         print("%s %s" % (args.command, args.comment))
         return 0
     except ApiError as exc:

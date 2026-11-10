@@ -14,6 +14,8 @@ The Zernio API key lives only in GitHub Secrets. Claude never sees it, and the r
 
 **Two publishing routes** (`PUBLISH_BACKEND`, a repository variable): `zernio` (default) needs no Meta developer account but can't post polls or reply under a post, so quizzes take answers in the comments and reveals are their own posts. `threads` uses Meta's Threads API directly with your own app and token, and adds native polls and reveals as replies. `tools/qc.py` rejects anything the active route can't post.
 
+**Instagram** runs through the same publisher (`--platform instagram`) with its own queue and log. It needs the Instagram account connected in Zernio too (still free: up to 2 accounts).
+
 ## Layout
 
 | Path | What it is |
@@ -23,9 +25,10 @@ The Zernio API key lives only in GitHub Secrets. Claude never sees it, and the r
 | `strategy/ROUTINE.md` | What the weekly Claude cloud routine does: report, fill the queue, check, push |
 | `strategy/COMMENTS.md` | What the 3×/day comment routine does: reply, escalate or skip each new comment |
 | `brand/` | Colours, fonts, and the profile picture (`avatar.json` → `avatar.png`) |
-| `content/queue/*.json` | Scheduled posts (UTC `publish_at`), including answer reveals |
+| `content/queue/*.json` | Scheduled Threads posts (UTC `publish_at`), including answer reveals |
+| `content/instagram/*.json` | Scheduled Instagram posts: captions plus 1–10 JPEG slides (`images`, `alt_text` lists) |
 | `content/cards/*.json` | Specs for graphics; `tools/render_cards.py` turns them into `media/*.png` |
-| `log/publications.jsonl` | Append-only record of every publish attempt, retry, failure, skip |
+| `log/publications.jsonl`, `log/instagram.jsonl` | Append-only record of every publish attempt, retry, failure, skip, per platform |
 | `log/comments.jsonl` | One decision per comment (replied, escalated, skipped): ids and our reply text, never what others wrote |
 | `reports/` | Weekly metrics (`insights-*.json`) and the weekly report (`weekly-*.md`, emailed to you as a GitHub issue) |
 | `tools/qc.py` | Mechanical checks: lengths, route limits, images, reveal linkage, duplicates |
@@ -67,6 +70,7 @@ To use the `threads` route instead, create a Meta app with the *Access the Threa
 python3 tools/render_cards.py content/cards/<file>.json
 python3 tools/qc.py
 python3 tools/publish.py --dry-run --now 2026-11-09T06:05:00Z
+python3 tools/publish.py --platform instagram --dry-run --now 2026-11-11T12:00:00Z
 python3 -m unittest discover -s tests
 ```
 

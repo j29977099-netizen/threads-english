@@ -65,6 +65,20 @@ For every date from max(tomorrow, 2026-11-09) through today + 12 days that has n
 
 Never edit or delete a post dated today or earlier, or any post that appears in the log. Posts up to 30 hours ahead may already be scheduled in Zernio: editing one is fine (the publisher pushes the change), but removing it from the queue does not stop it.
 
+## 3b. Instagram
+
+For the same dates, write one Instagram post per day at 15:00Z (18:00 MSK). Put them in `content/instagram/<first date>_auto.json`, in the same format as the files already there. Adapt the day's best Threads post (usually the morning quiz) rather than copying it, and follow STRATEGY.md §12.
+
+- **Slides:** every post is images, and the answer goes on a later slide, never in a next-day post. Add the specs to `content/cards/ig-<first date>.json`, saving to `media/ig/<date>-<slug>-<n>.jpg` (JPEG only), and run `python tools/render_cards.py` on it.
+  - A quiz: slide 1 uses `quiz` with prompt «Листай → ответ на следующем слайде»; slide 2 uses `answer`.
+  - A phrase or lesson: use `phrase` and/or `list` (2–3 slides), or `versus` / `mistakes` for a single image.
+  - Open every slide and check the text. The renderer refuses a quiz that is too long for one card: shorten the sentence or the options.
+- **Caption:** at most 2,200 characters, in the same Russian rules as Threads.
+  - Start with a hook line.
+  - Say where the answer is («Листай — ответ на втором слайде 👉»), give one useful sentence of explanation, and ask one question for the comments.
+  - End with 4–6 hashtags from STRATEGY.md §12.
+- **Fields:** `images` and `alt_text` are lists, with one Russian description per slide, and the answer slide's description contains the answer. Ids look like `ig-YYYY-MM-DD-slug`. There is no `topic_tag`, `poll` or `reply_to`.
+
 ## 4. Check
 
 ```bash
@@ -79,6 +93,7 @@ Both must pass. Fix your own posts until they do. If they still fail, don't push
 Commit only these paths:
 
 - `content/queue/`
+- `content/instagram/`
 - `content/cards/`
 - `media/`
 - `strategy/calendar-30d.json`
