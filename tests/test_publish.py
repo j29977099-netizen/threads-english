@@ -175,6 +175,9 @@ class FakeZernioApi:
         self.keys = []
         self.updates = []
         self.retries = []
+        self.deleted = []
+        self.comments = {}  # platform post id -> comments under it, as the inbox returns them
+        self.reply_errors = []
         self.connected = True
         self.created = 0
 
@@ -246,6 +249,27 @@ class FakeZernioApi:
     def published(self):
         return [p for p in self.posts.values() if threads_target(p)["status"] == "published"]
 
+    def delete_post(self, zid):
+        self.deleted.append(zid)
+        del self.posts[zid]
+        return {"message": "Post deleted"}
+
+    def post_comments(self, post_id, account_id):
+        return list(self.comments.get(post_id, []))
+
+    def reply_to_comment(self, post_id, account_id, comment_id, text, idempotency_key=None):
+        if self.reply_errors:
+            raise self.reply_errors.pop(0)
+        self.keys.append(idempotency_key)
+        reply = {"id": "r%d" % (sum(map(len, self.comments.values())) + 1), "message": text,
+                 "from": {"username": "esl_teacher_bro", "isOwner": True},
+                 "url": "https://www.threads.com/@esl_teacher_bro/post/reply-to-" + post_id}
+        self.comments.setdefault(post_id, []).append(reply)
+        return {"commentId": reply["id"], "isReply": True}
+
+    def owner_replies(self, post_id):
+        return [c["message"] for c in self.comments.get(post_id, []) if c["from"]["isOwner"]]
+
 
 class ZernioPublisherTest(Harness):
     publisher = ZernioPublisher
@@ -277,15 +301,101 @@ class ZernioPublisherTest(Harness):
         self.assertEqual(self.run_at("2026-11-07T23:59:00Z", [ZQUIZ]), [])
         self.assertEqual(self.api.posts, {})
 
-    def test_reveal_is_scheduled_only_after_its_quiz_is_out(self):
+    def test_reveal_is_replied_under_its_quiz_once_due(self):
         report = self.run_at("2026-11-08T12:00:00Z", [ZQUIZ, ZREVEAL])
         self.assertEqual(self.outcomes(report), {"d1-quiz": "scheduled"})  # reveal is 42 h away
         report = self.run_at("2026-11-09T05:00:00Z", [ZQUIZ, ZREVEAL])
         self.assertEqual(self.outcomes(report), {"d1-quiz": "scheduled", "d2-reveal": "waiting"})
         self.api.fire("z1")
         report = self.run_at("2026-11-09T09:00:00Z", [ZQUIZ, ZREVEAL])
-        self.assertEqual(self.outcomes(report), {"d1-quiz": "published", "d2-reveal": "scheduled"})
-        self.assertEqual(self.api.posts["z2"]["content"], ZREVEAL["text"])
+        self.assertEqual(self.outcomes(report), {"d1-quiz": "published", "d2-reveal": "waiting"})
+        report = self.run_at("2026-11-10T06:16:00Z", [ZQUIZ, ZREVEAL])
+        self.assertEqual(self.outcomes(report), {"d2-reveal": "published"})
+        self.assertEqual(self.api.owner_replies("tz1"), [ZREVEAL["text"]])
+        self.assertEqual(list(self.api.posts), ["z1"])  # no post of its own
+        published = self.event("d2-reveal", "published")
+        self.assertEqual((published["media_id"], published["reply_to_media_id"]), ("r1", "tz1"))
+        self.assertTrue(published["permalink"])
+        self.assertEqual(self.api.keys, ["d1-quiz.0", "d2-reveal.reply"])
+        self.assertEqual(self.run_at("2026-11-10T06:31:00Z", [ZQUIZ, ZREVEAL]), [])
+
+    def grace_run(self, when, posts, **kwargs):
+        pub = ZernioPublisher(self.api, Log(self.log_path), clock=lambda: parse_time(when), **kwargs)
+        return pub.run(posts, parse_time(when))
+
+    def test_github_run_leaves_a_due_reveal_to_the_routine_first(self):
+        self.run_at("2026-11-09T06:05:00Z", [ZQUIZ])
+        grace = timedelta(minutes=45)
+        report = self.grace_run("2026-11-10T06:20:00Z", [ZQUIZ, ZREVEAL], reply_grace=grace)
+        self.assertEqual(report, [("d2-reveal", "waiting", "goes out under its quiz at 2026-11-10T07:00:00Z")])
+        report = self.grace_run("2026-11-10T07:05:00Z", [ZQUIZ, ZREVEAL], reply_grace=grace)
+        self.assertEqual(self.outcomes(report), {"d2-reveal": "published"})  # the routine missed it
+
+    def test_reply_already_under_the_quiz_is_recorded_not_posted_again(self):
+        self.run_at("2026-11-09T06:05:00Z", [ZQUIZ])
+        self.api.comments["tz1"] = [
+            {"id": "c1", "message": ZREVEAL["text"], "from": {"isOwner": False}},  # someone quoting it
+            {"id": "r9", "message": ZREVEAL["text"] + " \n", "from": {"isOwner": True}, "url": "https://t/r9"}]
+        report = self.run_at("2026-11-10T06:16:00Z", [ZQUIZ, ZREVEAL])
+        self.assertEqual(report, [("d2-reveal", "published", "https://t/r9")])
+        self.assertEqual(self.event("d2-reveal", "published")["media_id"], "r9")
+        self.assertEqual(self.api.keys, ["d1-quiz.0"])  # no reply was sent
+
+    def test_reply_error_is_retried_next_run_under_the_same_key(self):
+        self.run_at("2026-11-09T06:05:00Z", [ZQUIZ])
+        self.api.reply_errors.append(ApiError("busy", status=503, transient=True))
+        first = self.run_at("2026-11-10T06:16:00Z", [ZQUIZ, ZREVEAL])
+        second = self.run_at("2026-11-10T06:31:00Z", [ZQUIZ, ZREVEAL])
+        self.assertEqual((self.outcomes(first), self.outcomes(second)),
+                         ({"d2-reveal": "retry later"}, {"d2-reveal": "published"}))
+        self.assertEqual(self.api.owner_replies("tz1"), [ZREVEAL["text"]])
+
+    def hand_reveal_over_the_old_way(self):
+        """Before reveals became replies, a reveal was scheduled in Zernio as a post of its own."""
+        self.api.create_post("acc-threads", ZREVEAL, idempotency_key="d2-reveal.0", scheduled_for=ZREVEAL["publish_at"])
+        Log(self.log_path).write("d2-reveal", "zernio_created", zernio_id="z2", scheduled_for=ZREVEAL["publish_at"])
+
+    def test_reveal_scheduled_as_its_own_post_is_withdrawn_and_replied(self):
+        self.run_at("2026-11-09T06:05:00Z", [ZQUIZ])
+        self.hand_reveal_over_the_old_way()
+        report = self.run_at("2026-11-09T09:00:00Z", [ZQUIZ, ZREVEAL])  # well before its time
+        self.assertEqual(self.outcomes(report), {"d2-reveal": "waiting"})
+        self.assertEqual((self.api.deleted, list(self.api.posts)), (["z2"], ["z1"]))
+        self.assertEqual(self.event("d2-reveal", "zernio_discarded")["zernio_id"], "z2")
+        report = self.run_at("2026-11-10T06:16:00Z", [ZQUIZ, ZREVEAL])
+        self.assertEqual(self.outcomes(report), {"d2-reveal": "published"})
+        self.assertEqual(self.api.owner_replies("tz1"), [ZREVEAL["text"]])
+
+    def test_reveal_already_out_as_its_own_post_is_kept(self):
+        self.run_at("2026-11-09T06:05:00Z", [ZQUIZ])
+        self.hand_reveal_over_the_old_way()
+        self.api.fire("z2")
+        report = self.run_at("2026-11-10T06:20:00Z", [ZQUIZ, ZREVEAL])
+        self.assertEqual(self.outcomes(report), {"d2-reveal": "published"})
+        self.assertEqual((self.api.deleted, self.api.owner_replies("tz1")), ([], []))
+        self.assertEqual(self.event("d2-reveal", "published")["zernio_id"], "z2")
+
+    def test_replies_only_run_posts_the_reveal_and_creates_nothing(self):
+        self.run_at("2026-11-08T12:00:00Z", [ZQUIZ])
+        self.api.fire("z1")  # Zernio published the quiz; no run has recorded it yet
+        lesson = post("d2-lesson", "2026-11-10T16:00:00Z")
+        report = self.grace_run("2026-11-10T06:16:00Z", [ZQUIZ, ZREVEAL, lesson], replies_only=True)
+        self.assertEqual(self.outcomes(report), {"d1-quiz": "published", "d2-reveal": "published"})
+        self.assertEqual(self.api.keys, ["d1-quiz.0", "d2-reveal.reply"])  # the lesson was left to GitHub
+        self.assertEqual(self.api.owner_replies("tz1"), [ZREVEAL["text"]])
+
+    def test_replies_only_run_never_retries_the_quiz(self):
+        self.run_at("2026-11-08T12:00:00Z", [ZQUIZ])
+        self.zernio_fails("z1", "platform_error")
+        report = self.grace_run("2026-11-09T07:00:00Z", [ZQUIZ, ZREVEAL], replies_only=True)
+        self.assertEqual(report, [("d2-reveal", "waiting", "for d1-quiz")])
+        self.assertEqual((self.api.retries, self.api.keys), ([], ["d1-quiz.0"]))
+
+    def test_dry_run_shows_the_reveal_as_a_reply(self):
+        self.run_at("2026-11-09T06:05:00Z", [ZQUIZ])
+        report = self.run_at("2026-11-09T09:00:00Z", [ZQUIZ, ZREVEAL], dry_run=True)
+        self.assertEqual(report, [("d2-reveal", "would reply", "under d1-quiz at 2026-11-10T06:15:00Z")])
+        self.assertEqual(self.api.owner_replies("tz1"), [])
 
     def test_quiz_that_never_went_out_takes_its_reveal_down_too(self):
         self.assertEqual(self.outcomes(self.run_at("2026-11-10T06:20:00Z", [ZQUIZ, ZREVEAL])),
@@ -506,6 +616,19 @@ class ZernioApiTest(unittest.TestCase):
         method, url, body = session.calls[1][:3]
         self.assertEqual((method, url, body), ("PUT", "https://zernio.com/api/v1/posts/z1",
                                                {"content": "Hello!", "scheduledFor": "2026-11-09T06:00:00Z"}))
+
+    def test_reply_under_a_post_and_delete_requests(self):
+        session = FakeSession([FakeResponse(200, {"success": True, "data": {"commentId": "c1", "isReply": True}}),
+                               FakeResponse(200, {"message": "Post deleted"})])
+        api = ZernioApi("sk_test", session=session)
+        self.assertEqual(api.reply_to_comment("tz1", "acc1", None, "Ответ", idempotency_key="d2-reveal.reply"),
+                         {"commentId": "c1", "isReply": True})
+        method, url, body, _, headers = session.calls[0]
+        self.assertEqual((method, url, body), ("POST", "https://zernio.com/api/v1/inbox/comments/tz1",
+                                               {"accountId": "acc1", "message": "Ответ"}))
+        self.assertEqual(headers["Idempotency-Key"], "d2-reveal.reply")
+        api.delete_post("z2")
+        self.assertEqual(session.calls[1][:2], ("DELETE", "https://zernio.com/api/v1/posts/z2"))
 
     def test_error_classification(self):
         cases = [(500, True, False), (429, True, False), (409, True, False), (400, False, False), (401, False, True)]

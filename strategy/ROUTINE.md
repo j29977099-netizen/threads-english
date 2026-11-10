@@ -40,7 +40,7 @@ For every date from max(tomorrow, 2026-11-09) through today + 12 days that has n
 - **Reveals:** every `quiz` and `challenge` gets a reveal: `kind: "reveal"` with `reply_to` set to the quiz id. It goes out the next day at 06:15Z for a morning quiz, or 16:15Z for an evening one.
 - **Publishing route (Zernio):** no `poll` field.
   - Quizzes list the options in the text as `A) … B) … C) … D) …`, ask for the letter in the comments, and set `answer` to the letter.
-  - A reveal is its own post, not a reply. It restates the question, then gives `Правильно — <letter>) …` and the explanation.
+  - A reveal goes out as a reply right under its quiz, so it doesn't restate the question. It opens with `✅ Разбор: правильно — <letter>) …`, then gives the explanation.
 - **Every post:** `topic_tag: "Английский язык"`. The id has the form `YYYY-MM-DD-p1-short-slug`, `YYYY-MM-DD-p2-…` or `YYYY-MM-DD-r-…`.
 - **Mini-tasks:** a lesson or tip that asks readers to translate, fill in or answer something also gets a next-day reveal, the same way a quiz does.
 - **Russian:** the teacher's own first-person past tense is masculine («прожил», «преподавал»). Forms for the reader stay neutral.

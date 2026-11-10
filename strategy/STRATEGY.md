@@ -37,7 +37,7 @@ Never invent personal stories, students, results, testimonials, prices, discount
 | 🇷🇺 → 🇺🇸 | Переведи | Translation challenge, natural answer revealed the next day |
 | ☕️ | Как говорят в США | Real-life situations: café, airport, office, interview, texting, TV |
 | 👀 | Ошибки, которые нас выдают | Common mistakes of Russian speakers, often as a graphic |
-| ✅ | Разбор | Answer reveal, its own post the next day. It restates the question first, so it reads without the quiz |
+| ✅ | Разбор | Answer reveal the next day, posted as a reply right under its quiz |
 | 👋 | О занятиях | Soft promotion of private lessons |
 
 ## 4. Content mix (of all non-reveal posts)
@@ -59,7 +59,7 @@ All times Moscow time (UTC+3), the centre of gravity for a Russian-speaking audi
 | Post 2 | 19:00 | 16:00 | Education: vocabulary, grammar, American English, tip, or promo |
 | Reveal | 19:15 next day | 16:15 | ✅ reveal of an evening quiz or mini-task, if there was one |
 
-**Publishing route.** Posts go out through Zernio, which needs no Meta developer account. Each post is handed to Zernio up to 30 hours ahead with its exact time, so it publishes on the minute; a reveal is handed over only after its quiz is confirmed live. Zernio cannot post polls or reply under an existing post, so quizzes collect answers in the comments and reveals are their own posts. If a Meta developer app is set up later, setting the repository variable `PUBLISH_BACKEND=threads` brings back native polls and reveals as replies.
+**Publishing route.** Posts go out through Zernio, which needs no Meta developer account. Each post is handed to Zernio up to 30 hours ahead with its exact time, so it publishes on the minute. Zernio cannot post polls, so quizzes collect answers in the comments. A reveal is replied under its quiz through Zernio's inbox, which can't schedule, so the "Threads answer reveals" cloud routine posts it at 06:15 and 16:15 UTC; GitHub runs post it only if the routine hasn't within 45 minutes. If a Meta developer app is set up later, setting the repository variable `PUBLISH_BACKEND=threads` brings back native polls and reveals as replies.
 
 From week 3, test alternative slots (07:30 / 12:30 / 21:00 MSK) one variable at a time and keep what wins.
 

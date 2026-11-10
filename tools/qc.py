@@ -9,7 +9,8 @@ poll 2-4 options of 1-25 chars on text-only posts, <= 5 links, images JPEG/PNG
 <= 8 MB and >= 320 px wide, topic tag without '.' or '&'.
 
 What a post may use depends on the publishing backend (PUBLISH_BACKEND, see
-tools/publish.py): only the direct Threads API can post polls and replies.
+tools/publish.py): only the direct Threads API can post polls and replies to
+comments (kind "reply"). On both backends a reveal is a reply under its quiz.
 """
 import argparse
 import glob

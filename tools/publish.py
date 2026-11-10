@@ -2,8 +2,12 @@
 
 Two backends, chosen with PUBLISH_BACKEND:
   zernio  (default) Zernio's API, which posts through its own Meta-approved app,
-          so no Meta developer account is needed. No polls, and a reveal goes
-          out as its own post instead of a reply under the quiz.
+          so no Meta developer account is needed. No polls. A reveal goes out
+          as the account's own reply under its quiz (Zernio's inbox reply
+          endpoint), which Zernio cannot schedule: it is posted by the first
+          run after its time. The "Threads answer reveals" cloud routine runs
+          --replies-only at 06:15 and 16:15 UTC so that run is on time; GitHub
+          runs pass --reply-grace and only step in when the routine missed it.
   threads Meta's Threads API directly, with your own app and token. Supports
           polls and replies.
 
@@ -14,8 +18,9 @@ runs it only every few hours):
   3. threads: creates a container, waits until FINISHED, publishes;
      zernio: hands the post to Zernio with its exact time (scheduledFor), so
      Zernio publishes on the minute however late GitHub runs. Later runs check
-     the result, push any edit made to a post that is still waiting, and only
-     schedule a reveal once its quiz is confirmed published,
+     the result and push any edit made to a post that is still waiting. A
+     reveal is replied under its quiz once the quiz is published and the
+     reveal is due,
   4. appends every step to the log (flushed immediately).
 
 Safety rails:
@@ -31,6 +36,7 @@ Safety rails:
   - any failure or skip makes the run exit 1 so the workflow opens an issue.
 
     python tools/publish.py --dry-run --now 2026-11-09T06:05:00Z
+    python tools/publish.py --platform threads --replies-only   # the reveal routine
 """
 import argparse
 import json
@@ -264,9 +270,16 @@ class ZernioApi:
                           params={"accountId": account_id, "limit": 100}).get("comments", [])
 
     def reply_to_comment(self, post_id, account_id, comment_id, text, idempotency_key=None):
-        body = {"accountId": account_id, "message": text, "commentId": comment_id}
+        """Reply to a comment, or with comment_id None to the post itself (post_id: Zernio or platform id)."""
+        body = {"accountId": account_id, "message": text}
+        if comment_id:
+            body["commentId"] = comment_id
         return self._call("POST", "inbox/comments/%s" % post_id, body=body,
                           idempotency_key=idempotency_key).get("data") or {}
+
+    def delete_post(self, zernio_id):
+        """Withdraw a post Zernio has not published (scheduled, failed...); published ones can't be deleted."""
+        return self._call("DELETE", "posts/%s" % zernio_id)
 
 
 def media_items(post, image_url):
@@ -355,6 +368,7 @@ class Publisher:
     backend = "threads"
     platform = "threads"
     replies = True  # a reveal is posted as a reply under its quiz
+    replies_only = False  # only reveals and replies are published in this run
     horizon = timedelta(0)  # how far ahead of its time a post is handed over
     max_per_run = MAX_PER_RUN
 
@@ -390,7 +404,8 @@ class Publisher:
         max_posts = max_posts or self.max_per_run
         by_id = {p["id"]: p for p in posts}
         due = [p for p in posts
-               if self.log.get(p["id"])["status"] not in TERMINAL and parse_time(p["publish_at"]) <= now + self.horizon]
+               if self.log.get(p["id"])["status"] not in TERMINAL and parse_time(p["publish_at"]) <= now + self.horizon
+               and (p.get("reply_to") or not self.replies_only)]
         due.sort(key=lambda p: p["publish_at"])
         done = 0
         for post in due:
@@ -409,6 +424,9 @@ class Publisher:
             parent_id = post.get("reply_to")
             if parent_id:
                 parent_status = self.status(parent_id)
+                if self.replies_only and parent_status not in TERMINAL and parent_id in by_id and not dry_run:
+                    # This run doesn't publish the quiz, so read where it stands instead.
+                    parent_status = self._refresh(by_id[parent_id]) or parent_status
                 if parent_status == "published":
                     if self.replies:
                         reply_to_id = self.log.get(parent_id).get("media_id") or "<media id of %s>" % parent_id
@@ -431,7 +449,10 @@ class Publisher:
                 detail = "reply to %s" % reply_to_id if reply_to_id else ("after %s" % parent_id if parent_id else "")
                 if parse_time(post["publish_at"]) > now:
                     self._simulated[pid] = "pending"  # scheduled, not out: its reveal still waits
-                    self.note(pid, "would schedule", "for %s" % post["publish_at"])
+                    if reply_to_id:
+                        self.note(pid, "would reply", "under %s at %s" % (parent_id, post["publish_at"]))
+                    else:
+                        self.note(pid, "would schedule", "for %s" % post["publish_at"])
                 else:
                     self.note(pid, "would publish", detail)
                 done += 1
@@ -453,6 +474,10 @@ class Publisher:
                     self.log.write(pid, "failed", error=str(exc))
                     self.note(pid, "failed", str(exc))
         return self.report
+
+    def _refresh(self, post):
+        """The backend's current status for a post this run doesn't publish (None: unknown)."""
+        return None
 
     def _finish(self, pid, outcome, reason, dry_run):
         if dry_run:
@@ -518,22 +543,28 @@ class ZernioPublisher(Publisher):
     Posts are handed to Zernio up to ZERNIO_LOOKAHEAD ahead with their exact
     time, and Zernio publishes them on the minute. Later runs read the
     result, push edits to posts still waiting, and fail a post Zernio still
-    hasn't published MAX_LATENESS after its time. Zernio cannot reply to an
-    existing post, so a reveal is its own post, scheduled only once its quiz
-    is confirmed published. Every create carries an Idempotency-Key, so a
-    retried request replays the first answer; that is also why a post Zernio
-    marked failed is retried in place (POST /posts/{id}/retry) rather than
-    created again.
+    hasn't published MAX_LATENESS after its time. Every create carries an
+    Idempotency-Key, so a retried request replays the first answer; that is
+    also why a post Zernio marked failed is retried in place
+    (POST /posts/{id}/retry) rather than created again.
+
+    On Threads a reveal is the account's own reply under its quiz, posted
+    through the inbox reply endpoint once the quiz is published and the reveal
+    is due (plus reply_grace). That endpoint can't schedule, so the reply is
+    never handed over ahead. Before replying, the quiz's comments are checked
+    for the same text, so a lost log or a second runner can't post it twice.
     """
 
     backend = "zernio"
-    replies = False
     horizon = ZERNIO_LOOKAHEAD
     max_per_run = 12
 
-    def __init__(self, *args, platform="threads", **kwargs):
+    def __init__(self, *args, platform="threads", reply_grace=timedelta(0), replies_only=False, **kwargs):
         super().__init__(*args, **kwargs)
         self.platform = platform
+        self.replies = platform == "threads"  # Zernio's inbox can reply under a Threads post
+        self.reply_grace = reply_grace
+        self.replies_only = replies_only
         self._account_id = None
 
     @property
@@ -548,6 +579,9 @@ class ZernioPublisher(Publisher):
         return self.media_base_url + post["image"] if post.get("image") else None
 
     def _publish_one(self, post, reply_to_id):
+        if reply_to_id:
+            self._publish_reply(post, reply_to_id)
+            return
         pid = post["id"]
         state = self.log.get(pid)
         zernio_id = state.get("zernio_id")
@@ -603,6 +637,60 @@ class ZernioPublisher(Publisher):
             self._still_publishing(post, zpost["_id"])
         else:
             raise zernio_error(target, body)
+
+    def _publish_reply(self, post, quiz_media_id):
+        """Post a reveal as the account's own reply under its quiz, once it is due."""
+        pid = post["id"]
+        zernio_id = self.log.get(pid).get("zernio_id")
+        if zernio_id:
+            # Handed to Zernio as a standalone post before reveals became replies: withdraw it.
+            try:
+                zpost = self.api.get_post(zernio_id)
+            except ApiError as exc:
+                if exc.status != 404:
+                    raise
+                zpost = {}
+            target = threads_target(zpost)
+            if target.get("status") == "published":
+                self._published_target(post, zernio_id, target, "already out as its own post")
+                return
+            if zpost:
+                self.api.delete_post(zernio_id)
+            self.log.write(pid, "zernio_discarded", zernio_id=zernio_id,
+                           error="withdrawn: the reveal goes out as a reply under its quiz")
+
+        go_at = parse_time(post["publish_at"]) + self.reply_grace
+        if self.clock() < go_at:
+            raise StillPublishing("goes out under its quiz at %s" % stamp(go_at), outcome="waiting")
+        existing = self._own_reply(quiz_media_id, post["text"])
+        if existing:
+            self._published(post, existing.get("id"), "already under its quiz", existing.get("url"),
+                            reply_to_media_id=quiz_media_id)
+            return
+        data = self.api.reply_to_comment(quiz_media_id, self.account_id, None, post["text"],
+                                         idempotency_key="%s.reply" % pid)
+        if not data.get("commentId"):
+            raise ApiError("Zernio did not return the reply's id", transient=True)
+        link = (self._own_reply(quiz_media_id, post["text"]) or {}).get("url")
+        self._published(post, data["commentId"], "", link, reply_to_media_id=quiz_media_id)
+
+    def _own_reply(self, quiz_media_id, text):
+        """The account's own comment with exactly this text under the quiz, if there is one."""
+        for comment in self.api.post_comments(quiz_media_id, self.account_id):
+            if (comment.get("from") or {}).get("isOwner") and normalize(comment.get("message")) == normalize(text):
+                return comment
+        return None
+
+    def _refresh(self, post):
+        """Record a post Zernio has published since the last run; never creates or retries anything."""
+        zernio_id = self.log.get(post["id"]).get("zernio_id")
+        if not zernio_id:
+            return None
+        target = threads_target(self.api.get_post(zernio_id), self.platform)
+        if target.get("status") != "published":
+            return None
+        self._published_target(post, zernio_id, target, "")
+        return "published"
 
     def _retry(self, post, zernio_id):
         """Publish a post Zernio marked failed again, as the same Zernio post."""
@@ -666,6 +754,10 @@ def main(argv=None):
     parser.add_argument("--platform", choices=sorted(QUEUES), default="threads")
     parser.add_argument("--check", action="store_true",
                         help="only confirm the key works and which Threads account it reaches; publish nothing")
+    parser.add_argument("--replies-only", action="store_true",
+                        help="publish only reveals and replies (the on-time cloud routine); never create posts")
+    parser.add_argument("--reply-grace", type=int, default=0, metavar="MINUTES",
+                        help="zernio: leave a due reveal this long to the on-time routine (GitHub runs)")
     args = parser.parse_args(argv)
 
     now = parse_time(args.now) if args.now else utcnow().replace(microsecond=0)
@@ -675,9 +767,11 @@ def main(argv=None):
     key = os.environ.get(secret, "")
     media_base_url = os.environ.get("MEDIA_BASE_URL", "")
     if BACKEND == "zernio":
-        publisher = ZernioPublisher(ZernioApi(key), Log(LOGS[args.platform]), media_base_url, platform=args.platform)
+        publisher = ZernioPublisher(ZernioApi(key), Log(LOGS[args.platform]), media_base_url, platform=args.platform,
+                                    reply_grace=timedelta(minutes=args.reply_grace), replies_only=args.replies_only)
     elif args.platform == "threads":
         publisher = Publisher(ThreadsApi(key), Log(), media_base_url)
+        publisher.replies_only = args.replies_only
     else:
         print("Instagram is published through Zernio only (PUBLISH_BACKEND=zernio)", file=sys.stderr)
         return 2

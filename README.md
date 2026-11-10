@@ -12,7 +12,7 @@ Claude cloud routine (weekly)          GitHub repo                      GitHub A
 
 The Zernio API key lives only in GitHub Secrets. Claude never sees it, and the routine doesn't need it.
 
-**Two publishing routes** (`PUBLISH_BACKEND`, a repository variable): `zernio` (default) needs no Meta developer account but can't post polls or reply under a post, so quizzes take answers in the comments and reveals are their own posts. `threads` uses Meta's Threads API directly with your own app and token, and adds native polls and reveals as replies. `tools/qc.py` rejects anything the active route can't post.
+**Two publishing routes** (`PUBLISH_BACKEND`, a repository variable): `zernio` (default) needs no Meta developer account but can't post polls, so quizzes take answers in the comments. Reveals are replied under their quiz through Zernio's inbox endpoint, which can't schedule: the **Threads answer reveals** cloud routine runs `publish.py --platform threads --replies-only` at 06:15 and 16:15 UTC, and GitHub runs (`--reply-grace 45`) post a reveal only if the routine missed it. `threads` uses Meta's Threads API directly with your own app and token, and adds native polls and reveals as replies. `tools/qc.py` rejects anything the active route can't post.
 
 **Instagram** runs through the same publisher (`--platform instagram`) with its own queue and log. It needs the Instagram account connected in Zernio too (still free: up to 2 accounts).
 
@@ -48,7 +48,7 @@ The Zernio API key lives only in GitHub Secrets. Claude never sees it, and the r
 }
 ```
 
-`kind` is one of intro, quiz, challenge, lesson, tip, promo, reveal, reply. A `reveal` has `reply_to` (the quiz id), must mention the quiz's `answer`, and goes out only after its quiz is published. On the `zernio` route it is a standalone post, so it restates the question. Image posts have `image` and `alt_text`. `poll` and `kind: reply` work only on the `threads` route.
+`kind` is one of intro, quiz, challenge, lesson, tip, promo, reveal, reply. A `reveal` has `reply_to` (the quiz id), must mention the quiz's `answer`, and goes out only after its quiz is published. On both routes it is a reply right under its quiz. Image posts have `image` and `alt_text`. `poll` and `kind: reply` work only on the `threads` route.
 
 ## One-time setup (owner)
 

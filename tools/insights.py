@@ -60,6 +60,10 @@ def threads_account(api, cutoff, now):
 
 
 def zernio_metrics(api, event, meta, row):
+    if not event.get("zernio_id"):
+        # A reveal replied under its quiz through the inbox is not a Zernio post, so Zernio has no metrics for it.
+        row["note"] = "reply under its quiz: no Zernio metrics"
+        return
     body = api.analytics(event["zernio_id"])
     row["metrics"] = body.get("analytics") or {}
     if body.get("syncStatus") not in (None, "synced"):

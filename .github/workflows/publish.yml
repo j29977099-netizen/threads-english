@@ -51,9 +51,10 @@ jobs:
           elif [ "$DRY_RUN" = "true" ]; then flags="--dry-run"
           else flags=""; fi
           # Both platforms always run; the job reports the worse exit code.
+          # --reply-grace: a due reveal is left 45 min to the on-time "Threads answer reveals" routine.
           status=0
           for platform in threads instagram; do
-            python tools/publish.py --platform "$platform" $flags --summary-file run-summary.md || {
+            python tools/publish.py --platform "$platform" $flags --reply-grace 45 --summary-file run-summary.md || {
               code=$?; if [ "$code" -gt "$status" ]; then status=$code; fi; }
           done
           exit $status

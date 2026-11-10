@@ -1,0 +1,2 @@
+# Publish runs (GitHub) and cloud routines both append to these logs; keep both sides on a rebase.
+log/*.jsonl merge=union
