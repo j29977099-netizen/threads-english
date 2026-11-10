@@ -34,9 +34,9 @@ Use only numbers from the files. Where there are none, say "no data yet". Never 
 
 ## 3. Fill the queue
 
-For every date from max(tomorrow, 2026-11-09) through today + 12 days that has no queued p1 or p2 post (reveals and idioms don't count), write that day's posts. Also give every date in that range that has no idiom one. Put them in one new file, `content/queue/<first date>_auto.json`, in the same format as the existing queue files.
+For every date from max(tomorrow, 2026-11-09) through today + 12 days that has no queued p1 or p2 post (reveals, idioms and «Как сказать» posts don't count), write that day's posts. Also give every date in that range that has no idiom one, and continue the «Как сказать по-английски» series through that range. Put them in one new file, `content/queue/<first date>_auto.json`, in the same format as the existing queue files.
 
-- **Slots:** p1 at 06:00Z (engagement) and p2 at 16:00Z (education), following that date's calendar entry and STRATEGY.md's mix. Every day also gets an idiom at 09:30Z (see **Idioms**).
+- **Slots:** p1 at 06:00Z (engagement) and p2 at 16:00Z (education), following that date's calendar entry and STRATEGY.md's mix. Every day also gets an idiom at 09:30Z (see **Idioms**), and every third day gets a «Как сказать по-английски» post at 18:00Z (see **Как сказать**).
 - **Idioms (🗽 Идиома дня):** `kind: "lesson"`, `topic: "idiom: <idiom>"`, id `YYYY-MM-DD-i-short-slug`. Follow the format of the posts in `content/queue/2026-11-11_idioms.json`:
   - `🗽 Идиома дня: <idiom>`, then «Дословно — «…».» and «На самом деле — …».
   - Two examples, each `✔️ <English>` with its Russian translation on the next line after «— ».
@@ -44,11 +44,19 @@ For every date from max(tomorrow, 2026-11-09) through today + 12 days that has n
   - Pick idioms Americans really use in everyday speech, understandable at B1. No rude or dated ones.
   - Never repeat an idiom from the queue or the log, ever. Check `topic` and the text of every file.
   - The question is open (no right answer), so an idiom never gets a reveal.
+- **Как сказать (Как сказать по-английски «…»):** `kind: "lesson"`, `topic: "how to say: <Russian phrase>"`, id `YYYY-MM-DD-s-short-slug`, at 18:00Z. One every third day: the next goes out 3 days after the latest one in the queue or the log. Follow the format of the posts in `content/queue/2026-11-11_how_to_say.json`:
+  - `Как сказать по-английски «<Russian phrase>»` and one emoji that fits the topic. This series has no fixed marker.
+  - Four lines, `<English> — <Russian>.`, from the mildest way to say it to the strongest.
+  - `И ловушка:`, then one trap: a near-identical word, form or preposition that changes the meaning, each side with its Russian meaning. Close with one short line and 👀.
+  - Pick a feeling or everyday situation that Russian names in one colloquial phrase and that learners tend to translate word for word. The English is what Americans actually say.
+  - The trap must be a real, checkable difference in meaning, not a matter of taste. If you aren't sure of it, choose another phrase.
+  - Write the Russian side so it needs no gender («мне лень», «у меня нет слов»), not «я устал(а)».
+  - Never repeat a phrase or a trap from the queue or the log. There is no task, so no reveal.
 - **Reveals:** every `quiz` and `challenge` gets a reveal: `kind: "reveal"` with `reply_to` set to the quiz id. It goes out the next day at 06:15Z for a morning quiz, or 16:15Z for an evening one.
 - **Publishing route (Zernio):** no `poll` field.
   - Quizzes list the options in the text as `A) … B) … C) … D) …`, ask for the letter in the comments, and set `answer` to the letter.
   - A reveal goes out as a reply right under its quiz, so it doesn't restate the question. It opens with `✅ Разбор: правильно — <letter>) …`, then gives the explanation.
-- **Every post:** `topic_tag: "Английский язык"`. The id has the form `YYYY-MM-DD-p1-short-slug`, `YYYY-MM-DD-p2-…`, `YYYY-MM-DD-i-…` or `YYYY-MM-DD-r-…`.
+- **Every post:** `topic_tag: "Английский язык"`. The id has the form `YYYY-MM-DD-p1-short-slug`, `YYYY-MM-DD-p2-…`, `YYYY-MM-DD-i-…`, `YYYY-MM-DD-s-…` or `YYYY-MM-DD-r-…`.
 - **Mini-tasks:** a lesson or tip that asks readers to translate, fill in or answer something also gets a next-day reveal, the same way a quiz does.
 - **Russian:** the teacher's own first-person past tense is masculine («прожил», «преподавал»). Forms for the reader stay neutral.
   - Address the reader as «ты» throughout, never «вы».

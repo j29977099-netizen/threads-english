@@ -38,6 +38,7 @@ Never invent personal stories, students, results, testimonials, prices, discount
 | ☕️ | Как говорят в США | Real-life situations: café, airport, office, interview, texting, TV |
 | 👀 | Ошибки, которые нас выдают | Common mistakes of Russian speakers, often as a graphic |
 | 🗽 | Идиома дня | An everyday American idiom: its literal translation (often funny), what it really means in Russian, 2 natural examples with translations, at most one short note on usage, and an open question for the comments. No task with a right answer, so no reveal. Added 2026-11-10 at the teacher's request |
+| «…» | Как сказать по-английски | A feeling or everyday situation that Russian names in one colloquial phrase («я загоняюсь», «мне лень»). Opens with «Как сказать по-английски «…»» and one emoji that fits the topic; the series has no fixed marker. Then 4 natural American ways to say it, from mild to strong, each with its Russian translation. Then «И ловушка:», one trap where a near-identical word, form or preposition changes the meaning, and a short closing line with 👀. No task, so no reveal. Every third day. Added 2026-11-10 at the teacher's request |
 | ✅ | Разбор | Answer reveal the next day, posted as a reply right under its quiz |
 | 👋 | О занятиях | Soft promotion of private lessons |
 
@@ -49,7 +50,7 @@ Never invent personal stories, students, results, testimonials, prices, discount
 - 10% practical learning advice
 - 10% personal brand and student acquisition (1–2 posts per week, never two days in a row)
 
-The daily 🗽 idiom has its own slot (§5) and doesn't count toward this mix.
+The daily 🗽 idiom and the «Как сказать по-английски» post have their own slots (§5) and don't count toward this mix.
 
 ## 5. Daily rhythm
 
@@ -62,10 +63,11 @@ All times Moscow time (UTC+3), the centre of gravity for a Russian-speaking audi
 | Idiom | 12:30 | 09:30 | 🗽 Идиома дня, every day |
 | Post 2 | 19:00 | 16:00 | Education: vocabulary, grammar, American English, tip, or promo |
 | Reveal | 19:15 next day | 16:15 | ✅ reveal of an evening quiz or mini-task, if there was one |
+| Phrases | 21:00 | 18:00 | «Как сказать по-английски «…»», every third day |
 
 **Publishing route.** Posts go out through Zernio, which needs no Meta developer account. Each post is handed to Zernio up to 30 hours ahead with its exact time, so it publishes on the minute. Zernio cannot post polls, so quizzes collect answers in the comments. A reveal is replied under its quiz through Zernio's inbox, which can't schedule, so the "Threads answer reveals" cloud routine posts it at 06:15 and 16:15 UTC; GitHub runs post it only if the routine hasn't within 45 minutes. If a Meta developer app is set up later, setting the repository variable `PUBLISH_BACKEND=threads` brings back native polls and reveals as replies.
 
-From week 3, test alternative slots (07:30 / 21:00 MSK) one variable at a time and keep what wins. 12:30 MSK is now the idiom slot.
+From week 3, test 07:30 MSK against 09:00 for Post 1 and keep what wins. 12:30 MSK is the idiom slot and 21:00 MSK is the «Как сказать» slot.
 
 Answer reveals are always replies to their own quiz (`reply_to`), so the explanation stays attached to the question. The original quiz never contains the answer.
 
