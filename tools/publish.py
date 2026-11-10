@@ -414,6 +414,9 @@ class Publisher:
             if problems:
                 self._finish(pid, "failed", "; ".join(problems), dry_run)
                 continue
+            if dry_run and started:
+                self.note(pid, "already handed over", "a real run checks its result")
+                continue
             if dry_run:
                 self._simulated[pid] = "published"
                 detail = "reply to %s" % reply_to_id if reply_to_id else ("after %s" % parent_id if parent_id else "")
