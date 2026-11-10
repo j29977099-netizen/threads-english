@@ -174,8 +174,13 @@ class FakeZernioApi:
         self.outcomes = []  # per post published now: "published", "pending", a failure category, or an ApiError
         self.keys = []
         self.updates = []
+        self.retries = []
+        self.connected = True
+        self.created = 0
 
     def account(self, platform="threads"):
+        if not self.connected:
+            raise ApiError("no active Threads account is connected in Zernio", code="auth_expired")
         return {"_id": "acc-" + platform, "username": "esl_teacher_bro"}
 
     def create_post(self, account_id, post, image_url=None, idempotency_key=None, scheduled_for=None,
@@ -183,7 +188,8 @@ class FakeZernioApi:
         self.keys.append(idempotency_key)
         if idempotency_key in self.replies:
             return self.replies[idempotency_key]
-        zid = "z%d" % (len(self.posts) + 1)
+        self.created += 1
+        zid = "z%d" % self.created
         if scheduled_for:
             target = {"platform": "threads", "status": "pending"}
             zpost = {"_id": zid, "status": "scheduled", "scheduledFor": scheduled_for[:19] + ".000Z"}
@@ -217,6 +223,19 @@ class FakeZernioApi:
 
     def get_post(self, zid):
         return self.posts.get(zid, {})
+
+    def retry_post(self, zid):
+        self.retries.append(zid)
+        outcome = self.outcomes.pop(0) if self.outcomes else "published"
+        if isinstance(outcome, ApiError):
+            raise outcome
+        zpost = self.posts[zid]
+        if outcome == "published":
+            self.fire(zid)
+        else:
+            zpost["status"] = "failed"
+            threads_target(zpost).update(status="failed", errorCategory=outcome, errorMessage="it broke again")
+        return {"post": zpost}
 
     def find_published(self, account_id, text, platform="threads"):
         for zpost in self.posts.values():
@@ -310,13 +329,62 @@ class ZernioPublisherTest(Harness):
         self.assertEqual(self.outcomes(report), {"d1-quiz": "published"})
         self.assertEqual(len(self.api.posts), 1)
 
-    def test_platform_error_retries_with_a_new_key(self):
+    def zernio_fails(self, zid, category, message="it broke"):
+        """Zernio's scheduler reaching the post's time and failing to publish it."""
+        self.api.posts[zid]["status"] = "failed"
+        threads_target(self.api.posts[zid]).update(status="failed", errorCategory=category, errorMessage=message)
+
+    def test_platform_error_is_retried_in_place(self):
         self.api.outcomes.append("platform_error")
         first = self.run_at("2026-11-09T06:05:00Z", [ZQUIZ])
         second = self.run_at("2026-11-09T06:20:00Z", [ZQUIZ])
         self.assertEqual((self.outcomes(first), self.outcomes(second)),
                          ({"d1-quiz": "retry later"}, {"d1-quiz": "published"}))
+        self.assertEqual((self.api.keys, self.api.retries, len(self.api.posts)), (["d1-quiz.0"], ["z1"], 1))
+
+    def test_post_failed_while_suspended_goes_out_after_reconnecting(self):
+        self.run_at("2026-11-08T12:00:00Z", [ZQUIZ])
+        self.zernio_fails("z1", "auth_expired", "You cannot access the app till you log in to www.threads.com")
+        self.api.connected = False
+        with self.assertRaises(ApiError):  # still disconnected: the run stops, nothing is used up
+            self.run_at("2026-11-09T06:20:00Z", [ZQUIZ])
+        self.assertEqual((self.api.retries, self.event("d1-quiz", "zernio_created")["zernio_id"]), ([], "z1"))
+        self.api.connected = True
+        report = self.run_at("2026-11-09T07:30:00Z", [ZQUIZ])
+        self.assertEqual(self.outcomes(report), {"d1-quiz": "published"})
+        self.assertEqual((self.api.keys, self.api.retries, len(self.api.posts)), (["d1-quiz.0"], ["z1"], 1))
+        self.assertEqual(self.event("d1-quiz", "published")["zernio_id"], "z1")
+
+    def test_failed_post_is_not_retried_once_stale(self):
+        self.run_at("2026-11-08T12:00:00Z", [ZQUIZ])
+        self.zernio_fails("z1", "auth_expired")
+        report = self.run_at("2026-11-09T12:30:00Z", [ZQUIZ])
+        self.assertEqual(self.outcomes(report), {"d1-quiz": "failed"})
+        self.assertEqual(self.api.retries, [])
+
+    def test_retry_that_fails_again_counts_as_an_attempt(self):
+        self.run_at("2026-11-08T12:00:00Z", [ZQUIZ])
+        self.zernio_fails("z1", "platform_error")
+        self.api.outcomes.extend(["platform_error"] * 3)
+        outcomes = [self.outcomes(self.run_at(t, [ZQUIZ]))["d1-quiz"]
+                    for t in ("2026-11-09T06:20:00Z", "2026-11-09T06:40:00Z", "2026-11-09T07:00:00Z")]
+        self.assertEqual(outcomes, ["retry later", "retry later", "failed"])
+        self.assertEqual(len(self.api.posts), 1)
+
+    def test_retry_while_zernio_is_publishing_waits(self):
+        self.run_at("2026-11-08T12:00:00Z", [ZQUIZ])
+        self.zernio_fails("z1", "platform_error")
+        self.api.outcomes.append(ApiError("Post is currently publishing", status=409, transient=True))
+        report = self.run_at("2026-11-09T06:20:00Z", [ZQUIZ])
+        self.assertEqual(self.outcomes(report), {"d1-quiz": "publishing"})
+
+    def test_post_gone_from_zernio_is_recreated_under_a_new_key(self):
+        self.run_at("2026-11-08T12:00:00Z", [ZQUIZ])
+        del self.api.posts["z1"]
+        report = self.run_at("2026-11-09T06:20:00Z", [ZQUIZ])
+        self.assertEqual(self.outcomes(report), {"d1-quiz": "published"})
         self.assertEqual(self.api.keys, ["d1-quiz.0", "d1-quiz.1"])
+        self.assertEqual(self.event("d1-quiz", "published")["zernio_id"], "z2")
 
     def test_content_error_fails_at_once(self):
         self.api.outcomes.append("user_content")
@@ -391,6 +459,14 @@ class FakeSession:
 
 
 class ZernioApiTest(unittest.TestCase):
+    def test_retry_request(self):
+        body = {"message": "Post published successfully",
+                "post": {"_id": "z1", "status": "published", "platforms": [{"platform": "threads", "status": "published"}]}}
+        session = FakeSession([FakeResponse(200, body)])
+        self.assertEqual(ZernioApi("sk_test", session=session).retry_post("z1"), body)
+        method, url, payload, _, _ = session.calls[0]
+        self.assertEqual((method, url, payload), ("POST", "https://zernio.com/api/v1/posts/z1/retry", None))
+
     def test_publish_request(self):
         session = FakeSession([FakeResponse(201, {"post": {"_id": "z1"}})])
         api = ZernioApi("sk_test", session=session)

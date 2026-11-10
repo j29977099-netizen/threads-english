@@ -24,6 +24,9 @@ Safety rails:
     (covers a run that died before its log was committed);
   - reveals wait for their quiz and are skipped if the quiz never went out;
   - transient API errors are retried on later runs, up to MAX_ATTEMPTS;
+  - zernio: a post Zernio marked failed (say, while the account was
+    suspended) is retried in place through its retry endpoint once the
+    account is connected again, never re-created under the same key;
   - posts more than MAX_LATENESS late are skipped, not dumped in a burst;
   - any failure or skip makes the run exit 1 so the workflow opens an issue.
 
@@ -223,6 +226,10 @@ class ZernioApi:
     def get_post(self, zernio_id):
         return self._call("GET", "posts/%s" % zernio_id).get("post") or {}
 
+    def retry_post(self, zernio_id):
+        """Publish a failed post again at once; the answer (200 or 207) carries its new status."""
+        return self._call("POST", "posts/%s/retry" % zernio_id)
+
     def find_published(self, account_id, text, platform="threads"):
         """The published Zernio post with exactly this text, if any."""
         params = {"accountId": account_id, "platform": platform, "status": "published",
@@ -318,6 +325,8 @@ class Log:
             st.pop("container_id", None)
         elif kind == "zernio_created":
             st["zernio_id"] = event["zernio_id"]
+            # Zernio posts made so far for this item: the next one needs a new Idempotency-Key.
+            st["created"] = st.get("created", 0) + 1
         elif kind == "zernio_discarded":
             st.pop("zernio_id", None)
         elif kind == "attempt_failed":
@@ -512,7 +521,9 @@ class ZernioPublisher(Publisher):
     hasn't published MAX_LATENESS after its time. Zernio cannot reply to an
     existing post, so a reveal is its own post, scheduled only once its quiz
     is confirmed published. Every create carries an Idempotency-Key, so a
-    retried request replays the first answer.
+    retried request replays the first answer; that is also why a post Zernio
+    marked failed is retried in place (POST /posts/{id}/retry) rather than
+    created again.
     """
 
     backend = "zernio"
@@ -554,13 +565,22 @@ class ZernioPublisher(Publisher):
             if zpost.get("status") == "scheduled" or status in ZERNIO_IN_FLIGHT:
                 self._sync_edits(post, zernio_id, zpost)
                 self._still_publishing(post, zernio_id)
-            # Failed (or gone): start over below with a fresh key.
-            self.log.write(pid, "zernio_discarded", zernio_id=zernio_id,
-                           error=target.get("errorMessage") or status or "not found")
+            reason = target.get("errorMessage") or status or "not found"
+            late = self.clock() - parse_time(post["publish_at"])
+            if late > MAX_LATENESS:
+                raise ApiError("Zernio could not publish it and it is now more than %d h late: %s"
+                               % (MAX_LATENESS.total_seconds() // 3600, reason))
+            if status == "failed":
+                self._retry(post, zernio_id)
+                return
+            # Gone or in an unknown state: start over below as a new Zernio post.
+            self.log.write(pid, "zernio_discarded", zernio_id=zernio_id, error=reason)
 
         when = parse_time(post["publish_at"])
         scheduled_for = post["publish_at"] if when - self.clock() > SCHEDULE_MARGIN else None
-        key = "%s.%d" % (pid, state["attempts"])
+        # Same key for every retry of one create request (Zernio replays the first
+        # answer for 24 h); a new key only once that Zernio post has been given up.
+        key = "%s.%d" % (pid, state.get("created", 0))
         try:
             body = self.api.create_post(self.account_id, post, self._image_url(post), key, scheduled_for,
                                         platform=self.platform)
@@ -581,6 +601,25 @@ class ZernioPublisher(Publisher):
             self._published_target(post, zpost["_id"], target, "")
         elif zpost.get("_id") and (zpost.get("status") == "scheduled" or target.get("status") in ZERNIO_IN_FLIGHT):
             self._still_publishing(post, zpost["_id"])
+        else:
+            raise zernio_error(target, body)
+
+    def _retry(self, post, zernio_id):
+        """Publish a post Zernio marked failed again, as the same Zernio post."""
+        self.account_id  # an account that is still disconnected stops the run here
+        try:
+            body = self.api.retry_post(zernio_id)
+        except ApiError as exc:
+            if exc.status == 409:  # Zernio is publishing it right now
+                raise StillPublishing("Zernio post %s is still publishing" % zernio_id)
+            raise
+        self.log.write(post["id"], "zernio_retried", zernio_id=zernio_id)
+        zpost = body.get("post") or {}
+        target = threads_target(zpost)
+        if target.get("status") == "published":
+            self._published_target(post, zernio_id, target, "published on retry")
+        elif zpost.get("status") == "scheduled" or target.get("status") in ZERNIO_IN_FLIGHT:
+            self._still_publishing(post, zernio_id)
         else:
             raise zernio_error(target, body)
 
