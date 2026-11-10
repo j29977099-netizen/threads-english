@@ -391,6 +391,14 @@ class ZernioPublisherTest(Harness):
         self.assertEqual(report, [("d2-reveal", "waiting", "for d1-quiz")])
         self.assertEqual((self.api.retries, self.api.keys), ([], ["d1-quiz.0"]))
 
+    def test_key_not_allowed_to_reply_stops_without_failing_the_reveal(self):
+        self.run_at("2026-11-09T06:05:00Z", [ZQUIZ])
+        self.api.reply_errors.append(ApiError("insufficient_permissions", status=403))
+        with self.assertRaises(ApiError):
+            self.grace_run("2026-11-10T06:16:00Z", [ZQUIZ, ZREVEAL], replies_only=True)
+        report = self.run_at("2026-11-10T07:30:00Z", [ZQUIZ, ZREVEAL])  # GitHub's run, with its own key
+        self.assertEqual(self.outcomes(report), {"d2-reveal": "published"})
+
     def test_dry_run_shows_the_reveal_as_a_reply(self):
         self.run_at("2026-11-09T06:05:00Z", [ZQUIZ])
         report = self.run_at("2026-11-09T09:00:00Z", [ZQUIZ, ZREVEAL], dry_run=True)
@@ -631,7 +639,8 @@ class ZernioApiTest(unittest.TestCase):
         self.assertEqual(session.calls[1][:2], ("DELETE", "https://zernio.com/api/v1/posts/z2"))
 
     def test_error_classification(self):
-        cases = [(500, True, False), (429, True, False), (409, True, False), (400, False, False), (401, False, True)]
+        cases = [(500, True, False), (429, True, False), (409, True, False), (400, False, False), (401, False, True),
+                 (403, False, True)]
         for status, transient, auth in cases:
             api = ZernioApi("sk_test", session=FakeSession([FakeResponse(status, {"error": "x"})]))
             with self.assertRaises(ApiError) as ctx:

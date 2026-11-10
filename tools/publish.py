@@ -80,7 +80,9 @@ class ApiError(Exception):
 
     @property
     def auth(self):
-        return self.code in (190, "auth_expired") or self.status == 401
+        # 403: the key or account isn't allowed to do this (say, a read-only key). Like a bad token,
+        # that stops the run without marking the post failed, so a runner with access can still post it.
+        return self.code in (190, "auth_expired") or self.status in (401, 403)
 
 
 class StillPublishing(Exception):
