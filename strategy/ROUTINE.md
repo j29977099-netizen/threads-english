@@ -63,7 +63,7 @@ For every date from max(tomorrow, 2026-11-09) through today + 12 days that has n
   If no template fits, write a text post.
 - **Calendar:** if it ends within 14 days of today, add the next 30 days to `strategy/calendar-30d.json`, with the same structure, series and mix.
 
-Never edit or delete a post dated today or earlier, or any post that appears in the log.
+Never edit or delete a post dated today or earlier, or any post that appears in the log. Posts up to 30 hours ahead may already be scheduled in Zernio: editing one is fine (the publisher pushes the change), but removing it from the queue does not stop it.
 
 ## 4. Check
 

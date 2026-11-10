@@ -170,28 +170,47 @@ class FakeZernioApi:
     def __init__(self):
         self.posts = {}
         self.replies = {}
-        self.outcomes = []  # per new post: "published", "pending", a failure category, or an ApiError
+        self.outcomes = []  # per post published now: "published", "pending", a failure category, or an ApiError
         self.keys = []
+        self.updates = []
 
     def threads_account(self):
         return {"_id": "acc1", "username": "esl_teacher_bro"}
 
-    def create_post(self, account_id, post, image_url=None, idempotency_key=None):
+    def create_post(self, account_id, post, image_url=None, idempotency_key=None, scheduled_for=None):
         self.keys.append(idempotency_key)
         if idempotency_key in self.replies:
             return self.replies[idempotency_key]
-        outcome = self.outcomes.pop(0) if self.outcomes else "published"
-        if isinstance(outcome, ApiError):
-            raise outcome
         zid = "z%d" % (len(self.posts) + 1)
-        target = {"platform": "threads", "status": outcome}
-        if outcome == "published":
-            target.update(platformPostId="t" + zid, platformPostUrl="https://www.threads.com/@esl_teacher_bro/post/" + zid)
-        elif outcome != "pending":
-            target.update(status="failed", errorCategory=outcome, errorMessage="it broke")
-        self.posts[zid] = {"_id": zid, "content": post["text"], "image_url": image_url, "platforms": [target]}
-        self.replies[idempotency_key] = {"post": self.posts[zid]}
+        if scheduled_for:
+            target = {"platform": "threads", "status": "pending"}
+            zpost = {"_id": zid, "status": "scheduled", "scheduledFor": scheduled_for[:19] + ".000Z"}
+        else:
+            outcome = self.outcomes.pop(0) if self.outcomes else "published"
+            if isinstance(outcome, ApiError):
+                raise outcome
+            target = {"platform": "threads", "status": outcome}
+            if outcome == "published":
+                target.update(platformPostId="t" + zid, platformPostUrl="https://www.threads.com/@esl_teacher_bro/post/" + zid)
+            elif outcome != "pending":
+                target.update(status="failed", errorCategory=outcome, errorMessage="it broke")
+            zpost = {"_id": zid, "status": "published" if outcome == "published" else "publishing"}
+        zpost.update(content=post["text"], image_url=image_url, platforms=[target])
+        self.posts[zid] = zpost
+        self.replies[idempotency_key] = {"post": zpost}
         return self.replies[idempotency_key]
+
+    def update_post(self, zid, post, image_url=None, scheduled_for=None):
+        self.updates.append(zid)
+        self.posts[zid].update(content=post["text"], scheduledFor=scheduled_for)
+        return {"post": self.posts[zid]}
+
+    def fire(self, zid, status="published"):
+        """Zernio's own scheduler reaching the post's time."""
+        zpost = self.posts[zid]
+        zpost["status"] = status
+        threads_target(zpost).update(status=status, platformPostId="t" + zid,
+                                     platformPostUrl="https://www.threads.com/@esl_teacher_bro/post/" + zid)
 
     def get_post(self, zid):
         return self.posts.get(zid, {})
@@ -213,22 +232,63 @@ class ZernioPublisherTest(Harness):
         super().setUp()
         self.api = FakeZernioApi()
 
-    def test_publishes_and_logs_the_threads_link(self):
-        report = self.run_at("2026-11-09T06:05:00Z", [ZQUIZ, LESSON])
-        self.assertEqual(self.outcomes(report), {"d1-quiz": "published"})
-        last = self.events()[-1]
-        self.assertEqual((last["event"], last["zernio_id"], last["media_id"]), ("published", "z1", "tz1"))
-        self.assertTrue(last["permalink"].endswith("/post/z1"))
-        self.assertEqual(self.run_at("2026-11-09T06:20:00Z", [ZQUIZ, LESSON]), [])
+    def event(self, pid, kind):
+        return [e for e in self.events() if e["id"] == pid and e["event"] == kind][-1]
 
-    def test_reveal_is_its_own_post_after_the_quiz(self):
+    def test_due_post_publishes_now_and_later_one_is_scheduled(self):
+        report = self.run_at("2026-11-09T06:05:00Z", [ZQUIZ, LESSON])
+        self.assertEqual(self.outcomes(report), {"d1-quiz": "published", "d1-lesson": "scheduled"})
+        published = self.event("d1-quiz", "published")
+        self.assertEqual((published["zernio_id"], published["media_id"]), ("z1", "tz1"))
+        self.assertTrue(published["permalink"].endswith("/post/z1"))
+        self.assertEqual(self.api.posts["z2"]["scheduledFor"], "2026-11-09T16:00:00.000Z")
+
+    def test_scheduled_post_is_recorded_once_zernio_publishes_it(self):
+        self.run_at("2026-11-08T12:00:00Z", [ZQUIZ])
+        self.assertEqual(self.outcomes(self.run_at("2026-11-08T20:00:00Z", [ZQUIZ])), {"d1-quiz": "scheduled"})
+        self.api.fire("z1")
+        report = self.run_at("2026-11-09T10:53:00Z", [ZQUIZ])  # however late GitHub runs
+        self.assertEqual(self.outcomes(report), {"d1-quiz": "published"})
+        self.assertEqual(self.api.keys, ["d1-quiz.0"])
+
+    def test_posts_beyond_the_lookahead_wait(self):
+        self.assertEqual(self.run_at("2026-11-07T23:59:00Z", [ZQUIZ]), [])
+        self.assertEqual(self.api.posts, {})
+
+    def test_reveal_is_scheduled_only_after_its_quiz_is_out(self):
+        report = self.run_at("2026-11-08T12:00:00Z", [ZQUIZ, ZREVEAL])
+        self.assertEqual(self.outcomes(report), {"d1-quiz": "scheduled"})  # reveal is 42 h away
+        report = self.run_at("2026-11-09T05:00:00Z", [ZQUIZ, ZREVEAL])
+        self.assertEqual(self.outcomes(report), {"d1-quiz": "scheduled", "d2-reveal": "waiting"})
+        self.api.fire("z1")
+        report = self.run_at("2026-11-09T09:00:00Z", [ZQUIZ, ZREVEAL])
+        self.assertEqual(self.outcomes(report), {"d1-quiz": "published", "d2-reveal": "scheduled"})
+        self.assertEqual(self.api.posts["z2"]["content"], ZREVEAL["text"])
+
+    def test_quiz_that_never_went_out_takes_its_reveal_down_too(self):
         self.assertEqual(self.outcomes(self.run_at("2026-11-10T06:20:00Z", [ZQUIZ, ZREVEAL])),
                          {"d1-quiz": "skipped", "d2-reveal": "skipped"})
-        os.remove(self.log_path)
-        self.run_at("2026-11-09T06:05:00Z", [ZQUIZ, ZREVEAL])
-        report = self.run_at("2026-11-10T06:20:00Z", [ZQUIZ, ZREVEAL])
-        self.assertEqual(self.outcomes(report), {"d2-reveal": "published"})
-        self.assertEqual([p["content"] for p in self.api.published()], [ZQUIZ["text"], ZREVEAL["text"]])
+        self.assertEqual(self.api.posts, {})
+
+    def test_edit_before_its_time_reaches_zernio(self):
+        self.run_at("2026-11-08T12:00:00Z", [ZQUIZ])
+        edited = dict(ZQUIZ, text="Quiz text, corrected")
+        self.run_at("2026-11-08T20:00:00Z", [edited])
+        self.assertEqual(self.api.updates, ["z1"])
+        self.assertEqual(self.api.posts["z1"]["content"], "Quiz text, corrected")
+        self.run_at("2026-11-08T22:00:00Z", [edited])
+        self.assertEqual(self.api.updates, ["z1"])  # nothing new to push
+
+    def test_scheduled_post_still_not_out_after_six_hours_fails(self):
+        self.run_at("2026-11-08T12:00:00Z", [ZQUIZ])
+        report = self.run_at("2026-11-09T12:30:00Z", [ZQUIZ])
+        self.assertEqual(self.outcomes(report), {"d1-quiz": "failed"})
+
+    def test_cancelled_in_zernio_is_skipped(self):
+        self.run_at("2026-11-08T12:00:00Z", [ZQUIZ])
+        self.api.posts["z1"]["status"] = "cancelled"
+        report = self.run_at("2026-11-08T20:00:00Z", [ZQUIZ])
+        self.assertEqual(self.outcomes(report), {"d1-quiz": "skipped"})
 
     def test_lost_log_replays_instead_of_reposting(self):
         self.run_at("2026-11-09T06:05:00Z", [ZQUIZ])
@@ -264,7 +324,7 @@ class ZernioPublisherTest(Harness):
         self.api.outcomes.append("pending")
         report = self.run_at("2026-11-09T06:05:00Z", [ZQUIZ])
         self.assertEqual(self.outcomes(report), {"d1-quiz": "publishing"})
-        threads_target(self.api.posts["z1"]).update(status="published", platformPostId="tz1")
+        self.api.fire("z1")
         report = self.run_at("2026-11-09T13:00:00Z", [ZQUIZ])  # past MAX_LATENESS, but already started
         self.assertEqual(self.outcomes(report), {"d1-quiz": "published"})
         self.assertEqual(len(self.api.posts), 1)
@@ -273,6 +333,11 @@ class ZernioPublisherTest(Harness):
         self.api.outcomes.append("auth_expired")
         with self.assertRaises(ApiError):
             self.run_at("2026-11-09T06:05:00Z", [ZQUIZ])
+
+    def test_dry_run_shows_what_would_be_scheduled(self):
+        report = self.run_at("2026-11-08T12:00:00Z", [ZQUIZ], dry_run=True)
+        self.assertEqual(report, [("d1-quiz", "would schedule", "for 2026-11-09T06:00:00Z")])
+        self.assertEqual(self.api.posts, {})
 
     def test_polls_are_rejected_before_any_request(self):
         report = self.run_at("2026-11-09T06:05:00Z", [QUIZ])
@@ -325,6 +390,19 @@ class ZernioApiTest(unittest.TestCase):
         self.assertEqual(body["mediaItems"], [{"type": "image", "url": "https://example.org/media/a.png",
                                                "altText": "alt"}])
 
+    def test_scheduled_request_and_update(self):
+        session = FakeSession([FakeResponse(201, {"post": {"_id": "z1"}}), FakeResponse(200, {"post": {"_id": "z1"}})])
+        api = ZernioApi("sk_test", session=session)
+        text_post = post("t1", "2026-11-09T06:00:00Z", "Hello")
+        api.create_post("acc1", text_post, None, "t1.0", "2026-11-09T06:00:00Z")
+        body = session.calls[0][2]
+        self.assertEqual(body["scheduledFor"], "2026-11-09T06:00:00Z")
+        self.assertNotIn("publishNow", body)
+        api.update_post("z1", dict(text_post, text="Hello!"), None, "2026-11-09T06:00:00Z")
+        method, url, body = session.calls[1][:3]
+        self.assertEqual((method, url, body), ("PUT", "https://zernio.com/api/v1/posts/z1",
+                                               {"content": "Hello!", "scheduledFor": "2026-11-09T06:00:00Z"}))
+
     def test_error_classification(self):
         cases = [(500, True, False), (429, True, False), (409, True, False), (400, False, False), (401, False, True)]
         for status, transient, auth in cases:
@@ -336,7 +414,7 @@ class ZernioApiTest(unittest.TestCase):
     def test_missing_key_matters_only_when_something_is_due(self):
         with tempfile.TemporaryDirectory() as tmp:
             pub = ZernioPublisher(ZernioApi("", session=FakeSession([])), Log(os.path.join(tmp, "log.jsonl")))
-            self.assertEqual(pub.run([ZQUIZ], parse_time("2026-11-08T06:00:00Z")), [])
+            self.assertEqual(pub.run([ZQUIZ], parse_time("2026-11-07T06:00:00Z")), [])  # beyond the lookahead
             with self.assertRaises(ApiError) as ctx:
                 pub.run([ZQUIZ], parse_time("2026-11-09T06:05:00Z"))
             self.assertTrue(ctx.exception.auth)

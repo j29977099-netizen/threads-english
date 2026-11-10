@@ -7,11 +7,15 @@ Two backends, chosen with PUBLISH_BACKEND:
   threads Meta's Threads API directly, with your own app and token. Supports
           polls and replies.
 
-Every run (GitHub Actions, every 15 minutes):
+Every run (GitHub Actions, scheduled every 15 minutes, though GitHub often
+runs it only every few hours):
   1. replays log/publications.jsonl to know what is already out,
-  2. picks posts whose publish_at has passed,
-  3. publishes each one (threads: container -> FINISHED -> publish;
-     zernio: one publish-now request with an idempotency key),
+  2. picks posts that are due (threads), or due within ZERNIO_LOOKAHEAD (zernio),
+  3. threads: creates a container, waits until FINISHED, publishes;
+     zernio: hands the post to Zernio with its exact time (scheduledFor), so
+     Zernio publishes on the minute however late GitHub runs. Later runs check
+     the result, push any edit made to a post that is still waiting, and only
+     schedule a reveal once its quiz is confirmed published,
   4. appends every step to the log (flushed immediately).
 
 Safety rails:
@@ -45,6 +49,11 @@ ZERNIO_VIA_PROXY = "proxy"
 ZERNIO_IN_FLIGHT = {"pending", "processing", "uploading"}
 # Zernio errorCategory values worth another try on a later run.
 ZERNIO_TRANSIENT = {"platform_error", "platform_rate_limit", "quota_exhausted", "system_error", "unknown"}
+# Scheduled posts are handed to Zernio this far ahead; GitHub's cron has run as
+# rarely as every 8 hours, so 30 hours gives every post several chances.
+ZERNIO_LOOKAHEAD = timedelta(hours=30)
+# Closer to its time than this, a post is published at once instead of scheduled.
+SCHEDULE_MARGIN = timedelta(minutes=2)
 MAX_ATTEMPTS = 3
 MAX_LATENESS = timedelta(hours=6)
 MAX_PER_RUN = 4
@@ -66,7 +75,11 @@ class ApiError(Exception):
 
 
 class StillPublishing(Exception):
-    """The backend accepted the post but has not finished; check again next run."""
+    """The backend has the post but it is not out yet; check again next run."""
+
+    def __init__(self, message, outcome="publishing"):
+        super().__init__(message)
+        self.outcome = outcome
 
 
 class ThreadsApi:
@@ -180,14 +193,26 @@ class ZernioApi:
                            code="auth_expired")
         return accounts[0]
 
-    def create_post(self, account_id, post, image_url=None, idempotency_key=None):
+    def create_post(self, account_id, post, image_url=None, idempotency_key=None, scheduled_for=None):
+        """Publish now, or at scheduled_for (ISO UTC) when given."""
         target = {"platform": "threads", "accountId": account_id}
         if post.get("topic_tag"):
             target["platformSpecificData"] = {"topic_tag": post["topic_tag"]}
-        body = {"content": post["text"], "publishNow": True, "platforms": [target]}
+        body = {"content": post["text"], "platforms": [target]}
+        if scheduled_for:
+            body["scheduledFor"] = scheduled_for
+        else:
+            body["publishNow"] = True
         if image_url:
             body["mediaItems"] = [{"type": "image", "url": image_url, "altText": post["alt_text"]}]
         return self._call("POST", "posts", body=body, idempotency_key=idempotency_key)
+
+    def update_post(self, zernio_id, post, image_url=None, scheduled_for=None):
+        """Change a post that is still scheduled: its text, image and time."""
+        body = {"content": post["text"], "scheduledFor": scheduled_for}
+        if image_url:
+            body["mediaItems"] = [{"type": "image", "url": image_url, "altText": post["alt_text"]}]
+        return self._call("PUT", "posts/%s" % zernio_id, body=body)
 
     def get_post(self, zernio_id):
         return self._call("GET", "posts/%s" % zernio_id).get("post") or {}
@@ -306,6 +331,8 @@ class Publisher:
 
     backend = "threads"
     replies = True  # a reveal is posted as a reply under its quiz
+    horizon = timedelta(0)  # how far ahead of its time a post is handed over
+    max_per_run = MAX_PER_RUN
 
     def __init__(self, api, log, media_base_url="", sleep=time.sleep, clock=utcnow):
         self.api = api
@@ -335,10 +362,11 @@ class Publisher:
     def status(self, post_id):
         return self._simulated.get(post_id) or self.log.get(post_id)["status"]
 
-    def run(self, posts, now, dry_run=False, max_posts=MAX_PER_RUN):
+    def run(self, posts, now, dry_run=False, max_posts=None):
+        max_posts = max_posts or self.max_per_run
         by_id = {p["id"]: p for p in posts}
         due = [p for p in posts
-               if self.log.get(p["id"])["status"] not in TERMINAL and parse_time(p["publish_at"]) <= now]
+               if self.log.get(p["id"])["status"] not in TERMINAL and parse_time(p["publish_at"]) <= now + self.horizon]
         due.sort(key=lambda p: p["publish_at"])
         done = 0
         for post in due:
@@ -374,7 +402,11 @@ class Publisher:
             if dry_run:
                 self._simulated[pid] = "published"
                 detail = "reply to %s" % reply_to_id if reply_to_id else ("after %s" % parent_id if parent_id else "")
-                self.note(pid, "would publish", detail)
+                if parse_time(post["publish_at"]) > now:
+                    self._simulated[pid] = "pending"  # scheduled, not out: its reveal still waits
+                    self.note(pid, "would schedule", "for %s" % post["publish_at"])
+                else:
+                    self.note(pid, "would publish", detail)
                 done += 1
                 continue
 
@@ -382,8 +414,7 @@ class Publisher:
                 self._publish_one(post, reply_to_id)
                 done += 1
             except StillPublishing as exc:
-                self.note(pid, "publishing", str(exc))
-                done += 1
+                self.note(pid, exc.outcome, str(exc))
             except ApiError as exc:
                 if exc.auth:
                     raise
@@ -457,13 +488,19 @@ class Publisher:
 class ZernioPublisher(Publisher):
     """Publishes through Zernio (backend "zernio").
 
-    Zernio cannot reply to an existing post, so a reveal goes out as its own
-    post once its quiz is published. Each publish request carries an
-    Idempotency-Key, so a retried request replays the first answer.
+    Posts are handed to Zernio up to ZERNIO_LOOKAHEAD ahead with their exact
+    time, and Zernio publishes them on the minute. Later runs read the
+    result, push edits to posts still waiting, and fail a post Zernio still
+    hasn't published MAX_LATENESS after its time. Zernio cannot reply to an
+    existing post, so a reveal is its own post, scheduled only once its quiz
+    is confirmed published. Every create carries an Idempotency-Key, so a
+    retried request replays the first answer.
     """
 
     backend = "zernio"
     replies = False
+    horizon = ZERNIO_LOOKAHEAD
+    max_per_run = 12
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -475,24 +512,36 @@ class ZernioPublisher(Publisher):
             self._account_id = self.api.threads_account()["_id"]
         return self._account_id
 
+    def _image_url(self, post):
+        return self.media_base_url + post["image"] if post.get("image") else None
+
     def _publish_one(self, post, reply_to_id):
         pid = post["id"]
         state = self.log.get(pid)
         zernio_id = state.get("zernio_id")
         if zernio_id:
-            target = threads_target(self.api.get_post(zernio_id))
-            if target.get("status") == "published":
-                self._published_target(post, zernio_id, target, "recovered after an interrupted run")
+            zpost = self.api.get_post(zernio_id)
+            target = threads_target(zpost)
+            status = target.get("status")
+            if status == "published":
+                self._published_target(post, zernio_id, target, "")
                 return
-            if target.get("status") in ZERNIO_IN_FLIGHT:
+            if zpost.get("status") == "cancelled" or status == "cancelled":
+                self.log.write(pid, "skipped", error="cancelled in Zernio")
+                self.note(pid, "skipped", "cancelled in Zernio")
+                return
+            if zpost.get("status") == "scheduled" or status in ZERNIO_IN_FLIGHT:
+                self._sync_edits(post, zernio_id, zpost)
                 self._still_publishing(post, zernio_id)
+            # Failed (or gone): start over below with a fresh key.
             self.log.write(pid, "zernio_discarded", zernio_id=zernio_id,
-                           error=target.get("errorMessage") or target.get("status") or "not found")
+                           error=target.get("errorMessage") or status or "not found")
 
-        image_url = self.media_base_url + post["image"] if post.get("image") else None
+        when = parse_time(post["publish_at"])
+        scheduled_for = post["publish_at"] if when - self.clock() > SCHEDULE_MARGIN else None
         key = "%s.%d" % (pid, state["attempts"])
         try:
-            body = self.api.create_post(self.account_id, post, image_url, key)
+            body = self.api.create_post(self.account_id, post, self._image_url(post), key, scheduled_for)
         except ApiError as exc:
             if exc.status != 409:
                 raise
@@ -504,24 +553,37 @@ class ZernioPublisher(Publisher):
 
         zpost = body.get("post") or {}
         if zpost.get("_id"):
-            self.log.write(pid, "zernio_created", zernio_id=zpost["_id"])
+            self.log.write(pid, "zernio_created", zernio_id=zpost["_id"], scheduled_for=scheduled_for)
         target = threads_target(zpost)
         if target.get("status") == "published":
             self._published_target(post, zpost["_id"], target, "")
-        elif target.get("status") in ZERNIO_IN_FLIGHT and zpost.get("_id"):
+        elif zpost.get("_id") and (zpost.get("status") == "scheduled" or target.get("status") in ZERNIO_IN_FLIGHT):
             self._still_publishing(post, zpost["_id"])
         else:
             raise zernio_error(target, body)
 
+    def _sync_edits(self, post, zernio_id, zpost):
+        """Push a queue edit (text or time) to a post Zernio has not published yet."""
+        if zpost.get("status") != "scheduled":
+            return
+        scheduled = (zpost.get("scheduledFor") or "")[:19]
+        if normalize(zpost.get("content")) == normalize(post["text"]) and scheduled == post["publish_at"][:19]:
+            return
+        self.api.update_post(zernio_id, post, self._image_url(post), post["publish_at"])
+        self.log.write(post["id"], "zernio_updated", zernio_id=zernio_id)
+
     def _still_publishing(self, post, zernio_id):
-        if self.clock() - parse_time(post["publish_at"]) > MAX_LATENESS:
-            raise ApiError("Zernio post %s has not published after %s" % (zernio_id, MAX_LATENESS))
+        now = self.clock()
+        when = parse_time(post["publish_at"])
+        if now - when > MAX_LATENESS:
+            raise ApiError("Zernio post %s has not published %s after its time" % (zernio_id, MAX_LATENESS))
+        if when > now:
+            raise StillPublishing("Zernio publishes it at %s" % post["publish_at"], outcome="scheduled")
         raise StillPublishing("Zernio post %s is still publishing" % zernio_id)
 
     def _published_target(self, post, zernio_id, target, detail):
         self._published(post, target.get("platformPostId"), detail, target.get("platformPostUrl"),
                         zernio_id=zernio_id)
-
 
 def summarize(report, now, dry_run, check=False):
     title = "Connection check" if check else "Dry run" if dry_run else "Publish run"
@@ -537,7 +599,8 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--dry-run", action="store_true", help="validate and show what is due; no API calls")
     parser.add_argument("--now", help="pretend the current UTC time is this (ISO, ends in Z)")
-    parser.add_argument("--max-posts", type=int, default=MAX_PER_RUN)
+    parser.add_argument("--max-posts", type=int, default=None,
+                        help="limit per run (default: 4 on threads, 12 on zernio)")
     parser.add_argument("--summary-file", help="also write the markdown summary here")
     parser.add_argument("--check", action="store_true",
                         help="only confirm the key works and which Threads account it reaches; publish nothing")

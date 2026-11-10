@@ -1,6 +1,6 @@
 # Threads: «Английский по-американски»
 
-Content and publishing system for an English tutor's Threads account. Claude plans and writes posts; GitHub Actions publishes them through Zernio (zernio.com, free for one account), which posts with its own Meta-approved app. Everything runs even when nobody's computer is on.
+Content and publishing system for an English tutor's Threads account. Claude plans and writes posts. GitHub Actions hands each one to Zernio (zernio.com, free for one account) up to 30 hours ahead with its exact time, and Zernio publishes it on the minute with its own Meta-approved app. GitHub's cron often runs only every few hours, so the timing never depends on it. Everything runs even when nobody's computer is on.
 
 ```
 Claude cloud routine (weekly)          GitHub repo                      GitHub Actions (every 15 min)
@@ -69,5 +69,7 @@ python3 tools/qc.py
 python3 tools/publish.py --dry-run --now 2026-11-09T06:05:00Z
 python3 -m unittest discover -s tests
 ```
+
+Editing a queued post is fine until its time: the next run pushes the change to Zernio. Deleting a post from the queue after it has been handed to Zernio does not stop it; cancel it in Zernio's dashboard instead, and the next run records it as skipped.
 
 When something fails, the publish workflow opens one GitHub issue per day with the run summary, so GitHub emails you. Nothing reports success unless Threads (directly or through Zernio) returned a published post id.

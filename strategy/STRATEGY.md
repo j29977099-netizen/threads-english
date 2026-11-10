@@ -59,7 +59,7 @@ All times Moscow time (UTC+3), the centre of gravity for a Russian-speaking audi
 | Post 2 | 19:00 | 16:00 | Education: vocabulary, grammar, American English, tip, or promo |
 | Reveal | 19:15 next day | 16:15 | ✅ reveal of an evening quiz or mini-task, if there was one |
 
-**Publishing route.** Posts go out through Zernio, which needs no Meta developer account. Zernio cannot post polls or reply under an existing post, so quizzes collect answers in the comments and reveals are their own posts. If a Meta developer app is set up later, setting the repository variable `PUBLISH_BACKEND=threads` brings back native polls and reveals as replies.
+**Publishing route.** Posts go out through Zernio, which needs no Meta developer account. Each post is handed to Zernio up to 30 hours ahead with its exact time, so it publishes on the minute; a reveal is handed over only after its quiz is confirmed live. Zernio cannot post polls or reply under an existing post, so quizzes collect answers in the comments and reveals are their own posts. If a Meta developer app is set up later, setting the repository variable `PUBLISH_BACKEND=threads` brings back native polls and reveals as replies.
 
 From week 3, test alternative slots (07:30 / 12:30 / 21:00 MSK) one variable at a time and keep what wins.
 
