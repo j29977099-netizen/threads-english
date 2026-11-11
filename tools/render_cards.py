@@ -1,6 +1,6 @@
 """Render educational cards (1080x1350) from JSON specs in content/cards/.
 
-Templates: quiz, versus, mistakes, answer, phrase, list, avatar.
+Templates: quiz, versus, mistakes, answer, phrase, list, chat, avatar.
 
 The look lives in brand/brand.json: one colour theme per template (a gradient, soft glows and
 fine grain), Unbounded for titles, Onest for text and Caveat for handwritten notes. A spec can
@@ -166,6 +166,11 @@ class Card:
             if line:
                 lines.append(line)
         return lines
+
+    def line_width(self, line, kind, size):
+        """The width of one line from wrap()."""
+        widths = [size * BLANK_EM if word == BLANK else self.tw(word, kind, size) for word in line]
+        return sum(widths) + self.tw(" ", kind, size) * (len(line) - 1)
 
     def paragraph(self, x, y, text, kind, size, fill, width, leading, blank_fill=None, balance=True):
         """Draw wrapped text; '___' tokens become highlighted blanks. Returns new y."""
@@ -345,6 +350,11 @@ class Card:
             self.pill(self.w - m, y, self.brand["handle"], "bold", 25, fill=rgb(c["white"], 240), ink=c["ink"], anchor="r")
         return top
 
+    def note(self, y, text, fill=None):
+        """A handwritten line across the card, as large as fits on one line."""
+        size = self.fit_line(text, "hand", (62, 58, 54, 50, 46, 42), self.w - 2 * self.m - 8)
+        self.text(self.m + 4, y, text, "hand", size, fill or self.c["sun"])
+
     def content_bottom(self):
         """Lowest y body content may reach without touching the footer."""
         return self.h - self.m - 50 - 28
@@ -407,7 +417,7 @@ def render_quiz(card, spec):
         card.text(text_x, y + row / 2, option, "semibold", opt_size, c["ink"], anchor="lc")
         y += row + gap + air
 
-    card.text(m + 4, y + 2, spec["prompt"], "hand", 62, c["sun"])
+    card.note(y + 2, spec["prompt"])
 
 
 def render_versus(card, spec):
@@ -419,7 +429,7 @@ def render_versus(card, spec):
     lines_h = sum(card.text_height(t, "semibold", 40, inner - 2 * pad, 56) for t in spec["textbook"])
     box_h = pad + 50 + lines_h + pad - 14
     card.panel([m, y, card.w - m, y + box_h], 40, rgb(c["white"], 238))
-    card.text(m + pad, y + pad - 4, "В УЧЕБНИКЕ", "display", 20, c["muted"])
+    card.text(m + pad, y + pad - 4, spec.get("top_tag", "В УЧЕБНИКЕ"), "display", 20, c["muted"])
     ty = y + pad + 46
     for text in spec["textbook"]:
         ty = card.paragraph(m + pad, ty, text, "semibold", 40, c["muted"], inner - 2 * pad, 56)
@@ -427,13 +437,16 @@ def render_versus(card, spec):
 
     box_h = pad + 50 + 62 + 16 + 80 * len(spec["real_answers"]) + pad - 18
     card.panel([m, y, card.w - m, y + box_h], 40, c["ink"])
-    card.text(m + pad, y + pad - 4, "В ЖИЗНИ", "display", 20, c["sun"])
+    card.text(m + pad, y + pad - 4, spec.get("bottom_tag", "В ЖИЗНИ"), "display", 20, c["sun"])
     ty = y + pad + 46
-    card.text(m + pad, ty, spec["real_question"], "semibold", 40, c["white"])
+    q_size = card.fit_line(spec["real_question"], "semibold", (40, 38, 36, 34, 32), inner - 2 * pad, spec["out"])
+    card.text(m + pad, ty, spec["real_question"], "semibold", q_size, c["white"])
     ty += 62 + 16
+    a_size = min(card.fit_line(answer, "bold", (46, 44, 42, 40, 38, 36, 34), inner - 2 * pad - 68, spec["out"])
+                 for answer in spec["real_answers"])
     for answer in spec["real_answers"]:
         card.check_mark(m + pad + 24, ty + 30, 24)
-        card.text(m + pad + 68, ty + 30, answer, "bold", 46, c["white"], anchor="lc")
+        card.text(m + pad + 68, ty + 30, answer, "bold", a_size, c["white"], anchor="lc")
         ty += 80
     y += box_h + 34
 
@@ -607,7 +620,78 @@ def render_list(card, spec):
         if i < len(rows):
             card.stroke([(text_x, ty - gap / 2 - 2), (card.w - m - pad, ty - gap / 2 - 2)], c["mist"], 2.5)
     if spec.get("cta"):
-        card.text(m + 4, y + sheet_h + 26, spec["cta"], "hand", 64, c["sun"])
+        card.note(y + sheet_h + 26, spec["cta"])
+
+
+def render_chat(card, spec):
+    """A message exchange as chat bubbles, then the question it raises. A message is
+    {"from": "them" or "me", "text": ...}, with an optional "name" above it, or
+    {"from": "me", "typing": true} for three dots where the reader has to answer."""
+    c, m = card.c, card.m
+    inner = card.w - 2 * m
+    y = card.frame(spec["label"])
+    if spec.get("title"):
+        y = card.title(y, spec["title"], (58, 54, 50, 46, 42), max_lines=2, gap=30)
+    messages, question, prompt = spec["messages"], spec.get("question"), spec.get("prompt")
+
+    widest = inner * 0.84
+    for size, pad, gap in ((56, 40, 30), (50, 36, 26), (46, 32, 24), (42, 30, 22), (38, 26, 18), (34, 24, 16),
+                           (30, 20, 14)):
+        lead = size * 1.3
+        bubbles = []
+        for msg in messages:
+            if msg.get("typing"):
+                bubbles.append((msg, None, size * 2.5 + 2 * pad, size * 0.7 + 2 * pad))
+                continue
+            lines = card.wrap(msg["text"], "semibold", size, widest - 2 * pad, balance=True)
+            if max(card.line_width(line, "semibold", size) for line in lines) > widest - 2 * pad:
+                break  # a single word wider than a bubble: try a smaller size
+            width = max(card.line_width(line, "semibold", size) for line in lines) + 2 * pad
+            bubbles.append((msg, lines, width, len(lines) * lead + 2 * pad - (lead - size) * 0.7))
+        if len(bubbles) < len(messages):
+            continue
+        names_h = sum(36 for msg in messages if msg.get("name"))
+        q_size = card.fit(question, "display", (58, 54, 50, 46, 42, 38), inner, 3) if question else 0
+        q_h = card.text_height(question, "display", q_size, inner, q_size * 1.22) + 46 if question else 0
+        bottom = y + sum(b[3] for b in bubbles) + gap * (len(bubbles) - 1) + names_h + q_h + (84 if prompt else 0)
+        if bottom <= card.content_bottom():
+            break
+    else:
+        raise too_long(spec, "the messages or the question")
+    air = card.spare(bottom, len(bubbles) + 2, 60)
+
+    y += air
+    for msg, lines, width, height in bubbles:
+        mine = msg.get("from") == "me"
+        x0 = card.w - m - width if mine else m
+        if msg.get("name"):
+            card.text(card.w - m - 8 if mine else m + 8, y, msg["name"], "bold", 25, rgb(c["white"], 230),
+                      anchor="ra" if mine else "la")
+            y += 36
+        fill = c["sun"] if mine else c["white"]
+        radius = min(40, height / 2)
+        card.shadow([x0, y, x0 + width, y + height], radius)
+        # the tail: a small wedge at the bottom corner on the speaker's side
+        tip = x0 + width + 14 if mine else x0 - 14
+        root = x0 + width - 34 if mine else x0 + 34
+        card.draw.polygon(card._px([root, y + height - 40, tip, y + height + 4, root, y + height - 4]), fill=fill)
+        card.rrect([x0, y, x0 + width, y + height], radius, fill=fill)
+        if lines is None:
+            for i in range(3):
+                cx = x0 + width / 2 + (i - 1) * size * 0.62
+                r = size * 0.17
+                card.ellipse([cx - r, y + height / 2 - r, cx + r, y + height / 2 + r], fill=rgb(c["ink"], 150 + i * 40))
+        else:
+            ty = y + pad - size * 0.14
+            for line in lines:
+                card.paragraph(x0 + pad, ty, " ".join(line), "semibold", size, c["ink"], width, lead, balance=False)
+                ty += lead
+        y += height + gap + air
+    y += air
+    if question:
+        y = card.paragraph(m, y + 46 - gap, question, "display", q_size, c["white"], inner, q_size * 1.22)
+    if prompt:
+        card.note(y + 18, prompt)
 
 
 def render_avatar(card, spec):
@@ -624,7 +708,7 @@ def render_avatar(card, spec):
 
 
 TEMPLATES = {"quiz": render_quiz, "versus": render_versus, "mistakes": render_mistakes, "answer": render_answer,
-             "phrase": render_phrase, "list": render_list, "avatar": render_avatar}
+             "phrase": render_phrase, "list": render_list, "chat": render_chat, "avatar": render_avatar}
 
 
 def render(spec, brand=None):

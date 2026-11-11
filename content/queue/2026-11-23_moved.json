@@ -1,0 +1,62 @@
+[
+  {
+    "id": "2026-11-30-p1-articles-a-an",
+    "publish_at": "2026-11-30T06:00:00Z",
+    "kind": "quiz",
+    "topic": "a / an by sound",
+    "topic_tag": "Английский язык",
+    "text": "🧩 Артикли: a или an?\n\nIt was ___ honest mistake — he's just ___ university student.\n\nA) a / a\nB) an / an\nC) an / a\nD) a / an\n\nПиши букву в комментариях 👇\nПодсказка: подвох не в грамматике, а в произношении 😉",
+    "answer": "C"
+  },
+  {
+    "id": "2026-12-01-r-articles-a-an",
+    "publish_at": "2026-12-01T06:15:00Z",
+    "kind": "reveal",
+    "reply_to": "2026-11-30-p1-articles-a-an",
+    "text": "✅ Разбор вчерашнего квиза: a или an?\n\nПравильно — C) an / a.\nIt was an honest mistake — he's just a university student.\n\nАртикль выбираем по первому звуку, а не по букве:\n• honest [ˈɑːnɪst] — h не читается, слово начинается с гласного звука → an\n• university [ˌjuːnɪˈvɜːrsəti] — начинается со звука [j] → a\n\nЕщё примеры:\nan hour, an MBA\na European country, a one-way ticket"
+  },
+  {
+    "id": "2026-12-02-p1-since-for",
+    "publish_at": "2026-12-02T06:00:00Z",
+    "kind": "quiz",
+    "topic": "since vs for",
+    "topic_tag": "Английский язык",
+    "text": "🧩 Проверь себя\n\nI've worked here ___ three years, and I've known my boss ___ 2021.\n\nA) for / since\nB) since / for\nC) for / for\nD) since / since\n\nПиши в комментариях букву — и как выбирал(а) 👇\nРазбор — завтра утром.",
+    "answer": "A"
+  },
+  {
+    "id": "2026-12-03-r-since-for",
+    "publish_at": "2026-12-03T06:15:00Z",
+    "kind": "reveal",
+    "topic": "answer to since vs for quiz",
+    "topic_tag": "Английский язык",
+    "reply_to": "2026-12-02-p1-since-for",
+    "text": "✅ Разбор вчерашнего квиза: for или since?\n\nI've worked here ___ three years, and I've known my boss ___ 2021.\nПравильно — A) for / since.\n\n• for + период: for three years, for a month\n• since + момент начала: since 2021, since Monday\n\n✔️ I've lived here for a year.\n✔️ I've lived here since last summer.\n\nЕсли действие длится до сих пор — Present Perfect: ❌ I work here since 2020. ✔️ I've worked here since 2020."
+  },
+  {
+    "id": "2026-12-05-p1-say-tell",
+    "publish_at": "2026-12-05T06:00:00Z",
+    "kind": "quiz",
+    "topic": "say vs tell",
+    "topic_tag": "Английский язык",
+    "text": "🔥 Только одно предложение правильное:\n\nA) He told me that he was tired.\nB) He said me that he was tired.\nC) He told that he was tired.\n\nПиши в комментариях A, B или C 👇\nРазбор — завтра утром.",
+    "answer": "A"
+  },
+  {
+    "id": "2026-12-06-r-say-tell",
+    "publish_at": "2026-12-06T06:15:00Z",
+    "kind": "reveal",
+    "topic": "answer to say vs tell quiz",
+    "topic_tag": "Английский язык",
+    "reply_to": "2026-12-05-p1-say-tell",
+    "text": "✅ Разбор вчерашнего квиза: say или tell?\n\nПравильно — A) He told me that he was tired.\n\ntell всегда с человеком: tell someone something\n✔️ Tell me the truth.\n✔️ She told us a story.\n\nsay — без человека, или с to:\n✔️ He said that he was tired.\n✔️ He said to me that he was tired.\n\n❌ He said me — частая ошибка.\n❌ He told that… — после tell нужен тот, кому говорят."
+  },
+  {
+    "id": "2026-11-23-p2-phrasal-context",
+    "publish_at": "2026-11-23T16:00:00Z",
+    "kind": "tip",
+    "topic": "how to learn phrasal verbs in context",
+    "topic_tag": "Английский язык",
+    "text": "💡 Как учить фразовые глаголы и не путаться\n\n1. Не списком, а во фразе: не «run out = закончиться», а We ran out of milk.\n2. Бери одно значение за раз. У глагола их много, начни с самого частого.\n3. Запоминай вместе с предлогом: get along with, look forward to.\n4. Придумай своё предложение про свою жизнь и скажи вслух.\n\nОдного глагола в день хватит.\nКакой фразовый глагол ты уже используешь? 👇"
+  }
+]

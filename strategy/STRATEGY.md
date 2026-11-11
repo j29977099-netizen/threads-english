@@ -39,6 +39,11 @@ Never invent personal stories, students, results, testimonials, prices, discount
 | 👀 | Ошибки, которые нас выдают | Common mistakes of Russian speakers, often as a graphic |
 | 🗽 | Идиома дня | An everyday American idiom: its literal translation (often funny), what it really means in Russian, 2 natural examples with translations, at most one short note on usage, and an open question for the comments. No task with a right answer, so no reveal. Added 2026-11-10 at the teacher's request |
 | «…» | Как сказать по-английски | A feeling or everyday situation that Russian names in one colloquial phrase («я загоняюсь», «мне лень»). Opens with «Как сказать по-английски «…»» and one emoji that fits the topic; the series has no fixed marker. Then 4 natural American ways to say it, from mild to strong, each with its Russian translation. Then «И ловушка:», one trap where a near-identical word, form or preposition changes the meaning, and a short closing line with 👀. No task, so no reveal. Every third day. Added 2026-11-10 at the teacher's request |
+| 💬 | Что он имел в виду? | A short exchange (a text, a reply at work) whose tone can be read two or three ways, with lettered readings A–C for readers to argue over. The next-day reply says which reading is most likely, what in the words points to it, what is only a guess, and one phrase to clarify. Pilot from 2026-11-13 |
+| ➡️ | А дальше что? | The moment where textbooks stop: every word is understood, and now the reader has to answer. Open task: write your next line in English. The next-day reply gives 2 natural lines that keep the conversation going, and the cultural note behind them. Pilot from 2026-11-13 |
+| 🛟 | Спасаем разговор | Something goes wrong mid-conversation: still lost after asking twice, a word forgotten, a «yes» said by accident. Open task. The next-day reply gives one move that fixes it, with 2–3 phrases. Pilot from 2026-11-13 |
+| 💪 | Английский с характером | One recognisable situation where you have to say no or hold a line: extra work, unwanted advice, a question that is too personal. Three ways to say it, marked «Мягко», «Твёрдо», «С условием», then an open question. No task, so no reveal. Pilot from 2026-11-13 |
+| ✏️ | Было → стало | A flat but correct answer and a livelier one, with what changed and why. A typical answer, never presented as a real student's. At most one a week |
 | ✅ | Разбор | Answer reveal the next day, posted as a reply right under its quiz |
 | 👋 | О занятиях | Soft promotion of private lessons |
 
@@ -51,6 +56,8 @@ Never invent personal stories, students, results, testimonials, prices, discount
 - 10% personal brand and student acquisition (1–2 posts per week, never two days in a row)
 
 The daily 🗽 idiom and the «Как сказать по-английски» post have their own slots (§5) and don't count toward this mix.
+
+**Situation series (pilot, requested by the teacher on 2026-11-11).** 💬, ➡️, 🛟 and 💪 are about what to say in a real conversation, not about grammar. Each week has one post of each. They take the place of grammar quizzes in the existing slots, so the number of posts per day stays the same: 💬, ➡️ and 🛟 count as interactive, 💪 and ✏️ as vocabulary and American English. The weekly report shows their views and replies next to the grammar quizzes', and the teacher decides which series stay.
 
 ## 5. Daily rhythm
 
@@ -77,7 +84,7 @@ Answer reveals are always replies to their own quiz (`reply_to`), so the explana
 - **Type:** Unbounded ExtraBold for headlines and labels, Onest for text (SemiBold for English examples, Medium for Russian explanations), Caveat for handwritten prompts. All SIL OFL, bundled in `brand/fonts/`. Inter stays as the fallback for arrows and IPA.
 - **Format:** 1080×1350 (4:5 portrait), 72 px margins, no more than ~40 words per card.
 - **Card frame:** a tilted yellow series label at the top left, sparkles at the top right, and the wordmark «Английский по-американски» and the handle in pills at the bottom. Cards must look designed, never plain: colour, depth and a handwritten touch on every one.
-- **Templates:** quiz card, textbook-vs-America card, mistakes list, vocabulary flashcard, comparison chart, mini-dialogue.
+- **Templates:** quiz card, answer card, textbook-vs-America card, mistakes list, phrase card, numbered list, chat card (a message exchange as bubbles).
 - **Rules:** no stock photos, no copyrighted images, no emoji inside graphics (they render inconsistently), every English and Russian word on a card is checked before publishing.
 
 ## 7. Growth and conversion
@@ -133,6 +140,6 @@ Posts published, views, likes, replies, reposts, quotes, shares, follower growth
 
 - **One post a day at 18:00 MSK (15:00 UTC).** Publishing goes through Zernio like Threads, scheduled ahead, with its own queue (`content/instagram/`) and log (`log/instagram.jsonl`).
 - **Format:** carousels of 1080×1350 JPEG slides in the brand style. A quiz shows the question on slide 1 («Листай → ответ на следующем слайде») and the answer with a short why on slide 2. A phrase or lesson takes 2–3 slides. `versus` and `mistakes` cards work as single images. No emoji in the images.
-- **Content:** adapted from that day's Threads posts, never a copy of the Threads text. The caption is a hook, then where the answer is, then one useful sentence, then one question for the comments.
+- **Content:** adapted from that day's Threads posts, never a copy of the Threads text. A situation post (§3: 💬 ➡️ 🛟 💪) opens with the exchange as chat bubbles and the question on slide 1, and gives the answer on slide 2. The caption is a hook, then where the answer is, then one useful sentence, then one question for the comments.
 - **Hashtags:** 4–6 per post, drawn from #английскийязык #американскийанглийский #английскийонлайн #учиманглийский #грамматикаанглийского #разговорныйанглийский #произношение #английскийдляпутешествий #ошибкиванглийском.
 - **Comments:** answered by the same routine and rules as Threads. The answer is always public on Instagram, because it is on slide 2.

@@ -1,0 +1,56 @@
+[
+  {
+    "id": "2026-11-13-p1-sure-text",
+    "publish_at": "2026-11-13T06:00:00Z",
+    "kind": "quiz",
+    "topic": "what did they mean: «Sure.» in a text",
+    "topic_tag": "Английский язык",
+    "text": "💬 Что он имел в виду?\n\nТы пишешь коллеге:\n— Can you send me the report today?\n\nОн отвечает одним словом:\n— Sure.\n\nОн…\nA) раздражён\nB) занят\nC) просто согласен\n\nПиши букву — и по чему это видно 👇\nРазбор — завтра утром.",
+    "answer": "C"
+  },
+  {
+    "id": "2026-11-14-r-sure-text",
+    "publish_at": "2026-11-14T06:15:00Z",
+    "kind": "reveal",
+    "reply_to": "2026-11-13-p1-sure-text",
+    "text": "✅ Разбор: чаще всего — C) просто согласен.\n\nSure — обычное «да, конечно». Подтекста в самом слове нет.\n\nСомнение вызывает точка. В переписке американцы часто обходятся без неё, поэтому короткое «Sure.» читается суше, чем «Sure!» или «Sure, no problem».\n\nНо это догадка, а не факт. Важно знать точно — уточни:\n✔️ Thanks! No rush if you're busy.\n\nА вот «Fine.» или «K.» уже чаще значат, что человек недоволен."
+  },
+  {
+    "id": "2026-11-16-p1-hang-out",
+    "publish_at": "2026-11-16T06:00:00Z",
+    "kind": "challenge",
+    "topic": "what next: «We should hang out sometime!»",
+    "topic_tag": "Английский язык",
+    "text": "➡️ А дальше что?\n\nЗнакомый из США говорит на прощание:\n— We should hang out sometime!\n\nКаждое слово понятно. И увидеться ты правда не против.\n\nЧто ответишь, чтобы встреча состоялась?\n\nПиши свой вариант по-английски 👇\nРазбор — завтра утром."
+  },
+  {
+    "id": "2026-11-17-r-hang-out",
+    "publish_at": "2026-11-17T06:15:00Z",
+    "kind": "reveal",
+    "reply_to": "2026-11-16-p1-hang-out",
+    "text": "✅ Разбор: что ответить на «We should hang out sometime!»\n\nВ США эта фраза часто просто вежливость, как наше «надо как-нибудь увидеться». Плана в ней нет.\n\nХочешь встретиться — назови день:\n✔️ I'd love that. Are you free this weekend?\n✔️ Definitely! Want to grab coffee on Saturday?\n\nА после «Yeah, totally!» разговор обычно на этом и заканчивается.\n\n💡 Конкретный день превращает вежливость в план."
+  },
+  {
+    "id": "2026-11-18-p1-repeat-twice",
+    "publish_at": "2026-11-18T06:00:00Z",
+    "kind": "challenge",
+    "topic": "conversation rescue: still lost after asking to repeat twice",
+    "topic_tag": "Английский язык",
+    "text": "🛟 Спасаем разговор\n\nСобеседник что-то рассказывает. Уже два раза прозвучало «Sorry, could you repeat that?» — а смысл так и не дошёл.\n\nПросить в третий раз неловко. Кивать и улыбаться рискованно 🙂\n\nЧто скажешь?\n\nПиши свой вариант 👇\nРазбор — завтра утром."
+  },
+  {
+    "id": "2026-11-19-r-repeat-twice",
+    "publish_at": "2026-11-19T06:15:00Z",
+    "kind": "reveal",
+    "reply_to": "2026-11-18-p1-repeat-twice",
+    "text": "✅ Разбор: что сказать вместо третьего «repeat»\n\nНе проси повторить всё. Скажи, что уже понятно, и спроси про остальное:\n\n✔️ I got the first part. What happened after that?\n✔️ So you're saying the meeting moved to Friday?\n✔️ Sorry, I missed the last part. Could you say that another way?\n\nТогда собеседник повторит только нужный кусок и, скорее всего, скажет проще.\n\n❌ What? / Repeat, please. — звучит резко."
+  },
+  {
+    "id": "2026-11-20-p2-say-no-shift",
+    "publish_at": "2026-11-20T16:00:00Z",
+    "kind": "lesson",
+    "topic": "english with a backbone: saying no to covering a shift",
+    "topic_tag": "Английский язык",
+    "text": "💪 Английский с характером\n\nКоллега просит:\n— Can you cover my shift on Saturday?\n\nТебе не хочется. Три способа отказать:\n\nМягко: I wish I could, but I have plans.\nТвёрдо: Sorry, I can't this Saturday.\nС условием: I can't do Saturday, but I could take Sunday morning.\n\n💡 Одной фразы достаточно. Длинные оправдания звучат так, будто тебя ещё можно уговорить.\n\n🗣 Какой вариант тебе ближе? 👇"
+  }
+]

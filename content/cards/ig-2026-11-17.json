@@ -1,0 +1,156 @@
+[
+  {
+    "template": "chat",
+    "out": "media/ig/2026-11-17-sure-text-1.jpg",
+    "label": "ЧТО ОН ИМЕЛ В ВИДУ?",
+    "messages": [
+      {
+        "from": "me",
+        "name": "Ты",
+        "text": "Can you send me the report today?"
+      },
+      {
+        "from": "them",
+        "name": "Коллега",
+        "text": "Sure."
+      }
+    ],
+    "question": "Раздражён, занят или просто согласен?",
+    "prompt": "Листай → разбор на следующем слайде"
+  },
+  {
+    "template": "answer",
+    "out": "media/ig/2026-11-17-sure-text-2.jpg",
+    "label": "РАЗБОР",
+    "title": "Чаще всего —\nпросто «да»",
+    "answer": "Sure = «да, конечно»",
+    "why": [
+      "В самом слове подтекста нет",
+      "С точкой звучит суше, чем «Sure!» или «Sure, no problem»",
+      "Это догадка, а не факт. Важно знать точно — уточни:"
+    ],
+    "examples": [
+      "Thanks! No rush if you're busy.",
+      "Is today still OK for you?"
+    ]
+  },
+  {
+    "template": "chat",
+    "out": "media/ig/2026-11-18-hang-out-1.jpg",
+    "label": "А ДАЛЬШЕ ЧТО?",
+    "messages": [
+      {
+        "from": "them",
+        "name": "Знакомый из США",
+        "text": "We should hang out sometime!"
+      },
+      {
+        "from": "me",
+        "name": "Ты",
+        "typing": true
+      }
+    ],
+    "question": "Что ответить, чтобы встреча состоялась?",
+    "prompt": "Листай → разбор на следующем слайде"
+  },
+  {
+    "template": "versus",
+    "out": "media/ig/2026-11-18-hang-out-2.jpg",
+    "label": "А ДАЛЬШЕ ЧТО?",
+    "title": "We should hang out\nsometime!",
+    "top_tag": "ВЕЖЛИВОСТЬ — И ВСЁ",
+    "textbook": [
+      "— Yeah, totally!"
+    ],
+    "bottom_tag": "ПОЯВИЛСЯ ПЛАН",
+    "real_question": "— I'd love that.",
+    "real_answers": [
+      "Are you free this weekend?",
+      "Want to grab coffee on Saturday?"
+    ],
+    "note": "В США эта фраза часто просто вежливость. Назови день — и получится план."
+  },
+  {
+    "template": "chat",
+    "out": "media/ig/2026-11-19-repeat-twice-1.jpg",
+    "label": "СПАСАЕМ РАЗГОВОР",
+    "messages": [
+      {
+        "from": "me",
+        "name": "Ты",
+        "text": "Sorry, could you repeat that?"
+      },
+      {
+        "from": "me",
+        "text": "Sorry, one more time?"
+      },
+      {
+        "from": "me",
+        "typing": true
+      }
+    ],
+    "question": "Третий раз просить неловко. Что сказать?",
+    "prompt": "Листай → разбор на следующем слайде"
+  },
+  {
+    "template": "list",
+    "out": "media/ig/2026-11-19-repeat-twice-2.jpg",
+    "label": "СПАСАЕМ РАЗГОВОР",
+    "title": "Вместо третьего\n«repeat»",
+    "items": [
+      {
+        "text": "I got the first part. What happened after that?",
+        "sub": "скажи, что уже понятно, и спроси про остальное"
+      },
+      {
+        "text": "So you're saying the meeting moved to Friday?",
+        "sub": "проверь свою догадку"
+      },
+      {
+        "text": "Could you say that another way?",
+        "sub": "попроси сказать иначе"
+      }
+    ],
+    "cta": "Сохрани — пригодится в разговоре"
+  },
+  {
+    "template": "chat",
+    "out": "media/ig/2026-11-20-say-no-shift-1.jpg",
+    "label": "АНГЛИЙСКИЙ С ХАРАКТЕРОМ",
+    "messages": [
+      {
+        "from": "them",
+        "name": "Коллега",
+        "text": "Can you cover my shift on Saturday?"
+      },
+      {
+        "from": "me",
+        "name": "Ты",
+        "typing": true
+      }
+    ],
+    "question": "Как отказать без длинных извинений?",
+    "prompt": "Листай → три способа на следующем слайде"
+  },
+  {
+    "template": "list",
+    "out": "media/ig/2026-11-20-say-no-shift-2.jpg",
+    "label": "АНГЛИЙСКИЙ С ХАРАКТЕРОМ",
+    "title": "Три способа\nсказать «нет»",
+    "items": [
+      {
+        "text": "I wish I could, but I have plans.",
+        "sub": "мягко"
+      },
+      {
+        "text": "Sorry, I can't this Saturday.",
+        "sub": "твёрдо"
+      },
+      {
+        "text": "I can't do Saturday, but I could take Sunday morning.",
+        "sub": "с условием"
+      }
+    ],
+    "cta": "Одной фразы достаточно"
+  }
+]

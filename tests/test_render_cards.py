@@ -60,6 +60,17 @@ class RenderCards(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "too long for one line"):
             self.render(dict(QUIZ, options=["have been living here for a very long time already, you know"] * 3))
 
+    def test_a_chat_card_draws_messages_and_a_typing_bubble_and_refuses_too_much(self):
+        chat = {"template": "chat", "label": "А ДАЛЬШЕ ЧТО?", "question": "Что ответить?",
+                "prompt": "Листай → три способа на следующем слайде",  # shrinks to fit the card's width
+                "messages": [{"from": "them", "name": "Коллега", "text": "Can you cover my shift on Saturday?"},
+                             {"from": "me", "typing": True}]}
+        self.render(chat)
+        with self.assertRaisesRegex(ValueError, "too long"):
+            self.render(dict(chat, messages=[{"from": "them", "text": "Can you cover my shift on Saturday? " * 4}] * 6))
+        with self.assertRaisesRegex(ValueError, "too long for one line"):
+            self.render(dict(chat, prompt="Листай → три способа на следующем слайде, их там правда три"))
+
     def test_the_same_spec_renders_the_same_file(self):
         with open(self.render(QUIZ, "a.jpg"), "rb") as a, open(self.render(QUIZ, "b.jpg"), "rb") as b:
             self.assertEqual(a.read(), b.read())

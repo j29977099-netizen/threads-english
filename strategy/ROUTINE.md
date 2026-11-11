@@ -28,13 +28,14 @@ If the newest `reports/insights-YYYY-MM-DD.json` has no matching `reports/weekly
 - follower count and change
 - best and worst topics and formats
 - anything that failed or was skipped, and why (from the log)
+- the situation series (💬 ➡️ 🛟 💪) next to the grammar quizzes (🧩 🔥 🇷🇺 → 🇺🇸): views and replies for each post. Report the numbers only; the teacher decides which series stay
 - three concrete changes for the coming week
 
 Use only numbers from the files. Where there are none, say "no data yet". Never estimate. Apply the three changes to the posts you write in step 3.
 
 ## 3. Fill the queue
 
-For every date from max(tomorrow, 2026-11-09) through today + 12 days that has no queued p1 or p2 post (reveals, idioms and «Как сказать» posts don't count), write that day's posts. Also give every date in that range that has no idiom one, and continue the «Как сказать по-английски» series through that range. Put them in one new file, `content/queue/<first date>_auto.json`, in the same format as the existing queue files.
+For every date from max(tomorrow, 2026-11-09) through today + 12 days, write whichever of that day's p1 and p2 posts the queue lacks (reveals, idioms and «Как сказать» posts are neither). A date that already has its p1 still needs its p2, and the other way round. Also give every date in that range that has no idiom one, and continue the «Как сказать по-английски» series through that range. Put them in one new file, `content/queue/<first date>_auto.json`, in the same format as the existing queue files.
 
 - **Slots:** p1 at 06:00Z (engagement) and p2 at 16:00Z (education), following that date's calendar entry and STRATEGY.md's mix. Every day also gets an idiom at 09:30Z (see **Idioms**), and every third day gets a «Как сказать по-английски» post at 18:00Z (see **Как сказать**).
 - **Idioms (🗽 Идиома дня):** `kind: "lesson"`, `topic: "idiom: <idiom>"`, id `YYYY-MM-DD-i-short-slug`. Follow the format of the posts in `content/queue/2026-11-11_idioms.json`:
@@ -52,6 +53,16 @@ For every date from max(tomorrow, 2026-11-09) through today + 12 days that has n
   - The trap must be a real, checkable difference in meaning, not a matter of taste. If you aren't sure of it, choose another phrase.
   - Write the Russian side so it needs no gender («мне лень», «у меня нет слов»), not «я устал(а)».
   - Never repeat a phrase or a trap from the queue or the log. There is no task, so no reveal.
+- **Situation series (pilot since 2026-11-13; STRATEGY.md §3 and §4):** each week (Monday to Sunday) gets one post of each: 💬, ➡️ and 🛟 in p1 slots and 💪 in a p2 slot, on four different days, plus at most one ✏️ in a p2 slot.
+  - They take the place of that day's calendar entry; they are never an extra post. Replace a grammar quiz (🧩, 🔥, 🇷🇺 → 🇺🇸) first, otherwise a vocabulary or tip entry. Never replace a holiday-tied or promo entry. Where the calendar already names one of these series for a date, write that topic.
+  - Follow the posts in `content/queue/2026-11-13_situations.json`.
+  - 💬 Что он имел в виду?: `kind: "quiz"` with readings A–C and `answer` set to the most likely one. Its reply opens `✅ Разбор: чаще всего — <letter>) …`, then says what in the words points to that reading, what is only a guess, and gives one phrase to clarify.
+  - ➡️ А дальше что? and 🛟 Спасаем разговор: `kind: "challenge"`. The situation, then an open task («Пиши свой вариант 👇»). The reply gives 2–3 natural lines and why they work.
+  - 💪 Английский с характером: `kind: "lesson"`. The situation in one or two lines, then three ways marked «Мягко:», «Твёрдо:» and «С условием:», one 💡 line and an open 🗣 question. No reveal.
+  - ✏️ Было → стало: `kind: "lesson"`. A flat but correct answer, the livelier one, and what changed. Call it a typical answer; never present it as a student's.
+  - One recognisable everyday situation per post: work, friends, a shop, texting. It is hypothetical («Коллега просит…»), never a story about the teacher or a student.
+  - What a phrase usually means differs between people. Write «часто» or «чаще всего», never «всегда», and only what you are sure Americans say and mean. If you aren't sure, choose another situation.
+  - `topic` starts with the series: "what did they mean: …", "what next: …", "conversation rescue: …", "english with a backbone: …", "before and after: …".
 - **Reveals:** every `quiz` and `challenge` gets a reveal: `kind: "reveal"` with `reply_to` set to the quiz id. It goes out the next day at 06:15Z for a morning quiz, or 16:15Z for an evening one.
 - **Publishing route (Zernio):** no `poll` field.
   - Quizzes list the options in the text as `A) … B) … C) … D) …`, ask for the letter in the comments, and set `answer` to the letter.
@@ -76,7 +87,7 @@ For every date from max(tomorrow, 2026-11-09) through today + 12 days that has n
   4. Set `image` and `alt_text` on the post.
 
   If no template fits, write a text post.
-- **Calendar:** if it ends within 14 days of today, add the next 30 days to `strategy/calendar-30d.json`, with the same structure, series and mix.
+- **Calendar:** if it ends within 14 days of today, add the next 30 days to `strategy/calendar-30d.json`, with the same structure, series and mix, and with the situation series planned in at the rate above.
 
 Never edit or delete a post dated today or earlier, or any post that appears in the log. Posts up to 30 hours ahead may already be scheduled in Zernio: editing one is fine (the publisher pushes the change), but removing it from the queue does not stop it.
 
@@ -87,6 +98,7 @@ For every date from tomorrow through today + 12 days that has no post in `conten
 - **Slides:** every post is images, and the answer goes on a later slide, never in a next-day post. Add the specs to `content/cards/ig-<first date>.json`, saving to `media/ig/<date>-<slug>-<n>.jpg` (JPEG only), and run `python tools/render_cards.py` on it.
   - A quiz: slide 1 uses `quiz` with prompt «Листай → ответ на следующем слайде»; slide 2 uses `answer`.
   - A phrase or lesson: use `phrase` and/or `list` (2–3 slides), or `versus` / `mistakes` for a single image.
+  - A situation post (💬 ➡️ 🛟 💪): slide 1 uses `chat`: the exchange as `messages` (`{"from": "them" or "me", "text": …}`, or `{"from": "me", "typing": true}` where the reader has to answer), the `question`, and prompt «Листай → разбор на следующем слайде». Slide 2 gives the answer with `answer`, `list`, or `versus` with its own `top_tag` and `bottom_tag`. See `content/cards/ig-2026-11-17.json`.
   - Open every slide and check the text. The renderer refuses a quiz that is too long for one card: shorten the sentence or the options.
 - **Caption:** at most 2,200 characters, in the same Russian rules as Threads.
   - Start with a hook line.
