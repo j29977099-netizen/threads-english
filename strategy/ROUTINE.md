@@ -82,7 +82,7 @@ Never edit or delete a post dated today or earlier, or any post that appears in 
 
 ## 3b. Instagram
 
-For the same dates, write one Instagram post per day at 15:00Z (18:00 MSK). Put them in `content/instagram/<first date>_auto.json`, in the same format as the files already there. Adapt the day's best Threads post (usually the morning quiz) rather than copying it, and follow STRATEGY.md §12.
+For every date from tomorrow through today + 12 days that has no post in `content/instagram/`, write one Instagram post at 15:00Z (18:00 MSK). Check these dates on their own, not against the Threads queue: Instagram can have empty days where Threads is already filled. Put them in `content/instagram/<first date>_auto.json`, in the same format as the files already there. Adapt the day's best Threads post (usually the morning quiz) rather than copying it, and follow STRATEGY.md §12.
 
 - **Slides:** every post is images, and the answer goes on a later slide, never in a next-day post. Add the specs to `content/cards/ig-<first date>.json`, saving to `media/ig/<date>-<slug>-<n>.jpg` (JPEG only), and run `python tools/render_cards.py` on it.
   - A quiz: slide 1 uses `quiz` with prompt «Листай → ответ на следующем слайде»; slide 2 uses `answer`.

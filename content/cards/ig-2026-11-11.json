@@ -1,0 +1,31 @@
+[
+  {
+    "template": "quiz",
+    "out": "media/ig/2026-11-11-explain-to-me-1.jpg",
+    "label": "ПРОВЕРЬ СЕБЯ",
+    "title": "Только один\nвариант правильный",
+    "sentence": "«Он объяснил мне правило»",
+    "options": [
+      "He explained me the rule.",
+      "He explained the rule to me.",
+      "He explained me about the rule."
+    ],
+    "prompt": "Листай → ответ на следующем слайде"
+  },
+  {
+    "template": "answer",
+    "out": "media/ig/2026-11-11-explain-to-me-2.jpg",
+    "label": "ОТВЕТ",
+    "title": "Правильно — B",
+    "answer": "He explained the rule to me.",
+    "why": [
+      "После explain сначала идёт то, что объясняем, а не человек",
+      "Схема: explain something to someone",
+      "Так же работают describe и suggest"
+    ],
+    "examples": [
+      "Can you explain this to me?",
+      "!Explain me, please."
+    ]
+  }
+]
