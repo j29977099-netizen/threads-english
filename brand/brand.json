@@ -4,19 +4,63 @@
   "size": [1080, 1350],
   "margin": 72,
   "colors": {
-    "ink": "#13213C",
-    "paper": "#FBF8F1",
-    "red": "#E4483F",
-    "teal": "#1F8A70",
-    "sun": "#FFC857",
-    "mist": "#E9EEF5",
-    "muted": "#5E6B80",
-    "white": "#FFFFFF"
+    "ink": "#16112F",
+    "paper": "#FFFFFF",
+    "white": "#FFFFFF",
+    "muted": "#6A6685",
+    "mist": "#EAE6F8",
+    "sun": "#FFD43B",
+    "pink": "#FF4F9A",
+    "orange": "#FF8A3D",
+    "mint": "#12B886",
+    "blue": "#3D7BFF",
+    "violet": "#6C3BFF",
+    "red": "#F03E5C",
+    "teal": "#0B9E7A"
   },
   "fonts": {
-    "display": "brand/fonts/Inter-ExtraBold.ttf",
-    "bold": "brand/fonts/Inter-Bold.ttf",
-    "semibold": "brand/fonts/Inter-SemiBold.ttf",
-    "medium": "brand/fonts/Inter-Medium.ttf"
+    "display": {"file": "brand/fonts/Unbounded-VF.ttf", "wght": 800},
+    "bold": {"file": "brand/fonts/Onest-VF.ttf", "wght": 700},
+    "semibold": {"file": "brand/fonts/Onest-VF.ttf", "wght": 600},
+    "medium": {"file": "brand/fonts/Onest-VF.ttf", "wght": 500},
+    "hand": {"file": "brand/fonts/Caveat-VF.ttf", "wght": 700},
+    "fallback": "brand/fonts/Inter-SemiBold.ttf"
+  },
+  "themes": {
+    "default": {
+      "bg": [["#5B2BFF", "#7A3CFF"], ["#3A1FD1", "#E0409A"]],
+      "glow": [{"at": [1020, 1240, 430], "color": "#FF8A3D", "alpha": 150}, {"at": [40, 60, 380], "color": "#3D7BFF", "alpha": 150}],
+      "shadow": "#1B0B66"
+    },
+    "quiz": {
+      "bg": [["#5B2BFF", "#7A3CFF"], ["#3A1FD1", "#E0409A"]],
+      "glow": [{"at": [1020, 1240, 430], "color": "#FF8A3D", "alpha": 150}, {"at": [40, 60, 380], "color": "#3D7BFF", "alpha": 150}],
+      "shadow": "#1B0B66"
+    },
+    "answer": {
+      "bg": [["#0A9486", "#0FA968"], ["#08708F", "#0F9D58"]],
+      "glow": [{"at": [1040, 80, 400], "color": "#B6F36A", "alpha": 120}, {"at": [60, 1300, 420], "color": "#2D6BFF", "alpha": 130}],
+      "shadow": "#043B45"
+    },
+    "phrase": {
+      "bg": [["#FF3D6E", "#FF6A3D"], ["#D61F7A", "#FF7A1F"]],
+      "glow": [{"at": [1040, 60, 420], "color": "#FFC23A", "alpha": 140}, {"at": [40, 1300, 440], "color": "#8A3CFF", "alpha": 140}],
+      "shadow": "#7A0F3A"
+    },
+    "list": {
+      "bg": [["#2D5BFF", "#2F8BFF"], ["#5B2BFF", "#12AFC2"]],
+      "glow": [{"at": [1040, 1250, 420], "color": "#3DF0C2", "alpha": 110}, {"at": [60, 60, 380], "color": "#8A3CFF", "alpha": 140}],
+      "shadow": "#0B1F7A"
+    },
+    "mistakes": {
+      "bg": [["#F03E5C", "#FF6A3D"], ["#C2187A", "#7A3CFF"]],
+      "glow": [{"at": [1040, 60, 400], "color": "#FFB03A", "alpha": 140}, {"at": [40, 1300, 420], "color": "#5B2BFF", "alpha": 140}],
+      "shadow": "#5A0B45"
+    },
+    "versus": {
+      "bg": [["#2D5BFF", "#6C3BFF"], ["#1B3BD1", "#E0409A"]],
+      "glow": [{"at": [1040, 1260, 420], "color": "#FF8A3D", "alpha": 130}, {"at": [40, 60, 380], "color": "#19C6D1", "alpha": 130}],
+      "shadow": "#0B1466"
+    }
   }
 }

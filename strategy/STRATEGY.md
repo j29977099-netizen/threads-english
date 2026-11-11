@@ -73,10 +73,10 @@ Answer reveals are always replies to their own quiz (`reply_to`), so the explana
 
 ## 6. Visual identity
 
-- **Palette:** Ink navy `#13213C` · Paper `#FBF8F1` · Liberty red `#E4483F` (accent, wrong answers) · Teal `#1F8A70` (correct answers) · Sun `#FFC857` (highlight) · Mist `#E9EEF5` (panels)
-- **Type:** Inter (SIL OFL), bundled in `brand/fonts/`. ExtraBold for headlines, SemiBold for English examples, Medium for Russian explanations.
+- **Palette:** vibrant gradients, one colour theme per template in `brand/brand.json` (quiz: violet to pink, answer: green to blue, phrase: pink to orange, list: blue to teal, mistakes: red to violet), each with soft glows and a fine grain. Text sits on white panels. Accents: Sun `#FFD43B` (labels, blanks, the answer) · Pink `#FF4F9A`, Orange `#FF8A3D`, Mint `#12B886`, Blue `#3D7BFF` (badges) · Red `#F03E5C` (wrong answers) · Teal `#0B9E7A` (correct answers) · Ink `#16112F` (text).
+- **Type:** Unbounded ExtraBold for headlines and labels, Onest for text (SemiBold for English examples, Medium for Russian explanations), Caveat for handwritten prompts. All SIL OFL, bundled in `brand/fonts/`. Inter stays as the fallback for arrows and IPA.
 - **Format:** 1080×1350 (4:5 portrait), 72 px margins, no more than ~40 words per card.
-- **Card frame:** series label at the top left, wordmark «Английский по-американски» at the bottom, a thin red–navy stripe across the bottom edge.
+- **Card frame:** a tilted yellow series label at the top left, sparkles at the top right, and the wordmark «Английский по-американски» and the handle in pills at the bottom. Cards must look designed, never plain: colour, depth and a handwritten touch on every one.
 - **Templates:** quiz card, textbook-vs-America card, mistakes list, vocabulary flashcard, comparison chart, mini-dialogue.
 - **Rules:** no stock photos, no copyrighted images, no emoji inside graphics (they render inconsistently), every English and Russian word on a card is checked before publishing.
 
