@@ -55,7 +55,7 @@ Never invent personal stories, students, results, testimonials, prices, discount
 - 10% practical learning advice
 - 10% personal brand and student acquisition (1–2 posts per week, never two days in a row)
 
-The daily 🗽 idiom and the «Как сказать по-английски» post have their own slots (§5) and don't count toward this mix.
+The 🗽 idiom and the «Как сказать по-английски» posts share the one evening slot with the lessons (§5) and don't count toward this mix.
 
 **Situation series (pilot, requested by the teacher on 2026-11-11).** 💬, ➡️, 🛟 and 💪 are about what to say in a real conversation, not about grammar. Each week has one post of each. They take the place of grammar quizzes in the existing slots, so the number of posts per day stays the same: 💬, ➡️ and 🛟 count as interactive, 💪 and ✏️ as vocabulary and American English. The weekly report shows their views and replies next to the grammar quizzes', and the teacher decides which series stay.
 
@@ -65,16 +65,16 @@ All times Moscow time (UTC+3), the centre of gravity for a Russian-speaking audi
 
 | Slot | Time (MSK) | UTC | Post |
 |---|---|---|---|
-| Post 1 | 09:00 | 06:00 | Engagement: quiz, challenge, translation, question to the audience |
+| Post 1 | 09:00 | 06:00 | Engagement: quiz, challenge, translation, a situation (§3: 💬 ➡️ 🛟), question to the audience |
 | Reveal | 09:15 next day | 06:15 | ✅ reveal of yesterday's morning quiz, after a full day of comments |
-| Idiom | 12:30 | 09:30 | 🗽 Идиома дня, every day |
-| Post 2 | 19:00 | 16:00 | Education: vocabulary, grammar, American English, tip, or promo |
+| Post 2 | 19:00 | 16:00 | The one evening post. Over a week: about three 🗽 idioms, about two «Как сказать по-английски», and about two of lesson, mistakes card, tip, 💪 or promo |
 | Reveal | 19:15 next day | 16:15 | ✅ reveal of an evening quiz or mini-task, if there was one |
-| Phrases | 21:00 | 18:00 | «Как сказать по-английски «…»», every third day |
 
 **Publishing route.** Posts go out through Zernio, which needs no Meta developer account. Each post is handed to Zernio up to 30 hours ahead with its exact time, so it publishes on the minute. Zernio cannot post polls, so quizzes collect answers in the comments. A reveal is replied under its quiz through Zernio's inbox, which can't schedule, so the "Threads answer reveals" cloud routine posts it at 06:15 and 16:15 UTC; GitHub runs post it only if the routine hasn't within 45 minutes. If a Meta developer app is set up later, setting the repository variable `PUBLISH_BACKEND=threads` brings back native polls and reveals as replies.
 
-From week 3, test 07:30 MSK against 09:00 for Post 1 and keep what wins. 12:30 MSK is the idiom slot and 21:00 MSK is the «Как сказать» slot.
+From week 3, test 07:30 MSK against 09:00 for Post 1 and keep what wins.
+
+**Two posts a day, no more (decided 2026-11-12).** Threads suspended the account on 2026-11-10 and removed one of its replies as spam on 2026-11-11, and the teacher asked for fewer posts and fewer replies. Until then the idiom (12:30 MSK) and «Как сказать» (21:00 MSK) had slots of their own, which made three or four posts a day. Posts already written were spread over the evening slots, one a day. Don't add a slot back without the teacher's say.
 
 Answer reveals are always replies to their own quiz (`reply_to`), so the explanation stays attached to the question. The original quiz never contains the answer.
 

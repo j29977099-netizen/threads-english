@@ -1,7 +1,7 @@
 [
   {
     "id": "2026-11-16-p2-run-late",
-    "publish_at": "2026-11-16T16:00:00Z",
+    "publish_at": "2026-11-24T16:00:00Z",
     "kind": "lesson",
     "topic": "run late",
     "topic_tag": "Английский язык",
@@ -17,7 +17,7 @@
   },
   {
     "id": "2026-11-17-p2-for-since-ago",
-    "publish_at": "2026-11-17T16:00:00Z",
+    "publish_at": "2026-11-30T16:00:00Z",
     "kind": "lesson",
     "topic": "for / since / ago",
     "topic_tag": "Английский язык",
@@ -25,7 +25,7 @@
   },
   {
     "id": "2026-11-17-r-run-late-task",
-    "publish_at": "2026-11-17T16:15:00Z",
+    "publish_at": "2026-11-25T16:15:00Z",
     "kind": "reveal",
     "topic": "answer to the run late translation task",
     "topic_tag": "Английский язык",
@@ -34,7 +34,7 @@
   },
   {
     "id": "2026-11-18-p2-living-here-mistakes",
-    "publish_at": "2026-11-18T16:00:00Z",
+    "publish_at": "2026-11-19T16:00:00Z",
     "kind": "lesson",
     "topic": "mistakes with time: Present Perfect, for, since",
     "topic_tag": "Английский язык",
@@ -44,7 +44,7 @@
   },
   {
     "id": "2026-11-18-r-for-since-ago-task",
-    "publish_at": "2026-11-18T16:15:00Z",
+    "publish_at": "2026-12-01T16:15:00Z",
     "kind": "reveal",
     "topic": "answer to the for / since / ago task",
     "topic_tag": "Английский язык",
@@ -61,7 +61,7 @@
   },
   {
     "id": "2026-11-19-p2-airport",
-    "publish_at": "2026-11-19T16:00:00Z",
+    "publish_at": "2026-12-02T16:00:00Z",
     "kind": "lesson",
     "topic": "airport vocabulary",
     "topic_tag": "Английский язык",
