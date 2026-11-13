@@ -26,11 +26,11 @@ from datetime import timedelta
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from publish import ApiError, ZernioApi, stamp, utcnow  # noqa: E402
-from qc import LINK_RE, LOG_PATH, LOGS, QUEUES, ROOT, load_queue, normalize, parse_time  # noqa: E402
+from qc import LINK_RE, LOG_PATH, LOGS, QUEUES, ROOT, load_queue, normalize, parse_time, style_problems  # noqa: E402
 
 COMMENTS_LOG = os.path.join(ROOT, "log", "comments.jsonl")
 MAX_AGE = timedelta(days=7)
-MAX_REPLY = 300
+MAX_REPLY = 220     # real replies on Threads run to about 100 characters (STRATEGY.md §2)
 MAX_REPLIES_PER_DAY = 60
 REASONS = {"pricing", "booking", "personal", "complaint", "harassment", "sensitive", "partnership", "unsure", "other"}
 PRICE_RE = re.compile(r"\d\s*(₽|руб|\$|€|usd|eur|долл)", re.I)
@@ -73,7 +73,7 @@ def check_reply(text):
         errors.append("replies never mention prices; escalate instead")
     if re.search(r"johnathan|джонатан", text, re.I):
         errors.append("posts and replies never name the teacher")
-    return errors
+    return errors + style_problems(text, kind="reply")
 
 
 def post_context(queue, published, platform="threads"):

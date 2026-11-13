@@ -11,6 +11,10 @@ poll 2-4 options of 1-25 chars on text-only posts, <= 5 links, images JPEG/PNG
 What a post may use depends on the publishing backend (PUBLISH_BACKEND, see
 tools/publish.py): only the direct Threads API can post polls and replies to
 comments (kind "reply"). On both backends a reveal is a reply under its quiz.
+
+style_problems() counts the marks that make a text read as generated (quotation
+marks, long dashes, colons, a period on every line). The queue check applies it
+to posts from STYLE_FROM on; tools/comments.py applies it to every reply.
 """
 import argparse
 import glob
@@ -46,6 +50,19 @@ BACKEND = os.environ.get("PUBLISH_BACKEND", "zernio")
 CAN = {"threads": {"polls", "replies"}, "zernio": set()}
 
 LINK_RE = re.compile(r"https?://|www\.", re.I)
+
+# How the text looks (STRATEGY.md §2). Measured on 248 real Russian posts and replies about learning
+# English, read on Threads on 2026-11-13: 13% end with a period and 18% of their lines do, about one
+# in ten has a quotation mark or a long dash, one in six a colon, none a semicolon. Ours had all of
+# them in nearly every post. Posts dated before STYLE_FROM were written under the old rule and stay.
+STYLE_FROM = "2026-11-14T00:00:00Z"
+MAX_QUOTE_PAIRS = 1
+MAX_LONG_DASHES = 1
+MAX_COLONS = 2
+MAX_PERIOD_LINES = 0.25     # share of a post's lines that may end with a period
+MAX_REPLY_EMOJI = 2
+EMOJI_RE = re.compile("[\U0001F000-\U0001FAFF☀-➿⭐⭕]")
+FORM_LETTER_RE = re.compile(r"\s*(здравствуйте|добрый\s+(день|вечер)|доброе\s+утро|приветствую)", re.I)
 
 
 def parse_time(value):
@@ -217,10 +234,54 @@ def check_post(post, root=ROOT, backend=None, platform="threads"):
     return errors
 
 
-def check_queue(posts, published=None, backend=None, platform="threads"):
-    """Cross-post problems: duplicates, reveal linkage, spoilers.
+def style_problems(text, kind="post"):
+    """Marks that make a text read as generated rather than typed by a person.
 
-    published maps post id -> text for everything already in the log.
+    kind "reply" (a public reply) and "dm" are held tighter than "post": no long dash, one colon and
+    two emoji at most. Only a public reply may not open like a form letter.
+    """
+    text = (text or "").strip()
+    lines = [line.strip() for line in text.splitlines() if line.strip()]
+    if not lines:
+        return []
+    short = kind != "post"
+    problems = []
+
+    quotes = text.count("«") + text.count("“") + text.count("„") + text.count('"') // 2
+    if quotes > MAX_QUOTE_PAIRS:
+        problems.append("%d pairs of quotation marks (max %d): English needs none, and a Russian phrase "
+                        "can stand on its own line" % (quotes, MAX_QUOTE_PAIRS))
+    dashes = text.count("—") + len(re.findall(r"\s–\s", text))
+    max_dashes = 0 if short else MAX_LONG_DASHES
+    if dashes > max_dashes:
+        problems.append("%d long dashes (max %d): start a new line or sentence, or put a hyphen between "
+                        "a word and its translation" % (dashes, max_dashes))
+    colons = len(re.findall(r":(?=\s|$)", text))
+    max_colons = 1 if short else MAX_COLONS
+    if colons > max_colons:
+        problems.append("%d colons (max %d)" % (colons, max_colons))
+    if ";" in text:
+        problems.append("a semicolon: nobody types those here")
+
+    period_lines = [line for line in lines if re.search(r"(?<!\.)\.$", line)]
+    if lines[-1] in period_lines:
+        problems.append("the last line ends with a period")
+    elif not short and len(period_lines) > max(1, int(len(lines) * MAX_PERIOD_LINES)):
+        problems.append("%d of %d lines end with a period (at most a quarter): the line break already "
+                        "ends the thought" % (len(period_lines), len(lines)))
+
+    if short and len(EMOJI_RE.findall(text)) > MAX_REPLY_EMOJI:
+        problems.append("more than %d emoji in a reply" % MAX_REPLY_EMOJI)
+    if kind == "reply" and FORM_LETTER_RE.match(text):
+        problems.append("opens like a form letter: answer what the person said, without a greeting")
+    return problems
+
+
+def check_queue(posts, published=None, backend=None, platform="threads"):
+    """Cross-post problems: duplicates, reveal linkage, spoilers, and how the text looks.
+
+    published maps post id -> text for everything already in the log. The style check lives here
+    and not in check_post, so the publisher never holds a post back over a comma.
     """
     errors = []
     by_id = {}
@@ -228,6 +289,10 @@ def check_queue(posts, published=None, backend=None, platform="threads"):
         pid = post.get("id")
         for problem in check_post(post, backend=backend, platform=platform):
             errors.append("%s: %s" % (pid, problem))
+        when = post.get("publish_at")
+        if isinstance(when, str) and when >= STYLE_FROM:
+            for problem in style_problems(post.get("text")):
+                errors.append("%s: %s" % (pid, problem))
         if pid in by_id:
             errors.append("%s: duplicate id" % pid)
         by_id[pid] = post

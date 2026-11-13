@@ -95,9 +95,20 @@ class InstagramInboxTest(unittest.TestCase):
 
 class ReplyCheckTest(unittest.TestCase):
     def test_rules(self):
-        self.assertEqual(comments.check_reply("Спасибо! Разбор — завтра утром 🙌"), [])
-        for bad in ("", "x" * 301, "смотри https://example.com", "Урок стоит 2000 ₽", "Johnathan тут"):
+        for good in ("спасибо, разбор будет завтра утром 🙌", "Верно! После to здесь идёт working, потому что это предлог",
+                     "Почти) В американском скажут I'm good, а не I'm fine thanks"):
+            self.assertEqual(comments.check_reply(good), [], good)
+        for bad in ("", "x" * 221, "смотри https://example.com", "Урок стоит 2000 ₽", "Johnathan тут"):
             self.assertTrue(comments.check_reply(bad), bad)
+
+    def test_a_reply_that_reads_as_generated_is_not_sent(self):
+        for bad, why in (("Спасибо! Разбор — завтра утром", "long dash"),
+                         ("Верно! Так и говорят.", "ends with a period"),
+                         ("Здравствуйте! Спасибо за ответ", "form letter"),
+                         ("Говорят «I'm beat», а не «I'm very tired»", "quotation marks"),
+                         ("Смотри: правило такое: после to идёт -ing", "colons"),
+                         ("Верно 🙌🔥👏", "emoji")):
+            self.assertTrue(comments.check_reply(bad), why)
 
 
 class CommandTest(unittest.TestCase):
