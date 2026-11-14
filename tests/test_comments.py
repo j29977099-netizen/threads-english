@@ -140,6 +140,15 @@ class CommandTest(unittest.TestCase):
         self.assertEqual(self.events()[0]["reply_id"], "r1")
         self.assertEqual(self.run_cli("reply", "--post", "T1", "--comment", "c1", "--text", "Ещё раз", api=api), 1)
 
+    def test_after_a_few_replies_in_a_day_no_more_are_sent(self):
+        self.assertLessEqual(comments.MAX_REPLIES_PER_DAY, 10)  # the teacher asked for a few a day
+        for n in range(comments.MAX_REPLIES_PER_DAY):
+            comments.record({"event": "replied", "platform": "threads", "comment_id": "old%d" % n, "post_id": "T1"})
+        session = FakeSession([])
+        self.assertEqual(self.run_cli("reply", "--post", "T1", "--comment", "c1", "--text", "спасибо",
+                                      api=ZernioApi("proxy", session=session)), 1)
+        self.assertEqual(session.calls, [])
+
     def test_bad_reply_is_not_sent(self):
         session = FakeSession([])
         self.assertEqual(self.run_cli("reply", "--post", "T1", "--comment", "c1", "--text", "2000 руб",

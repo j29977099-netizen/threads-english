@@ -41,7 +41,7 @@ ZERNIO_API_KEY=proxy python tools/comments.py escalate --platform PLATFORM --pos
 ZERNIO_API_KEY=proxy python tools/comments.py skip     --platform PLATFORM --post POST --comment ID --reason "why"
 ```
 
-At most 20 replies per run. Leave the rest for the next run.
+At most 5 replies per run, and `tools/comments.py` stops at 10 a day: the teacher asked on 2026-11-14 for a few a day and no more. Answer the comments that say the most first (a question, an attempt at the task), and leave the rest for the next run.
 
 ### Replying
 

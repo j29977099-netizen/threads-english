@@ -119,7 +119,7 @@ Answer reveals are always replies to their own quiz (`reply_to`), so the explana
 
 - Bio and the pinned intro post (`2026-11-09-intro`) tell a new visitor in 5 seconds who this is and how to book.
 - Every quiz invites a comment ("почему именно этот вариант?"), because replies drive Threads distribution more than likes.
-- Reply to genuine comments within the day: thank, encourage, explain. Never spoil a quiz before its reveal.
+- Reply to genuine comments within the day: thank, encourage, explain. Never spoil a quiz before its reveal. A few a day is enough (the teacher's word on 2026-11-14): at most 5 per run and 10 a day, written as §2 says.
 - One soft promotional post a week at most (it was 1–2 until 2026-11-13, when the teacher asked not to overdo sending people to direct messages). It is the only post that mentions writing to the teacher, and it says so once, in passing: «Если думаешь про занятия, напиши мне». No other post, and no reply to a stranger, invites anyone to direct messages.
 - No follow-for-follow, no bought engagement, no unsolicited DMs, no mass commenting on other accounts.
 - **What gets an answer** (from the 2026-11-13 reading, §2). In twelve threads where people asked for a tutor or for advice, 48 of the replies were pitches: a greeting, credentials, a price, an invitation to write. The person who asked answered one of them. Of the 61 replies that simply talked to the person (a tip, their own experience, a real question), five got an answer. A post asking for a tutor collects 30 to 130 near-identical pitches, so one more is noise at best and spam at worst, and many of those posts ask for a price up front, which this account does not state in public. People come from the posts and the profile, not from being asked to.

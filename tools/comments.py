@@ -31,7 +31,7 @@ from qc import LINK_RE, LOG_PATH, LOGS, QUEUES, ROOT, load_queue, normalize, par
 COMMENTS_LOG = os.path.join(ROOT, "log", "comments.jsonl")
 MAX_AGE = timedelta(days=7)
 MAX_REPLY = 220     # real replies on Threads run to about 100 characters (STRATEGY.md §2)
-MAX_REPLIES_PER_DAY = 60
+MAX_REPLIES_PER_DAY = 10    # "a few a day is good", the teacher on 2026-11-14; it was 60
 REASONS = {"pricing", "booking", "personal", "complaint", "harassment", "sensitive", "partnership", "unsure", "other"}
 PRICE_RE = re.compile(r"\d\s*(₽|руб|\$|€|usd|eur|долл)", re.I)
 DECISIONS = {"replied", "escalated", "skipped"}
