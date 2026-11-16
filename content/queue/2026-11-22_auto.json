@@ -1,0 +1,123 @@
+[
+  {
+    "id": "2026-11-22-p1-im-good",
+    "publish_at": "2026-11-22T06:00:00Z",
+    "kind": "quiz",
+    "topic": "what did they mean: «I'm good.» in answer to an offer",
+    "topic_tag": "Английский язык",
+    "text": "💬 Что он имел в виду?\n\nТы предлагаешь коллеге добавку\nWant some more pasta?\n\nОн отвечает\nI'm good.\n\nОн…\nA) просто сообщает, что у него всё хорошо\nB) вежливо отказывается\nC) соглашается\n\nПиши букву и почему так 👇\nРазбор завтра утром",
+    "answer": "B"
+  },
+  {
+    "id": "2026-11-23-r-im-good",
+    "publish_at": "2026-11-23T06:15:00Z",
+    "kind": "reveal",
+    "topic": "answer reveal",
+    "topic_tag": "Английский язык",
+    "reply_to": "2026-11-22-p1-im-good",
+    "text": "✅ Чаще всего это B) вежливо отказывается\n\nНа предложение I'm good обычно значит нет, спасибо, мне хватает\n\nВсё решает вопрос, на который человек отвечает. На How are you? тот же ответ значит просто хорошо\n\nЭто догадка по ситуации. Если не уверен, уточни\nSure? There's plenty left!\n\nМягче и понятнее для всех\nNo, thanks, I'm full"
+  },
+  {
+    "id": "2026-11-23-p1-weekend",
+    "publish_at": "2026-11-23T06:00:00Z",
+    "kind": "challenge",
+    "topic": "what next: «How was your weekend?» — «Good.»",
+    "topic_tag": "Английский язык",
+    "text": "➡️ А дальше что?\n\nВ понедельник коллега спрашивает\nHow was your weekend?\n\nТы отвечаешь Good. и повисает тишина\n\nЧто добавить, чтобы разговор пошёл дальше?\nПиши свой вариант по-английски 👇"
+  },
+  {
+    "id": "2026-11-24-r-weekend",
+    "publish_at": "2026-11-24T06:15:00Z",
+    "kind": "reveal",
+    "topic": "answer reveal",
+    "topic_tag": "Английский язык",
+    "reply_to": "2026-11-23-p1-weekend",
+    "text": "✅ Что ответить вместо одного слова\n\nДобавь одну деталь и верни вопрос\nPretty good! I finally tried that new taco place. How about you?\nRelaxing. I barely left the house. How was yours?\n\nОдно Good. не даёт собеседнику, за что зацепиться. Деталь даёт тему, а вопрос в конце передаёт ему слово\n\nМожно коротко, главное не молчать"
+  },
+  {
+    "id": "2026-11-24-p1-see-ya",
+    "publish_at": "2026-11-24T06:00:00Z",
+    "kind": "lesson",
+    "topic": "goodbye: see ya, take care, have a good one",
+    "topic_tag": "Английский язык",
+    "text": "📚 Учебник vs 🇺🇸 Америка\n\nВ учебнике\nGoodbye\n\nВ жизни\nSee ya\nTake care\nHave a good one\n\nSee ya это пока, увидимся\nTake care говорят, когда желают добра или прощаются надолго\nHave a good one значит хорошего дня или вечера\n\nGoodbye звучит официально, в обычном разговоре его слышно редко\n\n🗣 Чем ты прощаешься с коллегами?"
+  },
+  {
+    "id": "2026-11-25-p1-think-about-it",
+    "publish_at": "2026-11-25T06:00:00Z",
+    "kind": "quiz",
+    "topic": "what did they mean: «I'll think about it.»",
+    "topic_tag": "Английский язык",
+    "text": "💬 Что он имел в виду?\n\nТы зовёшь знакомого вместе съездить на выходные\nОн отвечает\nI'll think about it.\n\nЧто это значит?\nA) он правда подумает и ответит\nB) мягкое нет или не сейчас\nC) он согласен\n\nПиши букву и по чему это видно 👇\nРазбор завтра утром",
+    "answer": "B"
+  },
+  {
+    "id": "2026-11-26-r-think-about-it",
+    "publish_at": "2026-11-26T06:15:00Z",
+    "kind": "reveal",
+    "topic": "answer reveal",
+    "topic_tag": "Английский язык",
+    "reply_to": "2026-11-25-p1-think-about-it",
+    "text": "✅ Чаще всего это B) мягкое нет или не сейчас\n\nI'll think about it нередко звучит как способ не говорить нет сразу. Согласие обычно звучит конкретнее, например Sure, count me in\n\nНо бывает, что человек правда думает, и тут многое решают тон и то, назвал ли он срок. Это только догадка\n\nЧтобы выяснить, спроси\nSure! When should I check back with you?"
+  },
+  {
+    "id": "2026-11-26-p1-leftovers",
+    "publish_at": "2026-11-26T06:00:00Z",
+    "kind": "quiz",
+    "topic": "Thanksgiving: leftovers",
+    "topic_tag": "Английский язык",
+    "text": "☕️ Как говорят в США\n\nВ конце ужина на День благодарения хозяйка говорит\nTake some leftovers home!\n\nЧто она предлагает?\nA) подарки гостям\nB) остатки еды со стола\nC) забрать домой посуду\nD) остаться ночевать\n\nПиши букву 👇",
+    "answer": "B"
+  },
+  {
+    "id": "2026-11-27-r-leftovers",
+    "publish_at": "2026-11-27T06:15:00Z",
+    "kind": "reveal",
+    "topic": "answer reveal",
+    "topic_tag": "Английский язык",
+    "reply_to": "2026-11-26-p1-leftovers",
+    "text": "✅ Правильно B) остатки еды\n\nleftovers это то, что осталось после еды. После праздничного ужина хозяева часто раскладывают его по контейнерам для гостей\n\nThanks, that would be great!\nI'm having leftovers for lunch\n\nИндейка на второй день, в сэндвиче, у американцев почти отдельное блюдо"
+  },
+  {
+    "id": "2026-11-26-p2-thanksgiving",
+    "publish_at": "2026-11-26T16:00:00Z",
+    "kind": "lesson",
+    "topic": "Thanksgiving words and phrases",
+    "topic_tag": "Английский язык",
+    "text": "☕️ Как говорят в США\n\nСегодня День благодарения. Что говорят за столом\n\nHappy Thanksgiving! - с праздником\nCould you pass the gravy? - передай соус\nCan I have a slice of pumpkin pie? - можно кусочек тыквенного пирога\nI'm stuffed! - я объелся\nWhat are you thankful for? - за что говоришь спасибо в этом году\n\n🗣 Что у тебя сегодня на столе?"
+  },
+  {
+    "id": "2026-11-27-p1-worth-it",
+    "publish_at": "2026-11-27T06:00:00Z",
+    "kind": "challenge",
+    "topic": "is it worth it? (translation)",
+    "topic_tag": "Английский язык",
+    "text": "🇷🇺 → 🇺🇸 Как это сказать по-английски?\n\nНа распродаже скидка 30%, но нужно стоять в очереди\nОно того стоит?\n\nПиши свой перевод в комментариях\nБез переводчика, так честнее 😉"
+  },
+  {
+    "id": "2026-11-28-r-worth-it",
+    "publish_at": "2026-11-28T06:15:00Z",
+    "kind": "reveal",
+    "topic": "answer reveal",
+    "topic_tag": "Английский язык",
+    "reply_to": "2026-11-27-p1-worth-it",
+    "text": "✅ Самый естественный вариант\n\nIs it worth it?\n\nworth значит стоит своих денег, времени или усилий\nIs it worth the money?\nThat sale is totally worth it\n\nПосле worth глагол идёт с -ing\nIs it worth waiting in line?"
+  },
+  {
+    "id": "2026-11-28-p1-colander",
+    "publish_at": "2026-11-28T06:00:00Z",
+    "kind": "challenge",
+    "topic": "conversation rescue: forgot the word (colander)",
+    "topic_tag": "Английский язык",
+    "text": "🛟 Спасаем разговор\n\nГотовишь ужин с американским другом и хочешь попросить дуршлаг\nА слово вылетело из головы\n\nПо-русски объяснил бы за секунду, а тут пауза\n\nЧто скажешь, чтобы тебя поняли?\nПиши по-английски 👇"
+  },
+  {
+    "id": "2026-11-29-r-colander",
+    "publish_at": "2026-11-29T06:15:00Z",
+    "kind": "reveal",
+    "topic": "answer reveal",
+    "topic_tag": "Английский язык",
+    "reply_to": "2026-11-28-p1-colander",
+    "text": "✅ Опиши предмет, а не молчи\n\nCan you pass me the… what's it called? The bowl with holes that you drain pasta in\nI forgot the word. It's the thing for draining pasta\n\nНа английском это colander\nОбычно собеседник сам подсказывает слово, а ты его запоминаешь\n\nThe thing, that thing you use to… тоже выручают, когда слово забыл"
+  }
+]

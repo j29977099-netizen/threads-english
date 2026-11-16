@@ -1,0 +1,260 @@
+[
+  {
+    "template": "quiz",
+    "out": "media/ig/2026-11-21-rain-check-1.jpg",
+    "label": "КАК ГОВОРЯТ В США",
+    "title": "Can I take\na rain check?",
+    "sentence": "Друг зовёт на ужин, а ты отвечаешь: Can I take a rain check?",
+    "options": [
+      "Давай перенесём на другой раз",
+      "Посмотри, идёт ли дождь",
+      "Мне нужен зонт"
+    ],
+    "prompt": "Листай → ответ на следующем слайде"
+  },
+  {
+    "template": "answer",
+    "out": "media/ig/2026-11-21-rain-check-2.jpg",
+    "label": "ОТВЕТ",
+    "title": "Правильно — A",
+    "answer": "Давай перенесём на другой раз",
+    "why": [
+      "rain check это вежливый отказ с обещанием в другой раз",
+      "Пришло из бейсбола: билет на отменённый из-за дождя матч работал позже"
+    ],
+    "examples": [
+      "Thanks for the invite, but I'll take a rain check.",
+      "I can't tonight. Can I take a rain check?"
+    ]
+  },
+  {
+    "template": "chat",
+    "out": "media/ig/2026-11-22-im-good-1.jpg",
+    "label": "ЧТО ОН ИМЕЛ В ВИДУ?",
+    "messages": [
+      {
+        "from": "me",
+        "name": "Ты",
+        "text": "Want some more pasta?"
+      },
+      {
+        "from": "them",
+        "name": "Коллега",
+        "text": "I'm good."
+      }
+    ],
+    "question": "Доволен, отказывается или соглашается?",
+    "prompt": "Листай → разбор на следующем слайде"
+  },
+  {
+    "template": "answer",
+    "out": "media/ig/2026-11-22-im-good-2.jpg",
+    "label": "РАЗБОР",
+    "title": "Чаще всего —\nнет, спасибо",
+    "answer": "I'm good = «нет, спасибо, мне хватает»",
+    "why": [
+      "На предложение это обычно вежливый отказ",
+      "На How are you? то же самое значит просто «хорошо»",
+      "Это догадка. Если не уверен, уточни:"
+    ],
+    "examples": [
+      "Sure? There's plenty left!",
+      "No, thanks, I'm full."
+    ]
+  },
+  {
+    "template": "chat",
+    "out": "media/ig/2026-11-23-weekend-1.jpg",
+    "label": "А ДАЛЬШЕ ЧТО?",
+    "messages": [
+      {
+        "from": "them",
+        "name": "Коллега",
+        "text": "How was your weekend?"
+      },
+      {
+        "from": "me",
+        "name": "Ты",
+        "typing": true
+      }
+    ],
+    "question": "Что добавить к слову Good?",
+    "prompt": "Листай → разбор на следующем слайде"
+  },
+  {
+    "template": "list",
+    "out": "media/ig/2026-11-23-weekend-2.jpg",
+    "label": "А ДАЛЬШЕ ЧТО?",
+    "title": "Вместо одного\n«Good.»",
+    "items": [
+      {
+        "text": "Pretty good! I finally tried that new taco place. How about you?",
+        "sub": "деталь и вопрос обратно"
+      },
+      {
+        "text": "Relaxing. I barely left the house. How was yours?",
+        "sub": "коротко, но с темой"
+      }
+    ],
+    "cta": "Деталь плюс вопрос"
+  },
+  {
+    "template": "versus",
+    "out": "media/ig/2026-11-24-see-ya-1.jpg",
+    "label": "УЧЕБНИК VS АМЕРИКА",
+    "title": "Goodbye",
+    "top_tag": "В УЧЕБНИКЕ",
+    "textbook": [
+      "Goodbye"
+    ],
+    "bottom_tag": "В ЖИЗНИ",
+    "real_question": "See ya",
+    "real_answers": [
+      "Take care",
+      "Have a good one"
+    ],
+    "note": "Goodbye звучит официально. Эти три живее."
+  },
+  {
+    "template": "chat",
+    "out": "media/ig/2026-11-25-think-about-it-1.jpg",
+    "label": "ЧТО ОН ИМЕЛ В ВИДУ?",
+    "messages": [
+      {
+        "from": "me",
+        "name": "Ты",
+        "text": "Want to come with me this weekend?"
+      },
+      {
+        "from": "them",
+        "name": "Знакомый",
+        "text": "I'll think about it."
+      }
+    ],
+    "question": "Правда подумает или это мягкое нет?",
+    "prompt": "Листай → разбор на следующем слайде"
+  },
+  {
+    "template": "answer",
+    "out": "media/ig/2026-11-25-think-about-it-2.jpg",
+    "label": "РАЗБОР",
+    "title": "Чаще всего —\nмягкое «нет»",
+    "answer": "I'll think about it = «нет» или «не сейчас»",
+    "why": [
+      "Часто так отказывают, не говоря нет сразу",
+      "Бывает, что человек правда думает: смотри на тон и срок",
+      "Это догадка. Хочешь знать точно — спроси:"
+    ],
+    "examples": [
+      "Sure! When should I check back with you?"
+    ]
+  },
+  {
+    "template": "quiz",
+    "out": "media/ig/2026-11-26-leftovers-1.jpg",
+    "label": "КАК ГОВОРЯТ В США",
+    "title": "Take some\nleftovers home!",
+    "sentence": "Хозяйка после ужина на День благодарения говорит: Take some leftovers home! Что она предлагает?",
+    "options": [
+      "Подарки гостям",
+      "Остатки еды со стола",
+      "Забрать домой посуду"
+    ],
+    "prompt": "Листай → ответ на следующем слайде"
+  },
+  {
+    "template": "answer",
+    "out": "media/ig/2026-11-26-leftovers-2.jpg",
+    "label": "ОТВЕТ",
+    "title": "Правильно — B",
+    "answer": "Остатки еды со стола",
+    "why": [
+      "leftovers это то, что осталось после еды",
+      "После праздника хозяева часто раскладывают их гостям по контейнерам"
+    ],
+    "examples": [
+      "Thanks, that would be great!",
+      "I'm having leftovers for lunch."
+    ]
+  },
+  {
+    "template": "phrase",
+    "out": "media/ig/2026-11-27-worth-it-1.jpg",
+    "label": "ПЕРЕВЕДИ",
+    "phrase": "Is it worth it?",
+    "ipa": "[ɪz ɪt wɜːrθ ɪt]",
+    "meaning": "оно того стоит?",
+    "examples": [
+      {
+        "en": "That sale is totally worth it.",
+        "ru": "Эта распродажа того стоит."
+      },
+      {
+        "en": "Is it worth the money?",
+        "ru": "Оно стоит этих денег?"
+      }
+    ],
+    "note": "Пригодится в чёрную пятницу."
+  },
+  {
+    "template": "list",
+    "out": "media/ig/2026-11-27-worth-it-2.jpg",
+    "label": "ВЫРАЖЕНИЕ ДНЯ",
+    "title": "worth + -ing",
+    "items": [
+      {
+        "text": "Is it worth waiting in line?",
+        "sub": "стоит ли стоять в очереди"
+      },
+      {
+        "text": "Is it worth the money?",
+        "sub": "стоит ли оно денег"
+      },
+      {
+        "text": "It's not worth it.",
+        "sub": "не стоит"
+      }
+    ],
+    "cta": "После worth глагол с -ing"
+  },
+  {
+    "template": "chat",
+    "out": "media/ig/2026-11-28-colander-1.jpg",
+    "label": "СПАСАЕМ РАЗГОВОР",
+    "messages": [
+      {
+        "from": "them",
+        "name": "Друг",
+        "text": "Dinner's almost ready!"
+      },
+      {
+        "from": "me",
+        "name": "Ты",
+        "typing": true
+      }
+    ],
+    "question": "Как попросить дуршлаг, если забыл слово?",
+    "prompt": "Листай → разбор на следующем слайде"
+  },
+  {
+    "template": "list",
+    "out": "media/ig/2026-11-28-colander-2.jpg",
+    "label": "СПАСАЕМ РАЗГОВОР",
+    "title": "Опиши предмет,\nа не молчи",
+    "items": [
+      {
+        "text": "Can you pass me the… what's it called?",
+        "sub": "выиграй время"
+      },
+      {
+        "text": "The bowl with holes that you drain pasta in",
+        "sub": "опиши, что он делает"
+      },
+      {
+        "text": "colander",
+        "sub": "слово, которое искал"
+      }
+    ],
+    "cta": "Описание всегда выручает"
+  }
+]
