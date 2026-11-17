@@ -90,6 +90,15 @@ The 🗽 idiom and the «Как сказать по-английски» posts s
 
 **Situation series (pilot, requested by the teacher on 2026-11-11).** 💬, ➡️, 🛟 and 💪 are about what to say in a real conversation, not about grammar. Each week has one post of each. They take the place of grammar quizzes in the existing slots, so the number of posts per day stays the same: 💬, ➡️ and 🛟 count as interactive, 💪 and ✏️ as vocabulary and American English. The weekly report shows their views and replies next to the grammar quizzes', and the teacher decides which series stay.
 
+**What the market study changed (2026-11-17).** A study of 410 English tutor accounts on Threads (report v1, kept in `private/research`, not on GitHub) found three things that apply to this account. Per follower, image posts drew about 3.5 times the likes of text posts. Student stories, humor and honest first-person posts drew far more replies than promo posts, which earned the least. And the learners who ask for a tutor in public want speaking, exams and English for work, often while living outside Russia. So, from 2026-11-17:
+
+- **English for work and life in the US** is a pillar. About two posts a week, written in the existing series (☕️, ➡️, 🛟, 💪, a lesson), are set at work or in daily life in the US: a call with a client, an email, small talk with colleagues, the bank, the doctor, the landlord, a parent meeting at school. They take the place of other topics; never extra posts.
+- **Images on Threads:** one or two posts a week carry an image card, the week's 🎓 post with its phrase card and one lesson or 👀 mistakes post. Text stays the main format.
+- **Hooks:** a lesson opens with one line of a real situation before the rule, and an idiom opens with the funny literal picture.
+- **Unchanged:** two posts a day, at most one promo a week, no pitches in replies. The study found that sales replies in tutor-request threads almost never get an answer.
+
+The weekly report shows the pillar and the image posts next to the rest, and the teacher decides what stays.
+
 ## 5. Daily rhythm
 
 All times Moscow time (UTC+3), the centre of gravity for a Russian-speaking audience spread across Russia, Europe, Israel, Kazakhstan, and the US.

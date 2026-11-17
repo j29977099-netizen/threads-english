@@ -1,0 +1,20 @@
+[
+ {
+  "template": "phrase",
+  "out": "media/2026-11-25-make-it.png",
+  "label": "КАК ЭТО ПО-АНГЛИЙСКИ",
+  "phrase": "make it",
+  "meaning": "добиться своего, пробиться",
+  "examples": [
+   {
+    "en": "It's a tough market, but we're going to make it.",
+    "ru": "Рынок непростой, но мы пробьёмся."
+   },
+   {
+    "en": "Sorry, I can't make it tonight.",
+    "ru": "Прости, сегодня не смогу прийти."
+   }
+  ],
+  "note": "Два смысла: пробиться и успеть прийти."
+ }
+]

@@ -31,6 +31,7 @@ If the newest `reports/insights-YYYY-MM-DD.json` has no matching `reports/weekly
 - anything that failed or was skipped, and why (from the log)
 - the situation series (💬 ➡️ 🛟 💪) next to the grammar quizzes (🧩 🔥 🇷🇺 → 🇺🇸): views and replies for each post. Report the numbers only; the teacher decides which series stay
 - the week's 🎓 post about the teacher's students, if one went out: its views and replies. If the next ones would need a fact that `strategy/students.json` doesn't give, say under "For you" what the teacher could tell (one line)
+- the work-and-life-in-the-US pillar and the posts with an image card (STRATEGY.md §4, market study of 2026-11-17): views and replies next to the rest of the week's posts. Numbers only; the teacher decides what stays
 - three concrete changes for the coming week
 
 Use only numbers from the files. Where there are none, say "no data yet". Never estimate. Apply the three changes to the posts you write in step 3.
@@ -46,6 +47,9 @@ For every date from max(tomorrow, 2026-11-09) through today + 12 days, write whi
   - The series marker plus two emoji at most. Never ✔️ or • as bullets in front of examples.
   - Posts of one series don't share a skeleton: word the fixed parts differently each time, and don't close every post with a question and 👇.
   - `python tools/qc.py` refuses a post that breaks the countable parts. Reword the post; never work around the count with look-alike characters.
+- **Pillar: English for work and life in the US** (STRATEGY.md §4, from 2026-11-17): in each week (Monday to Sunday) at least two posts are set at work or in daily life in the US, written in the existing series (☕️, ➡️, 🛟, 💪, a lesson): a call with a client, an email, small talk with colleagues, the bank, the doctor, the landlord, a parent meeting at school. They take the place of other topics, never extra posts. Hypothetical situations («Клиент звонит и…»), never a story about the teacher or a student, and only English you are sure Americans use there.
+- **Images on Threads** (from 2026-11-17): one or two posts a week carry an image card. The week's 🎓 post gets a `phrase` card for its English phrase, and one lesson or 👀 mistakes post gets a fitting card. Add the spec to `content/cards/<same name as the queue file>.json`, save to `media/<date>-<slug>.png`, run `python tools/render_cards.py` on it, open the image and check every word, then set `image` and `alt_text` (Russian, including the phrase and the examples). See `content/cards/2026-11-18_students.json`. On the days of the Instagram 🎓 carousel, the Threads post can reuse that carousel's phrase slide.
+- **Hooks** (from 2026-11-17): a lesson or tip opens with one short line of a real situation before the rule, never a dry rule first. An idiom opens with the funny literal picture, then what it really means.
 - **Idioms (🗽 Идиома дня):** `kind: "lesson"`, `topic: "idiom: <idiom>"`, id `YYYY-MM-DD-i-short-slug`, in the 16:00Z slot. Follow the posts published from 2026-11-15 on in `content/queue/2026-11-11_idioms.json`; the earlier ones were written before the style rule:
   - `🗽 Идиома дня: <idiom>`, then one line with the literal translation and one with what it really means. Word these two lines differently from post to post («Дословно получается…», «Слово в слово это…», «А на деле…», «А по смыслу…»), without quotation marks.
   - Two examples: the English sentence on one line, its Russian translation on the next. No ✔️ and no dash in front.
