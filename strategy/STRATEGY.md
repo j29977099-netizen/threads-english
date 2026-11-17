@@ -99,6 +99,17 @@ The 🗽 idiom and the «Как сказать по-английски» posts s
 
 The weekly report shows the pillar and the image posts next to the rest, and the teacher decides what stays.
 
+**What the learner study changed (2026-11-17).** A study of 972 learners and would-be learners on Threads (report v1, kept in `private/research`, not on GitHub) found that most who name their level are beginners (58% say A0 to A2), that grammar and vocabulary are the difficulties they name most, and that the rest is about how learning feels: fear or shame, quitting and starting again, not knowing how to study, school, years with little progress. Their own posts about accent, work, learning for joy and wanting a calm teacher drew the most likes; questions about grammar rules and motivation drew the fewest. The teacher asked for these findings in the posts. So, from 2026-11-17:
+
+- **The knowing-speaking gap.** At least two posts a week, in the existing series (🛟, ➡️, ☕️, a lesson), start from the moment the reader knows the words but can't get them out: the phone rings, a neighbour says «Hi, how are you?», a colleague asks something in a meeting. They give one or two short phrases that buy time or keep the talk going. They can be the same posts as the work-and-life-in-the-US pillar; never extra posts.
+- **Starting again.** About every second week, one practical-advice post speaks to people who start and quit: why it so often ends after a few days or weeks, and one small thing to do on a hard day. No blame, no «просто будь дисциплинированным», nothing about the teacher's own students or results.
+- **Grammar through a moment.** A grammar post or quiz opens with the real moment where the rule changes what you mean, never with the rule's name, and stays at A2 to B1.
+- **Their words.** Hooks can use the phrases learners use about themselves, such as «с нуля», «понимаю, но не могу сказать», «начинать и бросать» or «стесняюсь говорить». They are common phrases, never a quote from a real person's post.
+- **Readers outside Russia.** Kazakhstan stands out among the learners, and others write in Ukrainian or from abroad. Examples don't assume the reader lives in Russia or went to a Russian school, and reader forms stay neutral (§2).
+- **Unchanged:** two posts a day, the same series and mix, at most one promo a week, no invented stories. Free speaking practice drew the strongest response in the study, but a free club or level check is a business offer and waits for the teacher.
+
+The weekly report shows the knowing-speaking posts and the starting-again posts next to the rest, and the teacher decides what stays.
+
 ## 5. Daily rhythm
 
 All times Moscow time (UTC+3), the centre of gravity for a Russian-speaking audience spread across Russia, Europe, Israel, Kazakhstan, and the US.
