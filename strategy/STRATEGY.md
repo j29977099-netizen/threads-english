@@ -16,6 +16,8 @@ This file is the source of truth for everyone (human or agent) who plans, writes
 
 Never invent personal stories, students, results, testimonials, prices, discounts, or free trials. If a post needs one of these, it waits for the teacher to supply it. The same goes for vote counts and poll percentages: quote them only from `reports/`, never from expectation.
 
+**The teacher's students.** On 2026-11-16 the teacher told us who studies with them and why, and asked for posts about it. Everything they said is in `strategy/students.json`, group by group, and that file is the only source for such a post (§3, 🎓). A post says what is written there and nothing more: no names, ages, jobs, cities, levels, exam scores, results, quotes or lengths of time that are not in the file, and never one person's story, because the teacher spoke of groups of a few students. When a post would need more, it waits, and the weekly report asks the teacher under "For you".
+
 ## 2. Voice
 
 - A real teacher talking to real students: friendly, confident, practical, sometimes funny.
@@ -72,6 +74,7 @@ The teacher asked for writing that reads as typed by a person: fewer quotation m
 | 🛟 | Спасаем разговор | Something goes wrong mid-conversation: still lost after asking twice, a word forgotten, a «yes» said by accident. Open task. The next-day reply gives one move that fixes it, with 2–3 phrases. Pilot from 2026-11-13 |
 | 💪 | Английский с характером | One recognisable situation where you have to say no or hold a line: extra work, unwanted advice, a question that is too personal. Three ways to say it, marked «Мягко», «Твёрдо», «С условием», then an open question. No task, so no reveal. Pilot from 2026-11-13 |
 | ✏️ | Было → стало | A flat but correct answer and a livelier one, with what changed and why. A typical answer, never presented as a real student's. At most one a week |
+| 🎓 | Мои ученики | Who studies with the teacher and why, taken from `strategy/students.json` and nowhere else (§1). One group per post, or several at once when the post is about how different the reasons are. Two or three lines about the group, then something for the reader that needs no new fact: an English phrase that fits, with an example, or a thought about learning, and an open question. Always several students, never one person; no names, no quotes, no promised results. It is not a promo: no invitation to write and nothing about lessons for sale. One a week in the evening slot. Added 2026-11-16 at the teacher's request |
 | ✅ | Разбор | Answer reveal the next day, posted as a reply right under its quiz |
 | 👋 | О занятиях | Soft promotion of private lessons |
 
@@ -81,7 +84,7 @@ The teacher asked for writing that reads as typed by a person: fewer quotation m
 - 25% vocabulary and American English
 - 20% grammar and common mistakes
 - 10% practical learning advice
-- 10% personal brand and student acquisition (1–2 posts per week, never two days in a row)
+- 10% personal brand and student acquisition (1–2 posts per week, never two days in a row): the week's 🎓 post about the teacher's students and at most one 👋 promo
 
 The 🗽 idiom and the «Как сказать по-английски» posts share the one evening slot with the lessons (§5) and don't count toward this mix.
 
@@ -95,7 +98,7 @@ All times Moscow time (UTC+3), the centre of gravity for a Russian-speaking audi
 |---|---|---|---|
 | Post 1 | 09:00 | 06:00 | Engagement: quiz, challenge, translation, a situation (§3: 💬 ➡️ 🛟), question to the audience |
 | Reveal | 09:15 next day | 06:15 | ✅ reveal of yesterday's morning quiz, after a full day of comments |
-| Post 2 | 19:00 | 16:00 | The one evening post. Over a week: about three 🗽 idioms, about two «Как сказать по-английски», and about two of lesson, mistakes card, tip, 💪 or promo |
+| Post 2 | 19:00 | 16:00 | The one evening post. Over a week: one 🎓 about the teacher's students, about three 🗽 idioms, one or two «Как сказать по-английски», and the rest from 💪, lesson, mistakes card, tip or promo |
 | Reveal | 19:15 next day | 16:15 | ✅ reveal of an evening quiz or mini-task, if there was one |
 
 **Publishing route.** Posts go out through Zernio, which needs no Meta developer account. Each post is handed to Zernio up to 30 hours ahead with its exact time, so it publishes on the minute. Zernio cannot post polls, so quizzes collect answers in the comments. A reveal is replied under its quiz through Zernio's inbox, which can't schedule, so the "Threads answer reveals" cloud routine posts it at 06:15 and 16:15 UTC; GitHub runs post it only if the routine hasn't within 45 minutes. If a Meta developer app is set up later, setting the repository variable `PUBLISH_BACKEND=threads` brings back native polls and reveals as replies.
@@ -137,12 +140,13 @@ Answer reveals are always replies to their own quiz (`reply_to`), so the explana
 8. Text ≤ 500 characters, at most 5 links, one topic tag (and poll options ≤ 25 characters on the threads route).
 9. There is a clear engagement prompt where appropriate.
 10. The reveal answers the same question, with the same options and letters, as its quiz.
+11. A post about the teacher's students says nothing that `strategy/students.json` doesn't (§1): no added detail, number or quote, and no single person's story.
 
-`tools/qc.py` checks 6–8 and 10 mechanically, and the countable part of 4 (quotation marks, long dashes, colons, periods). Items 1–5 and 9 need judgement.
+`tools/qc.py` checks 6–8 and 10 mechanically, the countable part of 4 (quotation marks, long dashes, colons, periods) and the countable part of 11 (the group named in `topic`, numbers, quotation marks, one student instead of several). Items 1–5 and 9 need judgement, and so does the rest of 11: read a 🎓 post against the file, line by line.
 
 ## 9. Escalate to the teacher (do not answer)
 
-Questions about prices, schedules, refunds, or personal details; complaints; anything political, religious, or about sanctions and payments; harassment; press or partnership offers; anything the teacher would want to see personally.
+Questions about prices, schedules, refunds, or personal details (the teacher's or their students'); complaints; anything political, religious, or about sanctions and payments; harassment; press or partnership offers; anything the teacher would want to see personally.
 
 ## 10. Weekly metrics
 

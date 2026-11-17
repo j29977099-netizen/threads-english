@@ -15,6 +15,7 @@ Today means the current UTC date (`date -u +%F`).
 ## 1. Read
 
 - `strategy/STRATEGY.md`, all of it. It is the source of truth for voice, series, mix, rhythm, the QC list and what to escalate.
+- `strategy/students.json`: all that the teacher has told about their own students. A post about them uses this file and nothing else (see **Students** in step 3)
 - `strategy/calendar-30d.json`
 - every file in `content/queue/` and `content/cards/`
 - `log/publications.jsonl`, to see what went out, what failed and what was skipped
@@ -29,6 +30,7 @@ If the newest `reports/insights-YYYY-MM-DD.json` has no matching `reports/weekly
 - best and worst topics and formats
 - anything that failed or was skipped, and why (from the log)
 - the situation series (💬 ➡️ 🛟 💪) next to the grammar quizzes (🧩 🔥 🇷🇺 → 🇺🇸): views and replies for each post. Report the numbers only; the teacher decides which series stay
+- the week's 🎓 post about the teacher's students, if one went out: its views and replies. If the next ones would need a fact that `strategy/students.json` doesn't give, say under "For you" what the teacher could tell (one line)
 - three concrete changes for the coming week
 
 Use only numbers from the files. Where there are none, say "no data yet". Never estimate. Apply the three changes to the posts you write in step 3.
@@ -37,7 +39,7 @@ Use only numbers from the files. Where there are none, say "no data yet". Never 
 
 For every date from max(tomorrow, 2026-11-09) through today + 12 days, write whichever of that day's two posts the queue lacks. A day has two posts and no others: the morning post at 06:00Z (p1) and the evening post at 16:00Z (p2). Whatever is queued at 06:00Z is that day's morning post and whatever is queued at 16:00Z is its evening post, whichever series or id it has; an answer posted as a reply is neither. A date that already has its morning post still needs its evening post, and the other way round. Never add a third post to a date: the teacher asked for fewer posts on 2026-11-12, after Threads removed one of the account's replies as spam (STRATEGY.md §5). Put them in one new file, `content/queue/<first date>_auto.json`, in the same format as the existing queue files.
 
-- **Slots:** p1 at 06:00Z (engagement), following that date's calendar entry and STRATEGY.md's mix. p2 at 16:00Z is the one evening post, and it rotates: over a week about three idioms (see **Idioms**), about two «Как сказать по-английски» posts (see **Как сказать**), and about two from the calendar's p2 entries (a lesson, a mistakes card, a tip, 💪, at most one promo). Never the same series on two evenings in a row. Nothing goes out at 09:30Z or 18:00Z any more.
+- **Slots:** p1 at 06:00Z (engagement), following that date's calendar entry and STRATEGY.md's mix. p2 at 16:00Z is the one evening post, and it rotates: over a week one 🎓 post about the teacher's students (see **Students**), about three idioms (see **Idioms**), one or two «Как сказать по-английски» posts (see **Как сказать**), and the rest from the calendar's p2 entries (💪, a lesson, a mistakes card, a tip, at most one promo). Never the same series on two evenings in a row. Nothing goes out at 09:30Z or 18:00Z any more.
 - **How the text looks:** STRATEGY.md §2 has the rule and the numbers behind it; read it before writing anything.
   - A line break ends the thought, so most lines have no period, and the last line never has one.
   - At most one pair of quotation marks and one long dash in a post, usually none. English needs no quotation marks. Two colons at most, no semicolons.
@@ -69,6 +71,13 @@ For every date from max(tomorrow, 2026-11-09) through today + 12 days, write whi
   - One recognisable everyday situation per post: work, friends, a shop, texting. It is hypothetical («Коллега просит…»), never a story about the teacher or a student.
   - What a phrase usually means differs between people. Write «часто» or «чаще всего», never «всегда», and only what you are sure Americans say and mean. If you aren't sure, choose another situation.
   - `topic` starts with the series: "what did they mean: …", "what next: …", "conversation rescue: …", "english with a backbone: …", "before and after: …".
+- **Students (🎓 Мои ученики; STRATEGY.md §1 and §3):** one post a week, added 2026-11-16 at the teacher's request. `kind: "lesson"`, in the 16:00Z slot, id `YYYY-MM-DD-p2-students-<group>`. Posts are already queued through 2026-12-17; write one for each later week whose evenings have none.
+  - `topic` is exactly `students: <group>`, with a key from `strategy/students.json`, or `students: all` for a post about several groups at once. Take the groups in turn, and never the same group twice within four weeks.
+  - Say about the students only what the file gives for that group, in your own words. Add nothing: no name, age, job, city, level, exam score, result, quote or length of time that is not there. Always several students («несколько моих учеников», «кто-то из учеников»), never one person's story, and nothing about all of the teacher's students at once («все», «никто», «каждый»).
+  - Follow the posts in `content/queue/2026-11-18_students.json`: the marker and a title, two or three lines about the group, then something for the reader that needs no new fact: one English phrase that fits, what it means and an example sentence that is plainly not about a student, or a thought about learning. Then an open 🗣 question. No task, so no reveal.
+  - It is not a promo: no invitation to write, and nothing about lessons, prices or what the reader would achieve. Never on the evening before or after the promo.
+  - Don't repeat a phrase or an angle from an earlier 🎓 post. When a post would need a fact the file doesn't give, don't write it: give that evening to another series and say so under "For you" in the weekly report.
+  - `python tools/qc.py` refuses a post that speaks of the teacher's students without this `topic`, that carries a number the group's facts don't give or any quotation marks, or that speaks of one student. The rest is yours to check: read the finished post against the file, line by line.
 - **Reveals:** every `quiz` and `challenge` gets a reveal: `kind: "reveal"` with `reply_to` set to the quiz id. It goes out the next day at 06:15Z for a morning quiz, or 16:15Z for an evening one.
 - **Publishing route (Zernio):** no `poll` field.
   - Quizzes list the options in the text as `A) … B) … C) … D) …`, ask for the letter in the comments, and set `answer` to the letter.
@@ -84,7 +93,7 @@ For every date from max(tomorrow, 2026-11-09) through today + 12 days, write whi
 - **Direct messages:** only the week's one promo post mentions writing to the teacher, once and in passing («Если думаешь про занятия, напиши мне»). No other post invites anyone to write (STRATEGY.md §7).
 - **Examples:** don't reuse an example sentence that already appeared in the last 30 days.
 - **No name:** posts never name the teacher. Use the first person or the brand «Английский по-американски».
-- **Facts only:** never invent stories, students, results, testimonials, prices, discounts, free trials or vote counts. If a calendar topic needs a fact about the teacher that STRATEGY.md doesn't give, replace it with another topic from the same series.
+- **Facts only:** never invent stories, students, results, testimonials, prices, discounts, free trials or vote counts. If a calendar topic needs a fact about the teacher that STRATEGY.md doesn't give, replace it with another topic from the same series. What the teacher has told about their students is in `strategy/students.json`; only a 🎓 post uses it (see **Students**), and no other post speaks of the teacher's students.
 - **English:** it must be correct, natural American English, and each quiz has exactly one defensible answer. If you are not sure an item is correct, choose a different item.
 - **No repeats:** don't reuse a topic from the last 30 days of the queue or the log.
 - **Graphics:** when the calendar entry has `"graphic": true` and a template fits (`quiz`, `versus`, `mistakes`):
@@ -94,7 +103,7 @@ For every date from max(tomorrow, 2026-11-09) through today + 12 days, write whi
   4. Set `image` and `alt_text` on the post.
 
   If no template fits, write a text post.
-- **Calendar:** if it ends within 14 days of today, add the next 30 days to `strategy/calendar-30d.json`, with the same structure, series and mix, and with the situation series planned in at the rate above.
+- **Calendar:** if it ends within 14 days of today, add the next 30 days to `strategy/calendar-30d.json`, with the same structure, series and mix, with the situation series planned in at the rate above and one 🎓 post a week in a p2 entry.
 
 Never edit or delete a post dated today or earlier, or any post that appears in the log. Posts up to 30 hours ahead may already be scheduled in Zernio: editing one is fine (the publisher pushes the change), but removing it from the queue does not stop it.
 
@@ -135,4 +144,4 @@ Commit only these paths:
 
 Use a message such as `content: queue 2026-11-14..2026-11-21`, then run `git push origin HEAD:main`. If main moved, run `git pull --rebase origin main` and push again.
 
-Never change `tools/`, `tests/`, `.github/`, `README.md`, `strategy/STRATEGY.md` or this file, and never touch the Threads or Instagram accounts. Anything that needs the teacher (see STRATEGY.md §9) goes in the weekly report under "For you", not in a post.
+Never change `tools/`, `tests/`, `.github/`, `README.md`, `strategy/STRATEGY.md`, `strategy/students.json` or this file, and never touch the Threads or Instagram accounts. Anything that needs the teacher (see STRATEGY.md §9) goes in the weekly report under "For you", not in a post.

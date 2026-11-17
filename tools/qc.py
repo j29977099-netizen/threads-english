@@ -15,6 +15,10 @@ comments (kind "reply"). On both backends a reveal is a reply under its quiz.
 style_problems() counts the marks that make a text read as generated (quotation
 marks, long dashes, colons, a period on every line). The queue check applies it
 to posts from STYLE_FROM on; tools/comments.py applies it to every reply.
+
+student_problems() keeps a post about the teacher's students inside what the
+teacher has told (strategy/students.json). It is part of check_post(), so the
+publisher holds such a post back too: nothing made up about real people goes out.
 """
 import argparse
 import glob
@@ -63,6 +67,17 @@ MAX_PERIOD_LINES = 0.25     # share of a post's lines that may end with a period
 MAX_REPLY_EMOJI = 2
 EMOJI_RE = re.compile("[\U0001F000-\U0001FAFF☀-➿⭐⭕]")
 FORM_LETTER_RE = re.compile(r"\s*(здравствуйте|добрый\s+(день|вечер)|доброе\s+утро|приветствую)", re.I)
+
+# Posts about the teacher's own students (STRATEGY.md §1 and §3, 🎓 Мои ученики). The facts and the
+# group keys live in strategy/students.json and nowhere else. A post is about them when its topic
+# says so, it carries the series marker, or it speaks of «мои ученики» in any case form.
+STUDENTS_PATH = os.path.join(ROOT, "strategy", "students.json")
+STUDENTS_ALL = "all"        # topic "students: all": a post that speaks of several groups at once
+STUDENT_TOPIC_RE = re.compile(r"\s*students:\s*(.*?)\s*$", re.I)
+MY_STUDENTS_RE = re.compile(r"🎓|\bмо(?:и|их|им|ими|й|его|ему|ём|ем|я|ей|ю)\s+учени[кц]", re.I)
+# Singular forms only: «учеников», «учениками» and «ученицы» don't match.
+ONE_STUDENT_RE = re.compile(r"\bученик(?:а|у|ом|е)?\b|\bучениц(?:а|е|у|ей|ой)\b"
+                            r"|\bстудент(?:а|у|ом|е|ка|ке|ку|кой)?\b", re.I)
 
 
 def parse_time(value):
@@ -152,6 +167,7 @@ def check_instagram_post(post, root=ROOT):
             errors.append("%s is %dx%d; Instagram feed needs 4:5 up to 1.91:1" % (image, width, height))
     if len(sizes) > 1:
         errors.append("all slides of a carousel must be the same size")
+    errors.extend(student_problems(post))
     return errors
 
 
@@ -231,7 +247,63 @@ def check_post(post, root=ROOT, backend=None, platform="threads"):
             errors.append("the %s backend cannot reply to comments" % backend)
         elif not post.get("reply_to_media_id"):
             errors.append("a reply to a comment needs reply_to_media_id")
+    errors.extend(student_problems(post))
     return errors
+
+
+def load_students(path=STUDENTS_PATH):
+    """Group key -> {"facts": [...]}: all that the teacher has told about their students."""
+    with open(path, encoding="utf-8") as fh:
+        return json.load(fh)["groups"]
+
+
+def student_problems(post, groups=None, path=STUDENTS_PATH):
+    """Where a post about the teacher's students goes beyond what the teacher has told.
+
+    The countable part only: the post names its group in `topic`, carries no number that the
+    group's facts don't give, no quotation marks (a quote would be invented speech) and speaks
+    of several students, never of one. Whether the words add a detail still takes a reader
+    (STRATEGY.md §8). A post that doesn't speak of the students is left alone.
+    """
+    alt = post.get("alt_text") or ""
+    text = post.get("text") or ""
+    blob = "\n".join([text] + (alt if isinstance(alt, list) else [alt]))
+    tagged = STUDENT_TOPIC_RE.match(post.get("topic") or "")
+    if not tagged and not MY_STUDENTS_RE.search(blob):
+        return []
+    if groups is None:
+        try:
+            groups = load_students(path)
+        except (OSError, ValueError, KeyError) as exc:
+            return ["strategy/students.json could not be read (%s), and it is the only source for a post "
+                    "about the teacher's students" % exc.__class__.__name__]
+
+    problems = []
+    known = sorted(groups)
+    key = tagged.group(1).lower() if tagged else None
+    facts = None
+    if key is None:
+        problems.append('speaks of the teacher\'s students, so `topic` must be "students: <group>", with a '
+                        'group from strategy/students.json (%s) or "%s"' % (", ".join(known), STUDENTS_ALL))
+    elif key == STUDENTS_ALL:
+        facts = [fact for name in known for fact in groups[name]["facts"]]
+    elif key in groups:
+        facts = groups[key]["facts"]
+    else:
+        problems.append('unknown group %r in `topic`: strategy/students.json has %s (or "%s")'
+                        % (key, ", ".join(known), STUDENTS_ALL))
+    if facts is not None:
+        told = set(re.findall(r"\d+", " ".join(facts)))
+        for number in sorted(set(re.findall(r"\d+", blob)) - told):
+            problems.append("the number %s is not among the teacher's facts for %s (strategy/students.json)"
+                            % (number, key))
+    if re.search('[«“„"]', text):
+        problems.append("quotation marks in a post about students: a quote would be invented speech")
+    one = ONE_STUDENT_RE.search(blob)
+    if one:
+        problems.append("tells about one student («%s»): the teacher told us about groups, so write about "
+                        "several students, never one person's story" % one.group(0))
+    return problems
 
 
 def style_problems(text, kind="post"):

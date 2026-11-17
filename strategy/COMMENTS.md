@@ -70,7 +70,7 @@ Escalate anything in STRATEGY.md §9:
 
 - prices, schedules or booking details;
 - refunds;
-- personal questions about the teacher;
+- personal questions about the teacher, and any question about the teacher's students: a 🎓 post already says all that may be said about them (`strategy/students.json`), so a reply never adds a detail (reason `personal`);
 - complaints;
 - harassment;
 - politics, religion, sanctions or payments;

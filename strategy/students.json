@@ -1,0 +1,31 @@
+{
+  "note": "What the teacher has told us about their own students (2026-11-16). This file is the only source for posts about students (🎓 Мои ученики, STRATEGY.md §3). A post may say what stands under `facts` for its group and nothing more: no names, ages, jobs, cities, levels, exam scores, results, quotes or lengths of time that are not here. The teacher spoke of groups (a few students), so a post never tells one person's story. Only the teacher adds to this file; a content run never does. A post names its group in `topic`: `students: <key>`, or `students: all` when it speaks of several groups at once. `tools/qc.py` reads the keys and the numbers from here.",
+  "groups": {
+    "usa": {
+      "facts": [
+        "A few students live in the USA: they relocated there.",
+        "They need English to live a normal life there and to succeed in their business."
+      ]
+    },
+    "dubai": {
+      "facts": [
+        "A few students relocated to Dubai.",
+        "They and the teacher have been working together for about 5 years.",
+        "They learn English because they love it, for the pleasure of it, not because they need it."
+      ]
+    },
+    "russia": {
+      "facts": [
+        "A few students are in Russia.",
+        "What interests them most is having conversations.",
+        "They look at English lessons as a kind of therapy."
+      ]
+    },
+    "keep-level": {
+      "facts": [
+        "A few students already have a fairly high level.",
+        "They keep studying because they understand that if they stop, the skill fades and their level drops."
+      ]
+    }
+  }
+}
