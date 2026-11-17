@@ -1,0 +1,91 @@
+[
+ {
+  "template": "list",
+  "out": "media/ig/2026-12-02-use-it-or-lose-it-1.jpg",
+  "label": "МОИ УЧЕНИКИ",
+  "title": "Уровень высокий,\nа они всё равно учат",
+  "items": [
+   "У нескольких учеников уровень уже высокий",
+   "Они всё равно продолжают заниматься",
+   "Знают, что стоит бросить, и язык начнёт уходить"
+  ],
+  "cta": "Листай → как это по-английски"
+ },
+ {
+  "template": "phrase",
+  "out": "media/ig/2026-12-02-use-it-or-lose-it-2.jpg",
+  "label": "КАК ЭТО ПО-АНГЛИЙСКИ",
+  "phrase": "Use it or lose it",
+  "meaning": "пользуйся, или потеряешь",
+  "examples": [
+   {
+    "en": "You have to keep speaking English. Use it or lose it.",
+    "ru": "Надо продолжать говорить, иначе всё забудется."
+   },
+   {
+    "en": "I don't play much anymore. Use it or lose it, right?",
+    "ru": "Я теперь мало играю. Не пользуешься, и навык уходит, да?"
+   }
+  ],
+  "note": "Так говорят про любой навык, не только про язык."
+ },
+ {
+  "template": "list",
+  "out": "media/ig/2026-12-10-for-the-fun-of-it-1.jpg",
+  "label": "МОИ УЧЕНИКИ",
+  "title": "Английский просто\nдля удовольствия",
+  "items": [
+   "С несколькими учениками мы вместе уже около пяти лет",
+   "Они переехали в Дубай",
+   "Учат не потому, что надо,\nа потому, что любят"
+  ],
+  "cta": "Листай → как это по-английски"
+ },
+ {
+  "template": "phrase",
+  "out": "media/ig/2026-12-10-for-the-fun-of-it-2.jpg",
+  "label": "КАК ЭТО ПО-АНГЛИЙСКИ",
+  "phrase": "for the fun of it",
+  "meaning": "просто ради удовольствия",
+  "examples": [
+   {
+    "en": "I'm not learning Spanish for work. I'm doing it for the fun of it.",
+    "ru": "Я учу испанский не для работы, а просто для удовольствия."
+   },
+   {
+    "en": "We took a dance class just for the fun of it.",
+    "ru": "Мы пошли на танцы просто ради удовольствия."
+   }
+  ],
+  "note": "Короче и разговорнее: just for fun."
+ },
+ {
+  "template": "list",
+  "out": "media/ig/2026-12-17-my-therapy-1.jpg",
+  "label": "МОИ УЧЕНИКИ",
+  "title": "Английский\nкак терапия",
+  "items": [
+   "Некоторым ученикам\nиз России интереснее всего\nпросто разговаривать",
+   "К занятиям они относятся\nкак к своего рода терапии"
+  ],
+  "cta": "Листай → как это по-английски"
+ },
+ {
+  "template": "phrase",
+  "out": "media/ig/2026-12-17-my-therapy-2.jpg",
+  "label": "КАК ЭТО ПО-АНГЛИЙСКИ",
+  "phrase": "It's my therapy",
+  "meaning": "это моя терапия",
+  "examples": [
+   {
+    "en": "Running is my therapy.",
+    "ru": "Бег для меня как терапия."
+   },
+   {
+    "en": "Cooking is my therapy.",
+    "ru": "Готовка мне вместо терапии."
+   }
+  ],
+  "note": "Подставь своё занятие, и фраза готова."
+ }
+]
