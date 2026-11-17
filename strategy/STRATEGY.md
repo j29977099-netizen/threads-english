@@ -16,7 +16,7 @@ This file is the source of truth for everyone (human or agent) who plans, writes
 
 Never invent personal stories, students, results, testimonials, prices, discounts, or free trials. If a post needs one of these, it waits for the teacher to supply it. The same goes for vote counts and poll percentages: quote them only from `reports/`, never from expectation.
 
-**The teacher's students.** On 2026-11-16 the teacher told us who studies with them and why, and asked for posts about it. Everything they said is in `strategy/students.json`, group by group, and that file is the only source for such a post (§3, 🎓). A post says what is written there and nothing more: no names, ages, jobs, cities, levels, exam scores, results, quotes or lengths of time that are not in the file, and never one person's story, because the teacher spoke of groups of a few students. When a post would need more, it waits, and the weekly report asks the teacher under "For you".
+**The teacher's students.** On 2026-11-16 the teacher told us who studies with them and why, and asked for posts about it. Everything they said is in `strategy/students.json`, group by group, with what holds for most of the students under `all`, and that file is the only source for such a post (§3, 🎓). A post says what is written there and nothing more: no names, ages, jobs, cities, levels, exam scores, results, quotes or lengths of time that are not in the file, and never one person's story, because the teacher spoke of groups of a few students. When a post would need more, it waits, and the weekly report asks the teacher under "For you".
 
 ## 2. Voice
 

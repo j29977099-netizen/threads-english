@@ -1,5 +1,10 @@
 {
-  "note": "What the teacher has told us about their own students (2026-11-16). This file is the only source for posts about students (🎓 Мои ученики, STRATEGY.md §3). A post may say what stands under `facts` for its group and nothing more: no names, ages, jobs, cities, levels, exam scores, results, quotes or lengths of time that are not here. The teacher spoke of groups (a few students), so a post never tells one person's story. Only the teacher adds to this file; a content run never does. A post names its group in `topic`: `students: <key>`, or `students: all` when it speaks of several groups at once. `tools/qc.py` reads the keys and the numbers from here.",
+  "note": "What the teacher has told us about their own students (2026-11-16). This file is the only source for posts about students (🎓 Мои ученики, STRATEGY.md §3). A post may say what stands under `facts` for its group and nothing more: no names, ages, jobs, cities, levels, exam scores, results, quotes or lengths of time that are not here. The teacher spoke of groups (a few students), so a post never tells one person's story. Only the teacher adds to this file; a content run never does. A post names its group in `topic`: `students: <key>`, or `students: all` when it speaks of several groups at once. `tools/qc.py` reads the keys and the numbers from here. `all` holds what the teacher said about their students as a whole (also 2026-11-16): any post about students may say it, in the teacher's own measure (most of the students), never about one group and never as all of them.",
+  "all": {
+    "facts": [
+      "Most of the teacher's students have been with the teacher for over 4 years."
+    ]
+  },
   "groups": {
     "usa": {
       "facts": [

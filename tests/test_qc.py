@@ -72,9 +72,13 @@ class StyleTest(unittest.TestCase):
         self.assertEqual(check_queue([lesson(TYPED, STYLE_FROM)]), [])
 
 
-GROUPS = {
-    "usa": {"facts": ["A few students relocated to the USA.", "They need English to live there and for their business."]},
-    "dubai": {"facts": ["A few students relocated to Dubai.", "Together with the teacher for about 5 years."]},
+STUDENTS = {
+    "all": {"facts": ["Most students have been with the teacher for over 4 years."]},
+    "groups": {
+        "usa": {"facts": ["A few students relocated to the USA.",
+                          "They need English to live there and for their business."]},
+        "dubai": {"facts": ["A few students relocated to Dubai.", "Together with the teacher for about 5 years."]},
+    },
 }
 
 DUBAI = """🎓 Учить язык just for the fun of it
@@ -97,19 +101,19 @@ class StudentPostTest(unittest.TestCase):
     """A post about the teacher's students may say only what the teacher has told."""
 
     def problems(self, text, topic="students: dubai"):
-        return " | ".join(student_problems(student_post(text, topic), GROUPS))
+        return " | ".join(student_problems(student_post(text, topic), STUDENTS))
 
     def test_a_post_inside_the_facts_passes(self):
-        self.assertEqual(student_problems(student_post(DUBAI), GROUPS), [])
-        self.assertEqual(student_problems(student_post(DUBAI.replace("пяти", "5")), GROUPS), [])
+        self.assertEqual(student_problems(student_post(DUBAI), STUDENTS), [])
+        self.assertEqual(student_problems(student_post(DUBAI.replace("пяти", "5")), STUDENTS), [])
 
     def test_a_post_that_is_not_about_students_is_left_alone(self):
         plain = student_post("📌 Выражение дня: run late\n\nI've lived here for 3 years", topic="run late")
-        self.assertEqual(student_problems(plain, GROUPS), [])
+        self.assertEqual(student_problems(plain, STUDENTS), [])
         # ... and needs no facts file at all
         self.assertEqual(student_problems(plain, path=os.path.join(ROOT, "no-such-file.json")), [])
         school = student_post("pupil - ученик в школе\nstudent - студент в колледже", topic="pupil vs student")
-        self.assertEqual(student_problems(school, GROUPS), [])
+        self.assertEqual(student_problems(school, STUDENTS), [])
 
     def test_speaking_of_my_students_needs_the_students_topic(self):
         for text in ("Мои ученики часто путают say и tell", "У моих учеников причины разные", DUBAI):
@@ -124,6 +128,16 @@ class StudentPostTest(unittest.TestCase):
         self.assertIn("number 3", self.problems(DUBAI + "\nЗа 3 месяца заговорили"))
         self.assertIn("number 5", self.problems(DUBAI.replace("пяти", "5"), topic="students: usa"))
         self.assertIn("number 2", self.problems(DUBAI + "\nУровень уже B2", topic="students: all"))
+
+    def test_what_the_teacher_said_about_most_students_fits_any_post(self):
+        most = "\nБольшинство со мной уже больше 4 лет"
+        for topic in ("students: dubai", "students: usa", "students: all"):
+            self.assertEqual(self.problems(DUBAI + most, topic=topic), "", topic)
+        self.assertIn("number 6", self.problems(DUBAI + most.replace("4", "6"), topic="students: all"))
+        # a facts file that says nothing about the students as a whole still works
+        only_groups = {"groups": STUDENTS["groups"]}
+        self.assertEqual(student_problems(student_post(DUBAI), only_groups), [])
+        self.assertTrue(student_problems(student_post(DUBAI + most), only_groups))
 
     def test_a_quote_is_refused(self):
         self.assertIn("quotation marks", self.problems(DUBAI + "\nГоворят: «это мой отдых»"))
@@ -148,11 +162,14 @@ class StudentPostTest(unittest.TestCase):
         self.assertTrue(any("one student" in e for e in check_queue([made_up])))
 
     def test_the_facts_file_is_well_formed(self):
-        groups = load_students()
+        students = load_students()
+        groups = dict(students["groups"])
         self.assertTrue(groups)
-        for key, group in groups.items():
+        for key in groups:
             self.assertRegex(key, r"^[a-z][a-z-]*$")
             self.assertNotEqual(key, "all")
+        groups["all"] = students.get("all", {"facts": ["-"]})
+        for key, group in groups.items():
             self.assertTrue(group["facts"] and all(isinstance(f, str) and f.strip() for f in group["facts"]), key)
         with open(STUDENTS_PATH, encoding="utf-8") as fh:
             self.assertIn("note", json.load(fh))

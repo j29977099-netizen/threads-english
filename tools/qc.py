@@ -72,7 +72,8 @@ FORM_LETTER_RE = re.compile(r"\s*(здравствуйте|добрый\s+(де�
 # group keys live in strategy/students.json and nowhere else. A post is about them when its topic
 # says so, it carries the series marker, or it speaks of «мои ученики» in any case form.
 STUDENTS_PATH = os.path.join(ROOT, "strategy", "students.json")
-STUDENTS_ALL = "all"        # topic "students: all": a post that speaks of several groups at once
+STUDENTS_ALL = "all"        # topic "students: all" (several groups at once), and the file's key for
+#                             what the teacher said about their students as a whole
 STUDENT_TOPIC_RE = re.compile(r"\s*students:\s*(.*?)\s*$", re.I)
 MY_STUDENTS_RE = re.compile(r"🎓|\bмо(?:и|их|им|ими|й|его|ему|ём|ем|я|ей|ю)\s+учени[кц]", re.I)
 # Singular forms only: «учеников», «учениками» and «ученицы» don't match.
@@ -252,18 +253,25 @@ def check_post(post, root=ROOT, backend=None, platform="threads"):
 
 
 def load_students(path=STUDENTS_PATH):
-    """Group key -> {"facts": [...]}: all that the teacher has told about their students."""
+    """All that the teacher has told about their students.
+
+    {"groups": {key: {"facts": [...]}}, "all": {"facts": [...]}}: `groups` is what holds for each
+    group, and `all` (it may be missing) is what holds for the students as a whole.
+    """
     with open(path, encoding="utf-8") as fh:
-        return json.load(fh)["groups"]
+        students = json.load(fh)
+    students["groups"]          # a file without groups is broken: the caller reports the KeyError
+    return students
 
 
-def student_problems(post, groups=None, path=STUDENTS_PATH):
+def student_problems(post, students=None, path=STUDENTS_PATH):
     """Where a post about the teacher's students goes beyond what the teacher has told.
 
     The countable part only: the post names its group in `topic`, carries no number that the
-    group's facts don't give, no quotation marks (a quote would be invented speech) and speaks
-    of several students, never of one. Whether the words add a detail still takes a reader
-    (STRATEGY.md §8). A post that doesn't speak of the students is left alone.
+    facts don't give (the group's own, and those about the students as a whole), no quotation
+    marks (a quote would be invented speech) and speaks of several students, never of one.
+    Whether the words add a detail still takes a reader (STRATEGY.md §8). A post that doesn't
+    speak of the students is left alone.
     """
     alt = post.get("alt_text") or ""
     text = post.get("text") or ""
@@ -271,13 +279,15 @@ def student_problems(post, groups=None, path=STUDENTS_PATH):
     tagged = STUDENT_TOPIC_RE.match(post.get("topic") or "")
     if not tagged and not MY_STUDENTS_RE.search(blob):
         return []
-    if groups is None:
+    if students is None:
         try:
-            groups = load_students(path)
+            students = load_students(path)
         except (OSError, ValueError, KeyError) as exc:
             return ["strategy/students.json could not be read (%s), and it is the only source for a post "
                     "about the teacher's students" % exc.__class__.__name__]
 
+    groups = students["groups"]
+    shared = (students.get(STUDENTS_ALL) or {}).get("facts", [])
     problems = []
     known = sorted(groups)
     key = tagged.group(1).lower() if tagged else None
@@ -286,9 +296,9 @@ def student_problems(post, groups=None, path=STUDENTS_PATH):
         problems.append('speaks of the teacher\'s students, so `topic` must be "students: <group>", with a '
                         'group from strategy/students.json (%s) or "%s"' % (", ".join(known), STUDENTS_ALL))
     elif key == STUDENTS_ALL:
-        facts = [fact for name in known for fact in groups[name]["facts"]]
+        facts = shared + [fact for name in known for fact in groups[name]["facts"]]
     elif key in groups:
-        facts = groups[key]["facts"]
+        facts = shared + groups[key]["facts"]
     else:
         problems.append('unknown group %r in `topic`: strategy/students.json has %s (or "%s")'
                         % (key, ", ".join(known), STUDENTS_ALL))

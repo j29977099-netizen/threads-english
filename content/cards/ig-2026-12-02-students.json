@@ -87,5 +87,34 @@
    }
   ],
   "note": "Подставь своё занятие, и фраза готова."
+ },
+ {
+  "template": "list",
+  "out": "media/ig/2026-12-23-been-with-me-1.jpg",
+  "label": "МОИ УЧЕНИКИ",
+  "title": "Больше четырёх лет\nвместе",
+  "items": [
+   "Большинство моих\nучеников со мной уже\nбольше четырёх лет",
+   "По-английски про это\nговорят просто be with"
+  ],
+  "cta": "Листай → как это по-английски"
+ },
+ {
+  "template": "phrase",
+  "out": "media/ig/2026-12-23-been-with-me-2.jpg",
+  "label": "КАК ЭТО ПО-АНГЛИЙСКИ",
+  "phrase": "be with",
+  "meaning": "быть чьим-то клиентом",
+  "examples": [
+   {
+    "en": "Most of my students have been with me for over four years.",
+    "ru": "Большинство учеников\nсо мной уже больше четырёх лет."
+   },
+   {
+    "en": "I've been with the same barber for ten years.",
+    "ru": "Я хожу к одному барберу уже десять лет."
+   }
+  ],
+  "note": "И про работу: I've been with them for years."
  }
 ]
