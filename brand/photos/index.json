@@ -2,22 +2,215 @@
   {
     "file": "brand/photos/cafe-rain.jpg",
     "scene": "Two friends talking at a cozy café on a rainy evening: a man on the left, a woman on the right, both smiling, coffee on the table",
-    "tags": ["café", "friends", "evening", "rain", "invitation", "plans", "small talk", "date"],
+    "tags": [
+      "café",
+      "friends",
+      "evening",
+      "rain",
+      "invitation",
+      "plans",
+      "small talk",
+      "date"
+    ],
+    "people": true,
     "faces": "left and right, upper middle",
     "source": "Canva AI image, generated 2026-11-17"
   },
   {
     "file": "brand/photos/dinner-pasta.jpg",
     "scene": "Dinner at home: the host in an apron offers more pasta, the guest on the left politely declines with a raised hand, candles and bread on the table",
-    "tags": ["dinner", "home", "food", "offer", "polite no", "guest", "host", "friends"],
+    "tags": [
+      "dinner",
+      "home",
+      "food",
+      "offer",
+      "polite no",
+      "guest",
+      "host",
+      "friends"
+    ],
+    "people": true,
     "faces": "left middle and right top",
     "source": "Canva AI image, generated 2026-11-17"
   },
   {
     "file": "brand/photos/office-coffee.jpg",
     "scene": "Two coworkers chatting by the coffee machine in a bright modern office: a man on the left, a woman on the right",
-    "tags": ["office", "work", "coworkers", "small talk", "coffee", "Monday", "meeting"],
+    "tags": [
+      "office",
+      "work",
+      "coworkers",
+      "small talk",
+      "coffee",
+      "Monday",
+      "meeting"
+    ],
+    "people": true,
     "faces": "left and right, upper third",
     "source": "Canva AI image, generated 2026-11-17"
+  },
+  {
+    "file": "brand/photos/conversation-puzzled.jpg",
+    "scene": "Friends talking outdoors; a woman in glasses makes a puzzled face, as if she didn't catch what was said",
+    "tags": [
+      "conversation",
+      "didn't understand",
+      "confused",
+      "friends",
+      "repeat",
+      "small talk"
+    ],
+    "people": true,
+    "faces": "centre, upper third",
+    "source": "Unsplash, free Unsplash License: https://images.unsplash.com/photo-1743017523584-7f1b868417d5"
+  },
+  {
+    "file": "brand/photos/barista-counter.jpg",
+    "scene": "A barista in an apron at a bright coffee-shop counter, pouring from a pitcher",
+    "tags": [
+      "work",
+      "café",
+      "shift",
+      "coworker",
+      "service job",
+      "coffee"
+    ],
+    "people": true,
+    "faces": "right, upper third",
+    "source": "Unsplash, free Unsplash License: https://images.unsplash.com/photo-1599549192669-6baac5d32432"
+  },
+  {
+    "file": "brand/photos/office-leaving.jpg",
+    "scene": "A woman walking through a loft office with her phone, on her way out",
+    "tags": [
+      "office",
+      "work",
+      "leaving",
+      "goodbye",
+      "end of the day",
+      "phone"
+    ],
+    "people": true,
+    "faces": "centre, small",
+    "source": "Unsplash, free Unsplash License: https://images.unsplash.com/photo-1573204263181-41b87df58a46"
+  },
+  {
+    "file": "brand/photos/sofa-thinking.jpg",
+    "scene": "A woman on a sofa with a mug and a blanket, looking thoughtful",
+    "tags": [
+      "home",
+      "thinking",
+      "maybe",
+      "invitation",
+      "weekend",
+      "relaxing"
+    ],
+    "people": true,
+    "faces": "centre, upper third",
+    "source": "Unsplash, free Unsplash License: https://images.unsplash.com/photo-1640087974611-8a510e0c45e2"
+  },
+  {
+    "file": "brand/photos/thanksgiving-table.jpg",
+    "scene": "A Thanksgiving table from above: roast turkey, pumpkin pie, cranberry sauce, hands passing a plate",
+    "tags": [
+      "Thanksgiving",
+      "holiday",
+      "food",
+      "dinner",
+      "leftovers",
+      "USA"
+    ],
+    "people": false,
+    "faces": "none (hands only)",
+    "source": "Unsplash, free Unsplash License: https://images.unsplash.com/photo-1669223308086-bf5152ff0231"
+  },
+  {
+    "file": "brand/photos/store-line.jpg",
+    "scene": "A long line of people waiting outside a shop on a city street",
+    "tags": [
+      "shopping",
+      "sale",
+      "line",
+      "queue",
+      "Black Friday",
+      "city"
+    ],
+    "people": true,
+    "faces": "small, backs mostly",
+    "source": "Unsplash, free Unsplash License: https://images.unsplash.com/photo-1720753608518-0256245fc15e"
+  },
+  {
+    "file": "brand/photos/kitchen-cooking.jpg",
+    "scene": "Three friends cooking together in a home kitchen, making pizza and laughing",
+    "tags": [
+      "kitchen",
+      "cooking",
+      "friends",
+      "home",
+      "food",
+      "dinner"
+    ],
+    "people": true,
+    "faces": "left, centre and right, upper half",
+    "source": "Unsplash, free Unsplash License: https://images.unsplash.com/photo-1772724317931-5b92c842ab53"
+  },
+  {
+    "file": "brand/photos/desk-journal-laptop.jpg",
+    "scene": "A journal, an open laptop and a cup of coffee on a wooden table, seen from above; no people",
+    "tags": [
+      "study",
+      "notes",
+      "online lesson",
+      "laptop",
+      "learning",
+      "coffee"
+    ],
+    "people": false,
+    "faces": "none",
+    "source": "Unsplash, free Unsplash License: https://images.unsplash.com/photo-1633304690105-8ccaa01dfa06"
+  },
+  {
+    "file": "brand/photos/dubai-burj-al-arab.jpg",
+    "scene": "Dubai from the air: the Burj Al Arab hotel and the Palm on the blue sea; no people",
+    "tags": [
+      "Dubai",
+      "UAE",
+      "abroad",
+      "relocation",
+      "city",
+      "sea"
+    ],
+    "people": false,
+    "faces": "none",
+    "source": "Unsplash, free Unsplash License: https://images.unsplash.com/photo-1518684079-3c830dcef090"
+  },
+  {
+    "file": "brand/photos/kitchen-mug-evening.jpg",
+    "scene": "A mug on a kitchen table in warm evening light; no people",
+    "tags": [
+      "home",
+      "kitchen",
+      "tea",
+      "conversation",
+      "cozy",
+      "evening"
+    ],
+    "people": false,
+    "faces": "none",
+    "source": "Unsplash, free Unsplash License: https://images.unsplash.com/photo-1590140103794-ce43de8e44c8"
+  },
+  {
+    "file": "brand/photos/laptop-video-lesson.jpg",
+    "scene": "An open laptop with a video on the screen on a wooden stool at home; no people in the room",
+    "tags": [
+      "online lesson",
+      "video call",
+      "laptop",
+      "home",
+      "learning"
+    ],
+    "people": false,
+    "faces": "none (tiny figures on the screen)",
+    "source": "Unsplash, free Unsplash License: https://images.unsplash.com/photo-1588702548102-e00682affa2a"
   }
 ]

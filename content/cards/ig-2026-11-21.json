@@ -146,7 +146,13 @@
       "Take care",
       "Have a good one"
     ],
-    "note": "Goodbye звучит официально. Эти три живее."
+    "note": "Goodbye звучит официально. Эти три живее.",
+    "photo": "brand/photos/office-leaving.jpg",
+    "focus": [
+      0.5,
+      0.6
+    ],
+    "shade": 1.25
   },
   {
     "template": "chat",
@@ -165,13 +171,18 @@
       }
     ],
     "question": "Правда подумает или это мягкое нет?",
-    "prompt": "Листай → разбор на следующем слайде"
+    "prompt": "Листай → разбор на следующем слайде",
+    "photo": "brand/photos/sofa-thinking.jpg",
+    "focus": [
+      0.5,
+      0.35
+    ]
   },
   {
     "template": "answer",
     "out": "media/ig/2026-11-25-think-about-it-2.jpg",
     "label": "РАЗБОР",
-    "title": "Чаще всего —\nмягкое «нет»",
+    "title": "Чаще всего\nмягкое нет",
     "answer": "I'll think about it = «нет» или «не сейчас»",
     "why": [
       "Часто так отказывают, не говоря нет сразу",
@@ -180,6 +191,11 @@
     ],
     "examples": [
       "Sure! When should I check back with you?"
+    ],
+    "photo": "brand/photos/sofa-thinking.jpg",
+    "focus": [
+      0.5,
+      0.55
     ]
   },
   {
@@ -193,13 +209,22 @@
       "Остатки еды со стола",
       "Забрать домой посуду"
     ],
-    "prompt": "Листай → ответ на следующем слайде"
+    "prompt": "Листай → ответ на следующем слайде",
+    "photo": "brand/photos/thanksgiving-table.jpg",
+    "focus": [
+      0.5,
+      0.45
+    ],
+    "tail": "right",
+    "situation": "После ужина на День благодарения хозяйка говорит",
+    "bubble": "Take some\nleftovers home!",
+    "question": "Что она предлагает?"
   },
   {
     "template": "answer",
     "out": "media/ig/2026-11-26-leftovers-2.jpg",
     "label": "ОТВЕТ",
-    "title": "Правильно — B",
+    "title": "Ответ B",
     "answer": "Остатки еды со стола",
     "why": [
       "leftovers это то, что осталось после еды",
@@ -208,6 +233,11 @@
     "examples": [
       "Thanks, that would be great!",
       "I'm having leftovers for lunch."
+    ],
+    "photo": "brand/photos/thanksgiving-table.jpg",
+    "focus": [
+      0.5,
+      0.3
     ]
   },
   {
@@ -227,7 +257,13 @@
         "ru": "Оно стоит этих денег?"
       }
     ],
-    "note": "Пригодится в чёрную пятницу."
+    "note": "Пригодится в чёрную пятницу.",
+    "photo": "brand/photos/store-line.jpg",
+    "focus": [
+      0.5,
+      0.9
+    ],
+    "shade": 1.4
   },
   {
     "template": "list",
@@ -248,7 +284,12 @@
         "sub": "не стоит"
       }
     ],
-    "cta": "После worth глагол с -ing"
+    "cta": "После worth глагол с -ing",
+    "photo": "brand/photos/store-line.jpg",
+    "focus": [
+      0.5,
+      0.5
+    ]
   },
   {
     "template": "chat",
@@ -267,7 +308,12 @@
       }
     ],
     "question": "Как попросить дуршлаг, если забыл слово?",
-    "prompt": "Листай → разбор на следующем слайде"
+    "prompt": "Листай → разбор на следующем слайде",
+    "photo": "brand/photos/kitchen-cooking.jpg",
+    "focus": [
+      0.5,
+      0.35
+    ]
   },
   {
     "template": "list",
@@ -288,6 +334,11 @@
         "sub": "слово, которое искал"
       }
     ],
-    "cta": "Описание всегда выручает"
+    "cta": "Описание всегда выручает",
+    "photo": "brand/photos/kitchen-cooking.jpg",
+    "focus": [
+      0.5,
+      0.6
+    ]
   }
 ]
