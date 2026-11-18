@@ -10,21 +10,35 @@
       "Посмотри, идёт ли дождь",
       "Мне нужен зонт"
     ],
-    "prompt": "Листай → ответ на следующем слайде"
+    "prompt": "Листай, ответ на следующем слайде",
+    "photo": "brand/photos/cafe-rain.jpg",
+    "focus": [
+      0.5,
+      0.45
+    ],
+    "tail": "right",
+    "situation": "Друг зовёт на ужин, а ты отвечаешь",
+    "bubble": "Can I take\na rain check?",
+    "question": "Что это значит?"
   },
   {
     "template": "answer",
     "out": "media/ig/2026-11-21-rain-check-2.jpg",
     "label": "ОТВЕТ",
-    "title": "Правильно — A",
+    "title": "Ответ A",
     "answer": "Давай перенесём на другой раз",
     "why": [
-      "rain check это вежливый отказ с обещанием в другой раз",
-      "Пришло из бейсбола: билет на отменённый из-за дождя матч работал позже"
+      "rain check это вежливый отказ с обещанием встретиться в другой раз",
+      "Пришло из бейсбола: билет на отменённый из-за дождя матч действовал позже"
     ],
     "examples": [
-      "Thanks for the invite, but I'll take a rain check.",
+      "Thanks for the invite, but I'll take a rain check",
       "I can't tonight. Can I take a rain check?"
+    ],
+    "photo": "brand/photos/cafe-rain.jpg",
+    "focus": [
+      0.5,
+      0.6
     ]
   },
   {
@@ -44,22 +58,31 @@
       }
     ],
     "question": "Доволен, отказывается или соглашается?",
-    "prompt": "Листай → разбор на следующем слайде"
+    "prompt": "Листай, разбор на следующем слайде",
+    "photo": "brand/photos/dinner-pasta.jpg",
+    "focus": [
+      0.5,
+      0.5
+    ]
   },
   {
     "template": "answer",
     "out": "media/ig/2026-11-22-im-good-2.jpg",
     "label": "РАЗБОР",
-    "title": "Чаще всего —\nнет, спасибо",
-    "answer": "I'm good = «нет, спасибо, мне хватает»",
+    "title": "Чаще всего\nнет, спасибо",
+    "answer": "I'm good = нет, спасибо, мне хватает",
     "why": [
       "На предложение это обычно вежливый отказ",
-      "На How are you? то же самое значит просто «хорошо»",
-      "Это догадка. Если не уверен, уточни:"
+      "На How are you? то же самое значит просто хорошо"
     ],
     "examples": [
       "Sure? There's plenty left!",
       "No, thanks, I'm full."
+    ],
+    "photo": "brand/photos/dinner-pasta.jpg",
+    "focus": [
+      0.35,
+      0.55
     ]
   },
   {
@@ -79,13 +102,18 @@
       }
     ],
     "question": "Что добавить к слову Good?",
-    "prompt": "Листай → разбор на следующем слайде"
+    "prompt": "Листай, разбор на следующем слайде",
+    "photo": "brand/photos/office-coffee.jpg",
+    "focus": [
+      0.5,
+      0.45
+    ]
   },
   {
     "template": "list",
     "out": "media/ig/2026-11-23-weekend-2.jpg",
     "label": "А ДАЛЬШЕ ЧТО?",
-    "title": "Вместо одного\n«Good.»",
+    "title": "Вместо одного Good",
     "items": [
       {
         "text": "Pretty good! I finally tried that new taco place. How about you?",
@@ -96,7 +124,12 @@
         "sub": "коротко, но с темой"
       }
     ],
-    "cta": "Деталь плюс вопрос"
+    "cta": "Деталь плюс вопрос",
+    "photo": "brand/photos/office-coffee.jpg",
+    "focus": [
+      0.7,
+      0.4
+    ]
   },
   {
     "template": "versus",

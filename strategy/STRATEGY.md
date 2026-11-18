@@ -136,7 +136,8 @@ Answer reveals are always replies to their own quiz (`reply_to`), so the explana
 - **Format:** 1080×1350 (4:5 portrait), 72 px margins, no more than ~40 words per card.
 - **Card frame:** a tilted yellow series label at the top left, sparkles at the top right, and the wordmark «Английский по-американски» and the handle in pills at the bottom. Cards must look designed, never plain: colour, depth and a handwritten touch on every one.
 - **Templates:** quiz card, answer card, textbook-vs-America card, mistakes list, phrase card, numbered list, chat card (a message exchange as bubbles).
-- **Rules:** no stock photos, no copyrighted images, no emoji inside graphics (they render inconsistently), every English and Russian word on a card is checked before publishing.
+- **Photo cards (Instagram, from 2026-11-17):** the teacher found the gradient slides template-made ("they all look like trash") and asked for vivid, human-looking posts, with Canva. An Instagram slide can now sit on a real-life photo from `brand/photos/` (`index.json` says what each shows): the label turns into a flat coral tag, the footer is just the handle, a quiz puts its English phrase in a big coral speech bubble over the photo with the options on a small cream card, and an answer puts its examples in chat bubbles. The photos are Canva AI images; the text on them is drawn by `tools/render_cards.py`, never by Canva, so every word is the checked one.
+- **Rules:** images only from `brand/photos/` (made in Canva for this account, or licensed for this use and approved by the teacher), no other stock photos, no copyrighted images, no emoji inside graphics (they render inconsistently), every English and Russian word on a card is checked before publishing.
 
 ## 7. Growth and conversion
 
@@ -192,7 +193,7 @@ Posts published, views, likes, replies, reposts, quotes, shares, follower growth
 ## 12. Instagram (@esl_teacher_bro)
 
 - **One post a day at 18:00 MSK (15:00 UTC).** Publishing goes through Zernio like Threads, scheduled ahead, with its own queue (`content/instagram/`) and log (`log/instagram.jsonl`).
-- **Format:** carousels of 1080×1350 JPEG slides in the brand style. A quiz shows the question on slide 1 («Листай → ответ на следующем слайде») and the answer with a short why on slide 2. A phrase or lesson takes 2–3 slides. `versus` and `mistakes` cards work as single images. No emoji in the images.
+- **Format:** carousels of 1080×1350 JPEG slides in the brand style, on a photo from `brand/photos/` when one fits the situation (§6). A quiz shows the question on slide 1 («Листай → ответ на следующем слайде») and the answer with a short why on slide 2. A phrase or lesson takes 2–3 slides. `versus` and `mistakes` cards work as single images. No emoji in the images.
 - **Content:** adapted from that day's Threads posts, never a copy of the Threads text. A situation post (§3: 💬 ➡️ 🛟 💪) opens with the exchange as chat bubbles and the question on slide 1, and gives the answer on slide 2. On the day of a 🎓 post the carousel adapts it: who the students are on slide 1, the English phrase on slide 2 and the story in the caption, under the same rule (§1). The caption is a hook, then where the answer is, then one useful sentence, then one question for the comments, written the way a Threads post is (§2, How the text looks), with the hashtags on the last line.
 - **Hashtags:** 4–6 per post, drawn from #английскийязык #американскийанглийский #английскийонлайн #учиманглийский #грамматикаанглийского #разговорныйанглийский #произношение #английскийдляпутешествий #ошибкиванглийском.
 - **Comments:** answered by the same routine and rules as Threads. The answer is always public on Instagram, because it is on slide 2.

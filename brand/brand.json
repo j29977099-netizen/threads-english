@@ -16,7 +16,9 @@
     "blue": "#3D7BFF",
     "violet": "#6C3BFF",
     "red": "#F03E5C",
-    "teal": "#0B9E7A"
+    "teal": "#0B9E7A",
+    "coral": "#FF6B57",
+    "cream": "#FFF8EE"
   },
   "fonts": {
     "display": {"file": "brand/fonts/Unbounded-VF.ttf", "wght": 800},

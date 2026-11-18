@@ -75,6 +75,54 @@ class RenderCards(unittest.TestCase):
         with open(self.render(QUIZ, "a.jpg"), "rb") as a, open(self.render(QUIZ, "b.jpg"), "rb") as b:
             self.assertEqual(a.read(), b.read())
 
+    # ----- photo cards (2026-11-17) -----
+
+    def photos(self):
+        with open(os.path.join(ROOT, "brand", "photos", "index.json"), encoding="utf-8") as fh:
+            return json.load(fh)
+
+    def test_the_photo_index_lists_files_that_exist_and_every_photo_a_spec_uses(self):
+        index = self.photos()
+        self.assertTrue(index)
+        listed = {entry["file"] for entry in index}
+        for entry in index:
+            self.assertTrue(os.path.exists(os.path.join(ROOT, entry["file"])), entry["file"])
+            self.assertTrue(entry.get("scene") and entry.get("tags"), entry["file"])
+        for path in sorted(glob.glob(os.path.join(ROOT, "content", "cards", "*.json"))):
+            with open(path, encoding="utf-8") as fh:
+                for spec in json.load(fh):
+                    if spec.get("photo"):
+                        self.assertIn(spec["photo"], listed, spec["out"])
+
+    def test_every_template_draws_on_a_photo(self):
+        photo = self.photos()[0]["file"]
+        specs = [
+            dict(QUIZ, situation="Друг зовёт на ужин, а ты отвечаешь", bubble="Can I take\na rain check?"),
+            {"template": "answer", "label": "ОТВЕТ", "title": "Ответ A", "answer": "Давай перенесём на другой раз",
+             "why": ["rain check это вежливый отказ"], "examples": ["I'll take a rain check", "! I take rain check"]},
+            {"template": "chat", "label": "А ДАЛЬШЕ ЧТО?", "question": "Что ответить?",
+             "messages": [{"from": "them", "text": "How was your weekend?"}, {"from": "me", "typing": True}]},
+            {"template": "list", "label": "СОВЕТ", "title": "Два способа", "items": ["Pretty good!", "Relaxing."]},
+            {"template": "phrase", "label": "ФРАЗА", "phrase": "I'm good", "meaning": "нет, спасибо",
+             "examples": [{"en": "I'm good, thanks.", "ru": "Нет, спасибо."}]},
+        ]
+        for spec in specs:
+            with self.subTest(template=spec["template"]):
+                plain = Image.open(self.render(spec, "plain.jpg")).convert("RGB")
+                shot = Image.open(self.render(dict(spec, photo=photo), "photo.jpg")).convert("RGB")
+                self.assertEqual(shot.size, tuple(self.brand["size"]))
+                # the middle of the card shows the photo, not the theme's gradient
+                self.assertNotEqual(plain.getpixel((540, 1250)), shot.getpixel((540, 1250)))
+
+    def test_a_photo_that_does_not_exist_is_refused(self):
+        with self.assertRaisesRegex(ValueError, "does not exist"):
+            self.render(dict(QUIZ, photo="brand/photos/nowhere.jpg"))
+
+    def test_a_photo_quiz_with_a_phrase_too_long_for_its_bubble_is_refused(self):
+        photo = self.photos()[0]["file"]
+        with self.assertRaisesRegex(ValueError, "too long"):
+            self.render(dict(QUIZ, photo=photo, bubble="Can I take a rain check on that dinner invitation? " * 6))
+
 
 if __name__ == "__main__":
     unittest.main()

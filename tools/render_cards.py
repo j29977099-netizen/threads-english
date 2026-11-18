@@ -8,6 +8,15 @@ borrow another template's colours with "theme": "<name>". A character a font lac
 with the fallback font, and a card with a character no font can draw is refused, so a card
 never ships with missing-glyph boxes. A card whose text doesn't fit is refused too.
 
+Photo cards (from 2026-11-17, after the teacher found the gradient slides template-made): a spec
+with "photo": "brand/photos/<name>.jpg" is drawn on that real-life photo instead of the gradient,
+cropped around "focus" ([x, y], 0 to 1, default [0.5, 0.4]) and shaded top and bottom ("shade",
+default 1) so text reads on it. The label becomes a flat coral tag and the footer just the handle.
+On a photo, a quiz puts its phrase in a big speech bubble ("bubble", else "title") under an
+optional "situation" bar, with the options in a compact card under a "question" tag; an answer
+puts its examples in chat bubbles. The other templates keep their layout on the photo.
+brand/photos/index.json says what each photo shows.
+
     python tools/render_cards.py content/cards/2026-11-09_week1.json
 """
 import argparse
@@ -18,7 +27,7 @@ import random
 import sys
 
 from fontTools.ttLib import TTFont
-from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont
+from PIL import Image, ImageChops, ImageDraw, ImageEnhance, ImageFilter, ImageFont
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BLANK = "___"
@@ -28,6 +37,9 @@ FALLBACK = "fallback"  # the font that draws what another font lacks (arrows, IP
 FALLBACK_SCALE = {"hand": 0.72}  # the handwriting is small for its size; shrink borrowed glyphs to match
 CAP_HALF = 0.36  # half the height of a capital letter, in font sizes
 BADGES = ("pink", "orange", "mint", "blue")
+LETTER_TINTS = ("coral", "teal", "orange", "blue")  # option letters on a photo quiz
+PHOTO_SHADE = "#0E0B1F"  # what a photo is darkened with behind text: the ink, a shade deeper
+PHOTO_FOCUS = (0.5, 0.4)
 _CMAPS = {}
 
 
@@ -61,7 +73,7 @@ def strings_in(value):
             yield from strings_in(item)
     elif isinstance(value, dict):
         for key, item in value.items():
-            if key not in ("out", "template", "theme"):
+            if key not in ("out", "template", "theme", "photo"):
                 yield from strings_in(item)
 
 
@@ -81,13 +93,14 @@ def missing_glyphs(spec, brand):
 class Card:
     """A canvas in card units (1080x1350); every drawing call takes card units."""
 
-    def __init__(self, brand, size=None, theme=None):
+    def __init__(self, brand, size=None, theme=None, photo=None, focus=None, shade=1.0):
         self.brand = brand
         self.w, self.h = size or brand["size"]
         self.m = brand["margin"]
         self.c = brand["colors"]
         themes = brand.get("themes", {})
         self.theme = themes.get(theme) or themes.get("default") or {}
+        self.photo, self.focus, self.shade_k = photo, tuple(focus or PHOTO_FOCUS), shade
         self.s = SCALE
         self.img = Image.new("RGB", (self.w * self.s, self.h * self.s), rgb(self.c["paper"]))
         self.draw = ImageDraw.Draw(self.img, "RGBA")
@@ -253,15 +266,42 @@ class Card:
             self.shadow(box, radius)
         self.rrect(box, radius, fill=fill)
 
-    def pill(self, x, y, text, kind, size, fill, ink, pad=(24, 13), anchor="l"):
-        """Text in a pill; anchor "r" puts its right edge at x. Returns (width, height)."""
+    def pill(self, x, y, text, kind, size, fill, ink, pad=(24, 13), anchor="l", radius=None):
+        """Text in a pill (or, with a radius, a tag); anchor "r" puts its right edge at x, "m" its middle.
+        Returns (width, height)."""
         w = self.tw(text, kind, size) + 2 * pad[0]
         h = size * 1.2 + 2 * pad[1]
-        if anchor == "r":
-            x -= w
-        self.rrect([x, y, x + w, y + h], h / 2, fill=fill)
+        x -= {"l": 0, "m": w / 2, "r": w}[anchor]
+        self.rrect([x, y, x + w, y + h], h / 2 if radius is None else radius, fill=fill)
         self.text(x + pad[0], y + h / 2, text, kind, size, ink, anchor="lc")
         return w, h
+
+    def strip(self, x, y, text, size, fill, ink, width, kind="bold", pad=(24, 16)):
+        """Text on a solid bar, the way a caption sits on a photo; wraps within width. Returns the bar's height."""
+        lines = self.wrap(text, kind, size, width - 2 * pad[0], balance=True)
+        lead = size * 1.22
+        w = max(self.line_width(line, kind, size) for line in lines) + 2 * pad[0]
+        h = len(lines) * lead + 2 * pad[1] - (lead - size) * 0.6
+        self.rrect([x, y, x + w, y + h], 12, fill=fill)
+        ty = y + pad[1] - size * 0.06
+        for line in lines:
+            self.text(x + pad[0], ty, " ".join(line), kind, size, ink)
+            ty += lead
+        return h
+
+    def bubble(self, box, fill, tail="right", radius=54, tail_size=1.0):
+        """A speech bubble: a rounded box with a tail under it, on the side of whoever says it."""
+        x0, y0, x1, y1 = box
+        k = tail_size
+        self.shadow(box, radius, blur=26, dy=14, alpha=80)
+        if tail == "left":
+            root = x0 + radius * 1.7
+            wedge = [root + 34 * k, y1 - 8, root - 34 * k, y1 - 8, root - 54 * k, y1 + 60 * k]
+        else:
+            root = x1 - radius * 1.7
+            wedge = [root - 34 * k, y1 - 8, root + 34 * k, y1 - 8, root + 54 * k, y1 + 60 * k]
+        self.draw.polygon(self._px(wedge), fill=fill)
+        self.rrect(box, radius, fill=fill)
 
     def sticker(self, x, y, text, kind="display", size=23, fill=None, ink=None, angle=3, pad=(26, 16)):
         """A tilted, outlined label on a solid offset block. Returns its height."""
@@ -307,8 +347,34 @@ class Card:
 
     # ----- the shared look -----
 
+    def photo_background(self):
+        """The photo, cropped to fill the card around its focus point, a little warmer and livelier,
+        and shaded at the top and the bottom so white text, the tag and the footer read on it."""
+        path = os.path.join(ROOT, self.photo)
+        if not os.path.exists(path):
+            raise ValueError("photo %s does not exist" % self.photo)
+        width, height = self.w * self.s, self.h * self.s
+        with Image.open(path) as src:
+            photo = src.convert("RGB")
+        k = max(width / photo.width, height / photo.height)
+        photo = photo.resize((max(width, math.ceil(photo.width * k)), max(height, math.ceil(photo.height * k))),
+                             Image.LANCZOS)
+        fx, fy = self.focus
+        left = min(max(0, round(photo.width * fx - width / 2)), photo.width - width)
+        top = min(max(0, round(photo.height * fy - height / 2)), photo.height - height)
+        photo = photo.crop((left, top, left + width, top + height))
+        photo = ImageEnhance.Contrast(ImageEnhance.Color(photo).enhance(1.12)).enhance(1.04)
+        column = bytes(round(255 * min(1.0, self.shade_k * max(max(0.0, 1 - t / 0.34) * 0.62,
+                                                               max(0.0, (t - 0.42) / 0.58) * 0.88)))
+                       for t in (i / 255 for i in range(256)))
+        mask = Image.frombytes("L", (1, 256), column).resize((width, height), Image.BILINEAR)
+        photo.paste(Image.new("RGB", (width, height), rgb(PHOTO_SHADE)), (0, 0), mask)
+        self.img.paste(photo, (0, 0))
+
     def background(self):
-        """The theme's gradient, with soft glows and a fine grain so it doesn't look flat."""
+        """The theme's gradient, with soft glows and a fine grain so it doesn't look flat; or the photo."""
+        if self.photo:
+            return self.photo_background()
         size = (self.w * self.s, self.h * self.s)
         grid = self.theme.get("bg") or [[self.c["paper"]]]
         small = Image.new("RGB", (len(grid[0]), len(grid)))
@@ -336,9 +402,15 @@ class Card:
         self.img.paste(bg, (0, 0))
 
     def frame(self, label):
-        """Background, corner decoration, the label sticker and the footer. Returns the y where content starts."""
+        """Background, corner decoration, the label sticker and the footer. Returns the y where content starts.
+        On a photo: just a flat coral tag and the handle, so the picture shows."""
         m, c = self.m, self.c
         self.background()
+        if self.photo:
+            _, h = self.pill(m, m - 16, label, "bold", 27, fill=c["coral"], ink=c["white"], pad=(22, 12), radius=10)
+            self.pill(self.w / 2, self.h - m - 50, self.brand["handle"], "bold", 27, fill=c["teal"], ink=c["white"],
+                      pad=(30, 13), anchor="m")
+            return m - 16 + h + 26
         self.ellipse([self.w - 260, -180, self.w + 180, 260], outline=rgb(c["white"], 52), width=3)
         self.ellipse([self.w - 170, -90, self.w + 90, 170], outline=rgb(c["white"], 36), width=3)
         self.sparkle(self.w - m - 30, m + 36, 32, c["sun"])
@@ -385,7 +457,68 @@ def too_long(spec, what):
     return ValueError("%s: %s is too long for one card; shorten %s" % (spec["out"], spec["template"], what))
 
 
+def render_photo_quiz(card, spec):
+    """A quiz on a photo: the situation on a bar, the phrase in a big speech bubble, then the question
+    tag on a compact card of options, and the handwritten prompt under it."""
+    c, m = card.c, card.m
+    inner = card.w - 2 * m
+    y = card.frame(spec["label"])
+    situation, phrase = spec.get("situation"), spec.get("bubble") or spec["title"]
+    question, options, prompt = spec.get("question", "Что это значит?"), spec["options"], spec.get("prompt")
+    tail = spec.get("tail", "right")
+
+    if situation:
+        size = card.fit(situation, "bold", (46, 44, 42, 40, 38, 36, 34), inner - 48, 2)
+        y += card.strip(m, y, situation, size, c["teal"], c["white"], inner) + 34
+
+    letter_w = max(card.tw(ch + ")", "bold", 42) for ch in "ABCD"[:len(options)])
+    for opt_size, row in ((42, 72), (40, 68), (38, 64), (36, 60), (34, 56), (32, 52)):
+        text_x = m + 34 + letter_w * opt_size / 42 + 14
+        if all(card.tw(option, "semibold", opt_size) <= card.w - m - 30 - text_x for option in options):
+            break
+    else:
+        card.fit_line(max(options, key=len), "semibold", (32,), card.w - m - 30 - text_x, spec["out"])
+    q_size = 38
+    q_h = q_size * 1.2 + 2 * 13
+    sheet_bottom = card.content_bottom() - (86 if prompt else 0)
+    sheet_top = sheet_bottom - (q_h / 2 + 12 + len(options) * row + 22)
+    q_top = sheet_top - q_h / 2
+
+    room_top, room_bottom = y, q_top - 84  # the bubble's tail hangs into the gap above the question
+    most = inner * 0.88 - 2 * 52
+    for size in (108, 100, 92, 84, 78, 72, 66, 60, 54, 48):
+        lead = size * 1.06
+        lines = card.wrap(phrase, "bold", size, most, balance=True)
+        widest = max(card.line_width(line, "bold", size) for line in lines)
+        bubble_h = len(lines) * lead + 2 * 44 - (lead - size) * 0.5
+        if widest <= most and bubble_h <= room_bottom - room_top:
+            break
+    else:
+        raise too_long(spec, "the phrase in the bubble")
+    bubble_w = widest + 2 * 52
+    bx0 = m + (inner - bubble_w) / 2
+    by0 = room_top + (room_bottom - room_top - bubble_h) * 0.45
+    card.bubble([bx0, by0, bx0 + bubble_w, by0 + bubble_h], c["coral"], tail)
+    ty = by0 + 44 - size * 0.04
+    for line in lines:
+        card.text(bx0 + 52, ty, " ".join(line), "bold", size, c["white"])
+        ty += lead
+
+    card.panel([m, sheet_top, card.w - m, sheet_bottom], 28, c["cream"])
+    card.pill(m + 28, q_top, question, "bold", q_size, fill=c["sun"], ink=c["ink"], pad=(22, 13), radius=10)
+    ry = sheet_top + q_h / 2 + 12
+    for i, option in enumerate(options):
+        mid = ry + row / 2
+        card.text(m + 34, mid, "ABCD"[i] + ")", "bold", opt_size, c[LETTER_TINTS[i % len(LETTER_TINTS)]], anchor="lc")
+        card.text(text_x, mid, option, "semibold", opt_size, c["ink"], anchor="lc")
+        ry += row
+    if prompt:
+        card.note(sheet_bottom + 22, prompt)
+
+
 def render_quiz(card, spec):
+    if card.photo:
+        return render_photo_quiz(card, spec)
     c, m = card.c, card.m
     inner = card.w - 2 * m
     y = card.title(card.frame(spec["label"]), spec["title"], (62, 58, 54, 50, 46, 42), max_lines=2)
@@ -489,8 +622,87 @@ def render_mistakes(card, spec):
             card.stroke([(text_x, line_y), (card.w - m - pad, line_y)], c["mist"], 2.5)
 
 
+def render_photo_answer(card, spec):
+    """An answer on a photo: the verdict on a coral block, the answer on a yellow one, the reasons
+    on a dark glass panel, and the examples as chat bubbles (a wrong one in red with a cross)."""
+    c, m = card.c, card.m
+    inner = card.w - 2 * m
+    y = card.frame(spec["label"])
+    why, examples = spec.get("why", []), spec.get("examples", [])
+    # The verdict gives way first: the reasons and the examples are what people read.
+    for t_size, a_size, w_size, e_size in ((84, 46, 38, 44), (76, 44, 37, 42), (68, 42, 36, 40), (60, 40, 34, 38),
+                                           (56, 38, 32, 36), (52, 36, 30, 34), (48, 34, 28, 32)):
+        t_lines = card.wrap(spec["title"], "display", t_size, inner - 2 * 32)
+        if len(t_lines) > 2 or max(card.line_width(line, "display", t_size) for line in t_lines) > inner - 2 * 32:
+            continue
+        t_lead = t_size * 1.14
+        t_h = len(t_lines) * t_lead + 2 * 24 - (t_lead - t_size) * 0.5
+        a_lead = a_size * 1.26
+        a_h = card.text_height(spec["answer"], "bold", a_size, inner - 2 * 30, a_lead) + 2 * 22 - (a_lead - a_size) * 0.5
+        w_lead = w_size * 1.36
+        w_rows = [card.text_height(line, "medium", w_size, inner - 2 * 28 - 26, w_lead) for line in why]
+        w_h = sum(w_rows) + 14 * (len(w_rows) - 1) + 2 * 24 if why else 0
+        e_lead = e_size * 1.28
+        bubbles = []
+        for example in examples:
+            ok = not example.startswith("!")
+            mark = 0 if ok else 46
+            lines = card.wrap(example.lstrip("!").strip(), "semibold", e_size, inner * 0.86 - 2 * 30 - mark, balance=True)
+            width = max(card.line_width(line, "semibold", e_size) for line in lines) + 2 * 30 + mark
+            bubbles.append((ok, lines, width, len(lines) * e_lead + 2 * 22 - (e_lead - e_size) * 0.5))
+        e_h = sum(b[3] for b in bubbles) + 34 * max(0, len(bubbles) - 1)
+        bottom = y + t_h + 24 + a_h + (26 + w_h if why else 0) + (30 + e_h if bubbles else 0)
+        if bottom <= card.content_bottom():
+            break
+    else:
+        raise too_long(spec, "the answer, the reasons or the examples")
+    air = card.spare(bottom, 1 + bool(why) + bool(bubbles) + 1, 30)
+
+    y += air
+    t_w = max(card.line_width(line, "display", t_size) for line in t_lines) + 2 * 32
+    card.rrect([m, y, m + t_w, y + t_h], 16, fill=c["coral"])
+    ty = y + 24 - t_size * 0.04
+    for line in t_lines:
+        card.text(m + 32, ty, " ".join(line), "display", t_size, c["white"])
+        ty += t_lead
+    y += t_h + 24
+    card.panel([m, y, card.w - m, y + a_h], 18, c["sun"])
+    card.paragraph(m + 30, y + 22 - a_size * 0.04, spec["answer"], "bold", a_size, c["ink"], inner - 2 * 30, a_lead)
+    y += a_h + air
+    if why:
+        y += 26
+        card.rrect([m, y, card.w - m, y + w_h], 22, fill=rgb(PHOTO_SHADE, 178))
+        ty = y + 24
+        for i, (line, row_h) in enumerate(zip(why, w_rows)):
+            bar = c[("teal", "sun", "coral", "blue")[i % 4]]
+            card.rrect([m + 28, ty + 2, m + 36, ty + row_h - (w_lead - w_size) * 0.6], 4, fill=bar)
+            card.paragraph(m + 28 + 26, ty, line, "medium", w_size, c["white"], inner - 2 * 28 - 26, w_lead)
+            ty += row_h + 14
+        y += w_h + air
+    if bubbles:
+        y += 30
+        for i, (ok, lines, width, height) in enumerate(bubbles):
+            mine = i % 2 == 1
+            x0 = card.w - m - width if mine else m
+            fill = c["white"] if not ok else (c["sun"] if mine else c["teal"])
+            ink = c["red"] if not ok else (c["ink"] if mine else c["white"])
+            card.bubble([x0, y, x0 + width, y + height], fill, "right" if mine else "left", radius=min(34, height / 2),
+                        tail_size=0.45)
+            tx = x0 + 30
+            if not ok:
+                card.check_mark(tx + 16, y + height / 2, 18, ok=False)
+                tx += 46
+            ty = y + 22 - e_size * 0.04
+            for line in lines:
+                card.text(tx, ty, " ".join(line), "semibold", e_size, ink)
+                ty += e_lead
+            y += height + 34
+
+
 def render_answer(card, spec):
     """Carousel answer slide: the right option, why, and examples marked ok / wrong."""
+    if card.photo:
+        return render_photo_answer(card, spec)
     c, m = card.c, card.m
     inner = card.w - 2 * m
     y = card.title(card.frame(spec["label"]), spec["title"], (66, 60, 54, 48), gap=30)
@@ -716,7 +928,8 @@ def render(spec, brand=None):
     missing = missing_glyphs(spec, brand)
     if missing:
         raise ValueError("%s: no font has a glyph for %s" % (spec["out"], " ".join(missing)))
-    card = Card(brand, spec.get("size"), spec.get("theme") or spec["template"])
+    card = Card(brand, spec.get("size"), spec.get("theme") or spec["template"], spec.get("photo"), spec.get("focus"),
+                spec.get("shade", 1.0))
     TEMPLATES[spec["template"]](card, spec)
     return card.save(spec["out"])
 

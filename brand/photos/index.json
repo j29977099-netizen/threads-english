@@ -1,0 +1,23 @@
+[
+  {
+    "file": "brand/photos/cafe-rain.jpg",
+    "scene": "Two friends talking at a cozy café on a rainy evening: a man on the left, a woman on the right, both smiling, coffee on the table",
+    "tags": ["café", "friends", "evening", "rain", "invitation", "plans", "small talk", "date"],
+    "faces": "left and right, upper middle",
+    "source": "Canva AI image, generated 2026-11-17"
+  },
+  {
+    "file": "brand/photos/dinner-pasta.jpg",
+    "scene": "Dinner at home: the host in an apron offers more pasta, the guest on the left politely declines with a raised hand, candles and bread on the table",
+    "tags": ["dinner", "home", "food", "offer", "polite no", "guest", "host", "friends"],
+    "faces": "left middle and right top",
+    "source": "Canva AI image, generated 2026-11-17"
+  },
+  {
+    "file": "brand/photos/office-coffee.jpg",
+    "scene": "Two coworkers chatting by the coffee machine in a bright modern office: a man on the left, a woman on the right",
+    "tags": ["office", "work", "coworkers", "small talk", "coffee", "Monday", "meeting"],
+    "faces": "left and right, upper third",
+    "source": "Canva AI image, generated 2026-11-17"
+  }
+]
