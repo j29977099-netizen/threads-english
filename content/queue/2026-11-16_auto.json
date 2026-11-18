@@ -16,14 +16,6 @@
     "text": "📚 Учебник vs 🇺🇸 Америка\n\nВ учебнике\nI'm very tired\n\nВ жизни\nI'm beat\nI'm wiped out\nI'm exhausted\n\nbeat и wiped out разговорные, так говорят друзьям\nexhausted сильнее, чем tired, это когда сил нет совсем\n\nI'm beat. Let's order pizza\n\n🗣 А ты как скажешь про себя после тяжёлого дня?"
   },
   {
-    "id": "2026-11-17-p2-for-since-ago",
-    "publish_at": "2026-11-30T16:00:00Z",
-    "kind": "lesson",
-    "topic": "for / since / ago",
-    "topic_tag": "Английский язык",
-    "text": "📚 for, since, ago. Три слова про время\n\nfor + период, то есть как долго\nI've lived here for 3 years\n\nsince + начало, с какого момента\nI've lived here since 2023\n\nago + период, сколько назад\nI moved here 3 years ago\n\nago дружит только с прошедшим временем, с Present Perfect его не ставят\n❌ I've moved here 3 years ago\n\nВставь for, since или ago\n1) I've had this phone ___ three years\n2) I've had it ___ 2023\n3) I bought it three years ___"
-  },
-  {
     "id": "2026-11-17-r-run-late-task",
     "publish_at": "2026-11-25T16:15:00Z",
     "kind": "reveal",
@@ -38,18 +30,9 @@
     "kind": "lesson",
     "topic": "mistakes with time: Present Perfect, for, since",
     "topic_tag": "Английский язык",
-    "text": "👀 Ошибки, которые нас выдают\n\nПо-русски «я живу здесь 5 лет» это настоящее время\nА в английском тут нужен Present Perfect\n\n1. I'm living here 5 years → I've been living here for 5 years\n2. I live here since 2020 → I've lived here since 2020\n3. I know him five years → I've known him for five years\n4. How long are you here? → How long have you been here?\n\nКакая из них твоя? 👇",
+    "text": "👀 Ошибки, которые нас выдают\n\nТебя спрашивают, давно ли ты здесь\nПо-русски скажешь просто, я здесь 5 лет\nНо в английском это прошлое, которое длится до сих пор, и нужен Present Perfect\n\n1. I'm living here 5 years → I've been living here for 5 years\n2. I live here since 2020 → I've lived here since 2020\n3. I know him five years → I've known him for five years\n4. How long are you here? → How long have you been here?\n\nКакая из них твоя? 👇",
     "image": "media/2026-11-18-living-here-mistakes.png",
     "alt_text": "Инфографика «Ошибки со временем»: I'm living here 5 years → I've been living here for 5 years; I live here since 2020 → I've lived here since 2020; I know him five years → I've known him for five years; How long are you here? → How long have you been here?"
-  },
-  {
-    "id": "2026-11-18-r-for-since-ago-task",
-    "publish_at": "2026-12-01T16:15:00Z",
-    "kind": "reveal",
-    "topic": "answer to the for / since / ago task",
-    "topic_tag": "Английский язык",
-    "reply_to": "2026-11-17-p2-for-since-ago",
-    "text": "✍️ Ответы на вчерашнее задание\n\n1) I've had this phone for three years\n2) I've had it since 2023\n3) I bought it three years ago\n\nfor это сколько длится, for three years\nsince с какого момента, since 2023\nago сколько назад и только с прошедшим временем, bought … ago"
   },
   {
     "id": "2026-11-19-p1-dont-mind",
