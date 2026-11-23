@@ -1,0 +1,225 @@
+[
+  {
+    "template": "chat",
+    "out": "media/ig/2026-11-29-phone-rings-1.jpg",
+    "label": "КАК ГОВОРЯТ В США",
+    "messages": [
+      {
+        "from": "them",
+        "name": "Звонок по работе",
+        "text": "Can you send the files by noon?"
+      },
+      {
+        "from": "me",
+        "name": "Ты",
+        "typing": true
+      }
+    ],
+    "question": "Слова понятны, а ответ не складывается. Что сказать?",
+    "prompt": "Листай → фразы на следующем слайде"
+  },
+  {
+    "template": "list",
+    "out": "media/ig/2026-11-29-phone-rings-2.jpg",
+    "label": "КАК ГОВОРЯТ В США",
+    "title": "Фразы,\nчтобы выиграть время",
+    "items": [
+      {
+        "text": "Let me think for a second.",
+        "sub": "дай мне секунду подумать"
+      },
+      {
+        "text": "Could you hold on a moment? I'll check.",
+        "sub": "подожди минуту, я проверю"
+      },
+      {
+        "text": "Sorry, could you say that again?",
+        "sub": "если не поймёшь с первого раза"
+      }
+    ],
+    "cta": "Секундная пауза звучит нормально"
+  },
+  {
+    "template": "mistakes",
+    "out": "media/ig/2026-11-30-stress-1.jpg",
+    "label": "ОШИБКИ, КОТОРЫЕ НАС ВЫДАЮТ",
+    "title": "Ударение важнее акцента",
+    "items": [
+      {
+        "wrong": "comFORtable",
+        "right": "COMfortable",
+        "note": "ударение на первый слог"
+      },
+      {
+        "wrong": "PHOtographer",
+        "right": "phoTOGrapher",
+        "note": "ударение на второй слог"
+      }
+    ]
+  },
+  {
+    "template": "chat",
+    "out": "media/ig/2026-12-01-said-yes-1.jpg",
+    "label": "СПАСАЕМ РАЗГОВОР",
+    "messages": [
+      {
+        "from": "them",
+        "name": "Регистратура",
+        "text": "Would Tuesday at ten work for you?"
+      },
+      {
+        "from": "me",
+        "name": "Ты",
+        "text": "Yes."
+      },
+      {
+        "from": "me",
+        "typing": true
+      }
+    ],
+    "question": "Вопрос прозвучал быстро, а вырвалось Yes. Как отыграть назад?",
+    "prompt": "Листай → разбор на следующем слайде",
+    "photo": "brand/photos/conversation-puzzled.jpg",
+    "focus": [
+      0.5,
+      0.3
+    ]
+  },
+  {
+    "template": "list",
+    "out": "media/ig/2026-12-01-said-yes-2.jpg",
+    "label": "СПАСАЕМ РАЗГОВОР",
+    "title": "Как исправить\nсвоё Yes",
+    "items": [
+      {
+        "text": "Sorry, I think I misunderstood. Could you ask that again?",
+        "sub": "признайся сразу и попроси повторить"
+      },
+      {
+        "text": "Wait, sorry, I said yes too fast. Can you repeat the question?",
+        "sub": "скажи, что ответил слишком быстро"
+      },
+      {
+        "text": "Just to make sure, you're asking about Tuesday?",
+        "sub": "проверь себя"
+      }
+    ],
+    "cta": "Чем раньше переспросишь, тем проще",
+    "photo": "brand/photos/conversation-puzzled.jpg",
+    "focus": [
+      0.5,
+      0.2
+    ]
+  },
+  {
+    "template": "chat",
+    "out": "media/ig/2026-12-03-compliment-1.jpg",
+    "label": "А ДАЛЬШЕ ЧТО?",
+    "messages": [
+      {
+        "from": "them",
+        "name": "Соседка в лифте",
+        "text": "I love your jacket!"
+      },
+      {
+        "from": "me",
+        "name": "Ты",
+        "text": "Thank you!"
+      },
+      {
+        "from": "me",
+        "typing": true
+      }
+    ],
+    "question": "Повисла тишина. Что добавить?",
+    "prompt": "Листай → разбор на следующем слайде"
+  },
+  {
+    "template": "list",
+    "out": "media/ig/2026-12-03-compliment-2.jpg",
+    "label": "А ДАЛЬШЕ ЧТО?",
+    "title": "Вместо одного\nThank you",
+    "items": [
+      {
+        "text": "Thanks! I got it on sale last week.",
+        "sub": "деталь про вещь"
+      },
+      {
+        "text": "Thank you! I like your scarf too.",
+        "sub": "ответный комплимент"
+      }
+    ],
+    "cta": "Спасибо, деталь и вопрос или комплимент в ответ"
+  },
+  {
+    "template": "quiz",
+    "out": "media/ig/2026-12-04-say-tell-1.jpg",
+    "label": "ТОЛЬКО ОДНО ПРАВИЛЬНОЕ",
+    "title": "say или tell?",
+    "sentence": "Пересказываешь, что сказал коллега. Какое предложение правильное?",
+    "options": [
+      "He told me that he was tired",
+      "He said me that he was tired",
+      "He told that he was tired"
+    ],
+    "prompt": "Листай → ответ на следующем слайде"
+  },
+  {
+    "template": "answer",
+    "out": "media/ig/2026-12-04-say-tell-2.jpg",
+    "label": "ОТВЕТ",
+    "title": "Ответ A",
+    "answer": "He told me that he was tired",
+    "why": [
+      "tell всегда идёт с человеком: tell someone something",
+      "say идёт без человека или через to: say to me"
+    ],
+    "examples": [
+      "He said that he was tired",
+      "He said to me that he was tired"
+    ]
+  },
+  {
+    "template": "chat",
+    "out": "media/ig/2026-12-05-not-bad-1.jpg",
+    "label": "ЧТО ОН ИМЕЛ В ВИДУ?",
+    "messages": [
+      {
+        "from": "me",
+        "name": "Ты",
+        "text": "Here's the report."
+      },
+      {
+        "from": "them",
+        "text": "Not bad!"
+      }
+    ],
+    "question": "Похвала, критика или вежливый ответ?",
+    "prompt": "Листай → разбор на следующем слайде",
+    "photo": "brand/photos/office-coffee.jpg",
+    "focus": [
+      0.5,
+      0.45
+    ]
+  },
+  {
+    "template": "answer",
+    "out": "media/ig/2026-12-05-not-bad-2.jpg",
+    "label": "РАЗБОР",
+    "title": "Чаще всего\nсдержанная похвала",
+    "answer": "Not bad = неплохо, даже хорошо",
+    "why": [
+      "Критика обычно идёт дальше: but или конкретные замечания",
+      "Многое решает интонация. Это догадка, а не правило",
+      "Хочешь знать точнее, спроси:"
+    ],
+    "examples": [
+      "Thanks! Is there anything you'd change?"
+    ],
+    "photo": "brand/photos/office-coffee.jpg",
+    "focus": [
+      0.35,
+      0.5
+    ]
+  }
+]

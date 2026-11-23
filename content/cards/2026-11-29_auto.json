@@ -1,0 +1,45 @@
+[
+  {
+    "template": "list",
+    "out": "media/2026-11-26-thanksgiving.png",
+    "label": "КАК ГОВОРЯТ В США",
+    "title": "За столом в\nДень благодарения",
+    "items": [
+      {
+        "text": "Happy Thanksgiving!",
+        "sub": "с праздником"
+      },
+      {
+        "text": "Could you pass the gravy?",
+        "sub": "передай соус"
+      },
+      {
+        "text": "Can I have a slice of pumpkin pie?",
+        "sub": "можно кусочек тыквенного пирога"
+      },
+      {
+        "text": "I'm stuffed!",
+        "sub": "я объелся"
+      }
+    ],
+    "cta": "Пригодится за столом"
+  },
+  {
+    "template": "phrase",
+    "out": "media/2026-12-03-cold-feet.png",
+    "label": "ИДИОМА ДНЯ",
+    "phrase": "get cold feet",
+    "meaning": "струсить, передумать в последний момент",
+    "examples": [
+      {
+        "en": "He got cold feet the night before the wedding.",
+        "ru": "Накануне свадьбы он струсил."
+      },
+      {
+        "en": "I wanted to sign up for the marathon, but I got cold feet.",
+        "ru": "Хотелось записаться на марафон, но стало страшно."
+      }
+    ],
+    "note": "Дословно: получить холодные ноги."
+  }
+]

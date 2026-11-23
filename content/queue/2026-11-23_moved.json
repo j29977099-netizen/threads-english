@@ -34,8 +34,8 @@
     "text": "✅ Правильно A) for / since\n\nI've worked here for three years, and I've known my boss since 2021\n\nfor + период (for three years, for a month)\nsince + момент начала (since 2021, since Monday)\n\nI've lived here for a year\nI've lived here since last summer\n\nИ раз действие длится до сих пор, нужен Present Perfect\n❌ I work here since 2020\n✔️ I've worked here since 2020"
   },
   {
-    "id": "2026-12-05-p1-say-tell",
-    "publish_at": "2026-12-05T06:00:00Z",
+    "id": "2026-12-04-p1-say-tell",
+    "publish_at": "2026-12-04T06:00:00Z",
     "kind": "quiz",
     "topic": "say vs tell",
     "topic_tag": "Английский язык",
@@ -43,20 +43,20 @@
     "answer": "A"
   },
   {
-    "id": "2026-12-06-r-say-tell",
-    "publish_at": "2026-12-06T06:15:00Z",
+    "id": "2026-12-05-r-say-tell",
+    "publish_at": "2026-12-05T06:15:00Z",
     "kind": "reveal",
     "topic": "answer to say vs tell quiz",
     "topic_tag": "Английский язык",
-    "reply_to": "2026-12-05-p1-say-tell",
+    "reply_to": "2026-12-04-p1-say-tell",
     "text": "✅ Правильно A) He told me that he was tired\n\ntell всегда с человеком, tell someone something\nTell me the truth\nShe told us a story\n\nsay без человека или через to\nHe said that he was tired\nHe said to me that he was tired\n\nПоэтому\n❌ He said me that he was tired\n❌ He told that he was tired\nВ первом не хватает to, во втором того, кому говорят"
   },
   {
-    "id": "2026-11-23-p2-phrasal-context",
+    "id": "2026-12-04-p2-salary-question",
     "publish_at": "2026-12-04T16:00:00Z",
-    "kind": "tip",
-    "topic": "how to learn phrasal verbs in context",
+    "kind": "lesson",
+    "topic": "english with a backbone: a coworker asks how much you make",
     "topic_tag": "Английский язык",
-    "text": "💡 Как учить фразовые глаголы и не путаться\n\nУчи не списком, а во фразе\nНе run out = закончиться, а We ran out of milk\n\nБери одно значение за раз. У глагола их много, начни с самого частого\n\nЗапоминай сразу с предлогом, например get along with или look forward to\n\nПридумай предложение про свою жизнь и скажи его вслух\n\nОдного глагола в день хватит\nА какой фразовый глагол у тебя уже в ходу?"
+    "text": "💪 Английский с характером\n\nЗа обедом коллега спрашивает\nSo, how much do you make?\n\nОтвечать не хочется. Вариантов несколько\n\nМягко\nI'd rather not get into numbers, if that's okay\n\nТвёрдо\nThat's a bit personal\n\nС условием\nI'll keep mine private, but I'm happy to talk about what this job usually pays\n\nВопрос о зарплате в США часто считают слишком личным, так что вежливо отказаться нормально\n\n🗣 Какой вариант тебе проще произнести?"
   }
 ]

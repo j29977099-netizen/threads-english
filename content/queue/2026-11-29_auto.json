@@ -1,0 +1,62 @@
+[
+  {
+    "id": "2026-11-29-p1-phone-rings",
+    "publish_at": "2026-11-29T06:00:00Z",
+    "kind": "lesson",
+    "topic": "phone call at work: buying time when you know the words but can't answer",
+    "topic_tag": "Английский язык",
+    "text": "☕️ Как говорят в США\n\nТебе звонят по работе, слова все знакомые, а ответ не складывается\nПауза тянется, и от неё только хуже\n\nЭти фразы дают время подумать\nLet me think for a second\nCould you hold on a moment? I'll check\nGood question, let me see\n\nИ если с первого раза не поймёшь\nSorry, could you say that again?\n\nНа звонке секундная пауза слышится как обычное размышление\n\n🗣 Какая из этих фраз уже у тебя на автомате?"
+  },
+  {
+    "id": "2026-12-01-p1-said-yes",
+    "publish_at": "2026-12-01T06:00:00Z",
+    "kind": "challenge",
+    "topic": "conversation rescue: said yes without understanding the question",
+    "topic_tag": "Английский язык",
+    "text": "🛟 Спасаем разговор\n\nВ регистратуре клиники тебя быстро о чём-то спрашивают\nСмысл ускользнул, а в ответ уже вырвалось Yes\n\nЧерез секунду ясно, что ты, похоже, с чем-то согласился\nКак отыграть назад и не смутиться?\n\nПиши свою фразу по-английски 👇"
+  },
+  {
+    "id": "2026-12-02-r-said-yes",
+    "publish_at": "2026-12-02T06:15:00Z",
+    "kind": "reveal",
+    "topic": "answer reveal",
+    "topic_tag": "Английский язык",
+    "reply_to": "2026-12-01-p1-said-yes",
+    "text": "✅ Лучше признаться сразу, пока ничего не записали\n\nSorry, I think I misunderstood. Could you ask that again?\nWait, sorry, I said yes too fast. Can you repeat the question?\n\nПереспрашивают в таких местах постоянно, ведь им нужен точный ответ\nЧем раньше скажешь, тем проще исправить\n\nМожно ещё проверить себя\nJust to make sure, you're asking about Tuesday?"
+  },
+  {
+    "id": "2026-12-03-p1-compliment",
+    "publish_at": "2026-12-03T06:00:00Z",
+    "kind": "challenge",
+    "topic": "what next: a compliment from a stranger (I love your jacket)",
+    "topic_tag": "Английский язык",
+    "text": "➡️ А дальше что?\n\nВ лифте незнакомая соседка говорит\nI love your jacket!\n\nТы улыбаешься, говоришь Thank you, и повисает тишина\n\nЧто добавить, чтобы это стало маленьким разговором?\nПиши по-английски 👇"
+  },
+  {
+    "id": "2026-12-04-r-compliment",
+    "publish_at": "2026-12-04T06:15:00Z",
+    "kind": "reveal",
+    "topic": "answer reveal",
+    "topic_tag": "Английский язык",
+    "reply_to": "2026-12-03-p1-compliment",
+    "text": "✅ Скажи спасибо, добавь деталь и верни комплимент\n\nThanks! I got it on sale last week\nThank you! I like your scarf too\n\nНа комплимент в США принято откликаться, а не отмахиваться. Короткая деталь про вещь превращает его в разговор\n\nИ необязательно что-то выдумывать, хватит одной фразы"
+  },
+  {
+    "id": "2026-12-05-p1-not-bad",
+    "publish_at": "2026-12-05T06:00:00Z",
+    "kind": "quiz",
+    "topic": "what did they mean: «Not bad!» about your work",
+    "topic_tag": "Английский язык",
+    "text": "💬 Что он имел в виду?\n\nПоказываешь начальнику отчёт, он смотрит и говорит\nNot bad!\n\nЭто…\nA) довольно сдержанная похвала\nB) критика, отчёт придётся переделывать\nC) просто вежливый ответ, чтобы закончить разговор\n\nПиши букву и почему так 👇\nРазбор завтра утром",
+    "answer": "A"
+  },
+  {
+    "id": "2026-12-06-r-not-bad",
+    "publish_at": "2026-12-06T06:15:00Z",
+    "kind": "reveal",
+    "topic": "answer reveal",
+    "topic_tag": "Английский язык",
+    "reply_to": "2026-12-05-p1-not-bad",
+    "text": "✅ Чаще всего это A) сдержанная похвала\n\nNot bad в американском английском нередко значит неплохо, даже хорошо. Если нужна критика, дальше обычно идёт but или конкретные замечания\n\nМного решает интонация, так что это догадка, а не правило\n\nЧтобы узнать точнее, спроси\nThanks! Is there anything you'd change?"
+  }
+]
