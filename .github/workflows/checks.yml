@@ -18,6 +18,9 @@ jobs:
 
       - run: pip install -r requirements.txt
 
+      # ffmpeg for the Reel renderer's video test (tools/render_reel.py); the publisher doesn't need it
+      - run: pip install imageio-ffmpeg
+
       - name: Unit tests
         run: python -m unittest discover -s tests -v
 

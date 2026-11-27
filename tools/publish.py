@@ -48,7 +48,7 @@ from datetime import datetime, timedelta, timezone
 import requests
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from qc import BACKEND, LOG_PATH, LOGS, QUEUES, check_post, load_queue, normalize, parse_time  # noqa: E402
+from qc import BACKEND, LOG_PATH, LOGS, QUEUES, ROOT, check_post, load_queue, normalize, parse_time  # noqa: E402
 
 API_BASE = os.environ.get("THREADS_API_BASE", "https://graph.threads.com/v1.0")
 ZERNIO_API_BASE = os.environ.get("ZERNIO_API_BASE", "https://zernio.com/api/v1")
@@ -207,11 +207,17 @@ class ZernioApi:
     def threads_account(self):
         return self.account("threads")
 
-    def create_post(self, account_id, post, image_url=None, idempotency_key=None, scheduled_for=None,
+    def create_post(self, account_id, post, media=None, idempotency_key=None, scheduled_for=None,
                     platform="threads"):
-        """Publish now, or at scheduled_for (ISO UTC) when given. image_url may be a list (a carousel)."""
+        """Publish now, or at scheduled_for (ISO UTC) when given. media is an image URL, a list of them
+        (a carousel), or {"video": url, "cover": url} for an Instagram Reel."""
         target = {"platform": platform, "accountId": account_id}
-        extra = {"topic_tag": post.get("topic_tag")} if platform == "threads" else {"firstComment": post.get("first_comment")}
+        if platform == "threads":
+            extra = {"topic_tag": post.get("topic_tag")}
+        else:
+            extra = {"firstComment": post.get("first_comment")}
+            if isinstance(media, dict):  # a Reel: also on the profile grid, with its own cover
+                extra.update(shareToFeed=True, instagramThumbnail=media["cover"])
         extra = {k: v for k, v in extra.items() if v}
         if extra:
             target["platformSpecificData"] = extra
@@ -220,16 +226,34 @@ class ZernioApi:
             body["scheduledFor"] = scheduled_for
         else:
             body["publishNow"] = True
-        if image_url:
-            body["mediaItems"] = media_items(post, image_url)
+        if media:
+            body["mediaItems"] = media_items(post, media)
         return self._call("POST", "posts", body=body, idempotency_key=idempotency_key)
 
     def update_post(self, zernio_id, post, image_url=None, scheduled_for=None):
-        """Change a post that is still scheduled: its text, images and time."""
+        """Change a post that is still scheduled: its text, images and time (a Reel keeps its video)."""
         body = {"content": post["text"], "scheduledFor": scheduled_for}
         if image_url:
             body["mediaItems"] = media_items(post, image_url)
         return self._call("PUT", "posts/%s" % zernio_id, body=body)
+
+    def upload(self, path, content_type):
+        """Put a local file in Zernio's storage (POST media/presign, then a PUT of the file) and return
+        its public URL. A Reel's video goes this way: raw.githubusercontent.com serves .mp4 as
+        application/octet-stream (checked 2026-11-24). An upload no post uses expires after 7 days."""
+        slot = self._call("POST", "media/presign", body={"filename": os.path.basename(path),
+                                                         "contentType": content_type, "size": os.path.getsize(path)})
+        with open(path, "rb") as fh:
+            try:  # storage, not the API: no Authorization header
+                resp = self.session.request("PUT", slot["uploadUrl"], data=fh, headers={"Content-Type": content_type},
+                                            timeout=300)
+            except requests.RequestException as exc:
+                raise ApiError("upload of %s failed: %s" % (os.path.basename(path), exc.__class__.__name__),
+                               transient=True)
+        if resp.status_code >= 400:
+            # an expired or refused upload slot: a later run asks for a new one
+            raise ApiError("upload of %s failed: HTTP %d" % (os.path.basename(path), resp.status_code), transient=True)
+        return slot["publicUrl"]
 
     def get_post(self, zernio_id):
         return self._call("GET", "posts/%s" % zernio_id).get("post") or {}
@@ -285,7 +309,10 @@ class ZernioApi:
 
 
 def media_items(post, image_url):
-    """Zernio mediaItems for one image (Threads) or a carousel (Instagram)."""
+    """Zernio mediaItems for one image (Threads), a carousel or a Reel's video (Instagram).
+    A Reel has no alt text: Instagram ignores it on video."""
+    if isinstance(image_url, dict):
+        return [{"type": "video", "url": image_url["video"]}]
     urls = image_url if isinstance(image_url, list) else [image_url]
     alts = post["alt_text"] if isinstance(post["alt_text"], list) else [post["alt_text"]]
     return [{"type": "image", "url": url, "altText": alt} for url, alt in zip(urls, alts)]
@@ -555,6 +582,10 @@ class ZernioPublisher(Publisher):
     is due (plus reply_grace). That endpoint can't schedule, so the reply is
     never handed over ahead. Before replying, the quiz's comments are checked
     for the same text, so a lost log or a second runner can't post it twice.
+
+    An Instagram Reel's video is uploaded to Zernio's storage when the post is
+    handed over (each try of the create uploads again; unused uploads expire).
+    Later edits change its caption and time; the video stays as handed over.
     """
 
     backend = "zernio"
@@ -576,9 +607,17 @@ class ZernioPublisher(Publisher):
         return self._account_id
 
     def _image_url(self, post):
+        """The post's image URLs (none for a Reel, whose video Zernio keeps once it has it)."""
         if post.get("images"):
             return [self.media_base_url + image for image in post["images"]]
         return self.media_base_url + post["image"] if post.get("image") else None
+
+    def _media(self, post):
+        """What a new Zernio post carries: its images, or a Reel's video (uploaded now) and its cover."""
+        if post.get("video"):
+            return {"video": self.api.upload(os.path.join(ROOT, post["video"]), "video/mp4"),
+                    "cover": self.media_base_url + post["cover"]}
+        return self._image_url(post)
 
     def _publish_one(self, post, reply_to_id):
         if reply_to_id:
@@ -618,7 +657,7 @@ class ZernioPublisher(Publisher):
         # answer for 24 h); a new key only once that Zernio post has been given up.
         key = "%s.%d" % (pid, state.get("created", 0))
         try:
-            body = self.api.create_post(self.account_id, post, self._image_url(post), key, scheduled_for,
+            body = self.api.create_post(self.account_id, post, self._media(post), key, scheduled_for,
                                         platform=self.platform)
         except ApiError as exc:
             if exc.status != 409:

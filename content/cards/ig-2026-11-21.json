@@ -292,53 +292,57 @@
     ]
   },
   {
-    "template": "chat",
-    "out": "media/ig/2026-11-28-colander-1.jpg",
-    "label": "СПАСАЕМ РАЗГОВОР",
-    "messages": [
+    "template": "reel",
+    "out": "media/ig/2026-11-28-colander.mp4",
+    "slides": [
       {
-        "from": "them",
-        "name": "Друг",
-        "text": "Dinner's almost ready!"
+        "template": "chat",
+        "label": "СПАСАЕМ РАЗГОВОР",
+        "messages": [
+          {
+            "from": "them",
+            "name": "Друг",
+            "text": "Dinner's almost ready!"
+          },
+          {
+            "from": "me",
+            "name": "Ты",
+            "typing": true
+          }
+        ],
+        "question": "Как попросить дуршлаг, если забыл слово?",
+        "prompt": "Листай → разбор на следующем слайде",
+        "photo": "brand/photos/kitchen-cooking.jpg",
+        "focus": [
+          0.5,
+          0.35
+        ]
       },
       {
-        "from": "me",
-        "name": "Ты",
-        "typing": true
+        "template": "list",
+        "label": "СПАСАЕМ РАЗГОВОР",
+        "title": "Опиши предмет,\nа не молчи",
+        "items": [
+          {
+            "text": "Can you pass me the… what's it called?",
+            "sub": "выиграй время"
+          },
+          {
+            "text": "The bowl with holes that you drain pasta in",
+            "sub": "опиши, что он делает"
+          },
+          {
+            "text": "colander",
+            "sub": "слово, которое искал"
+          }
+        ],
+        "cta": "Описание всегда выручает",
+        "photo": "brand/photos/kitchen-cooking.jpg",
+        "focus": [
+          0.5,
+          0.6
+        ]
       }
-    ],
-    "question": "Как попросить дуршлаг, если забыл слово?",
-    "prompt": "Листай → разбор на следующем слайде",
-    "photo": "brand/photos/kitchen-cooking.jpg",
-    "focus": [
-      0.5,
-      0.35
-    ]
-  },
-  {
-    "template": "list",
-    "out": "media/ig/2026-11-28-colander-2.jpg",
-    "label": "СПАСАЕМ РАЗГОВОР",
-    "title": "Опиши предмет,\nа не молчи",
-    "items": [
-      {
-        "text": "Can you pass me the… what's it called?",
-        "sub": "выиграй время"
-      },
-      {
-        "text": "The bowl with holes that you drain pasta in",
-        "sub": "опиши, что он делает"
-      },
-      {
-        "text": "colander",
-        "sub": "слово, которое искал"
-      }
-    ],
-    "cta": "Описание всегда выручает",
-    "photo": "brand/photos/kitchen-cooking.jpg",
-    "focus": [
-      0.5,
-      0.6
     ]
   }
 ]

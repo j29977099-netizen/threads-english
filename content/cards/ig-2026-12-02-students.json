@@ -1,19 +1,48 @@
 [
  {
-  "template": "list",
-  "out": "media/ig/2026-12-02-use-it-or-lose-it-1.jpg",
-  "label": "МОИ УЧЕНИКИ",
-  "title": "Уровень высокий,\nа они всё равно учат",
-  "items": [
-   "У нескольких учеников уровень уже высокий",
-   "Они всё равно продолжают заниматься",
-   "Знают, что стоит бросить, и язык начнёт уходить"
-  ],
-  "cta": "Листай → как это по-английски",
-  "photo": "brand/photos/desk-journal-laptop.jpg",
-  "focus": [
-   0.5,
-   0.5
+  "template": "reel",
+  "out": "media/ig/2026-12-02-use-it-or-lose-it.mp4",
+  "countdown": "По-английски через",
+  "cover_prompt": "Как это по-английски, в конце ролика",
+  "slides": [
+   {
+    "template": "list",
+    "label": "МОИ УЧЕНИКИ",
+    "title": "Уровень высокий,\nа они всё равно учат",
+    "items": [
+     "У нескольких учеников уровень уже высокий",
+     "Они всё равно продолжают заниматься",
+     "Знают, что стоит бросить, и язык начнёт уходить"
+    ],
+    "cta": "Листай → как это по-английски",
+    "photo": "brand/photos/desk-journal-laptop.jpg",
+    "focus": [
+     0.5,
+     0.5
+    ]
+   },
+   {
+    "template": "phrase",
+    "label": "КАК ЭТО ПО-АНГЛИЙСКИ",
+    "phrase": "Use it or lose it",
+    "meaning": "пользуйся, или потеряешь",
+    "examples": [
+     {
+      "en": "You have to keep speaking English. Use it or lose it.",
+      "ru": "Надо продолжать говорить, иначе всё забудется."
+     },
+     {
+      "en": "I don't play much anymore. Use it or lose it, right?",
+      "ru": "Я теперь мало играю. Не пользуешься, и навык уходит, да?"
+     }
+    ],
+    "note": "Так говорят про любой навык, не только про язык.",
+    "photo": "brand/photos/desk-journal-laptop.jpg",
+    "focus": [
+     0.5,
+     0.3
+    ]
+   }
   ]
  },
  {
@@ -40,20 +69,49 @@
   ]
  },
  {
-  "template": "list",
-  "out": "media/ig/2026-12-10-for-the-fun-of-it-1.jpg",
-  "label": "МОИ УЧЕНИКИ",
-  "title": "Английский просто\nдля удовольствия",
-  "items": [
-   "С несколькими учениками мы вместе уже около пяти лет",
-   "Они переехали в Дубай",
-   "Учат не потому, что надо,\nа потому, что любят"
-  ],
-  "cta": "Листай → как это по-английски",
-  "photo": "brand/photos/dubai-burj-al-arab.jpg",
-  "focus": [
-   0.5,
-   0.45
+  "template": "reel",
+  "out": "media/ig/2026-12-10-for-the-fun-of-it.mp4",
+  "countdown": "По-английски через",
+  "cover_prompt": "Как это по-английски, в конце ролика",
+  "slides": [
+   {
+    "template": "list",
+    "label": "МОИ УЧЕНИКИ",
+    "title": "Английский просто\nдля удовольствия",
+    "items": [
+     "С несколькими учениками мы вместе уже около пяти лет",
+     "Они переехали в Дубай",
+     "Учат не потому, что надо,\nа потому, что любят"
+    ],
+    "cta": "Листай → как это по-английски",
+    "photo": "brand/photos/dubai-burj-al-arab.jpg",
+    "focus": [
+     0.5,
+     0.45
+    ]
+   },
+   {
+    "template": "phrase",
+    "label": "КАК ЭТО ПО-АНГЛИЙСКИ",
+    "phrase": "for the fun of it",
+    "meaning": "просто ради удовольствия",
+    "examples": [
+     {
+      "en": "I'm not learning Spanish for work. I'm doing it for the fun of it.",
+      "ru": "Я учу испанский не для работы, а просто для удовольствия."
+     },
+     {
+      "en": "We took a dance class just for the fun of it.",
+      "ru": "Мы пошли на танцы просто ради удовольствия."
+     }
+    ],
+    "note": "Короче и разговорнее: just for fun.",
+    "photo": "brand/photos/dubai-burj-al-arab.jpg",
+    "focus": [
+     0.5,
+     0.6
+    ]
+   }
   ]
  },
  {
@@ -80,19 +138,48 @@
   ]
  },
  {
-  "template": "list",
-  "out": "media/ig/2026-12-17-my-therapy-1.jpg",
-  "label": "МОИ УЧЕНИКИ",
-  "title": "Английский\nкак терапия",
-  "items": [
-   "Некоторым ученикам\nиз России интереснее всего\nпросто разговаривать",
-   "К занятиям они относятся\nкак к своего рода терапии"
-  ],
-  "cta": "Листай → как это по-английски",
-  "photo": "brand/photos/kitchen-mug-evening.jpg",
-  "focus": [
-   0.5,
-   0.6
+  "template": "reel",
+  "out": "media/ig/2026-12-17-my-therapy.mp4",
+  "countdown": "По-английски через",
+  "cover_prompt": "Как это по-английски, в конце ролика",
+  "slides": [
+   {
+    "template": "list",
+    "label": "МОИ УЧЕНИКИ",
+    "title": "Английский\nкак терапия",
+    "items": [
+     "Некоторым ученикам\nиз России интереснее всего\nпросто разговаривать",
+     "К занятиям они относятся\nкак к своего рода терапии"
+    ],
+    "cta": "Листай → как это по-английски",
+    "photo": "brand/photos/kitchen-mug-evening.jpg",
+    "focus": [
+     0.5,
+     0.6
+    ]
+   },
+   {
+    "template": "phrase",
+    "label": "КАК ЭТО ПО-АНГЛИЙСКИ",
+    "phrase": "It's my therapy",
+    "meaning": "это моя терапия",
+    "examples": [
+     {
+      "en": "Running is my therapy.",
+      "ru": "Бег для меня как терапия."
+     },
+     {
+      "en": "Cooking is my therapy.",
+      "ru": "Готовка мне вместо терапии."
+     }
+    ],
+    "note": "Подставь своё занятие, и фраза готова.",
+    "photo": "brand/photos/kitchen-mug-evening.jpg",
+    "focus": [
+     0.5,
+     0.45
+    ]
+   }
   ]
  },
  {
@@ -119,21 +206,51 @@
   ]
  },
  {
-  "template": "list",
-  "out": "media/ig/2026-12-23-been-with-me-1.jpg",
-  "label": "МОИ УЧЕНИКИ",
-  "title": "Больше четырёх лет\nвместе",
-  "items": [
-   "Большинство моих\nучеников со мной уже\nбольше четырёх лет",
-   "По-английски про это\nговорят просто be with"
-  ],
-  "cta": "Листай → как это по-английски",
-  "photo": "brand/photos/laptop-video-lesson.jpg",
-  "focus": [
-   0.5,
-   0.55
-  ],
-  "shade": 1.3
+  "template": "reel",
+  "out": "media/ig/2026-12-23-been-with-me.mp4",
+  "countdown": "По-английски через",
+  "cover_prompt": "Как это по-английски, в конце ролика",
+  "slides": [
+   {
+    "template": "list",
+    "label": "МОИ УЧЕНИКИ",
+    "title": "Больше четырёх лет\nвместе",
+    "items": [
+     "Большинство моих\nучеников со мной уже\nбольше четырёх лет",
+     "По-английски про это\nговорят просто be with"
+    ],
+    "cta": "Листай → как это по-английски",
+    "photo": "brand/photos/laptop-video-lesson.jpg",
+    "focus": [
+     0.5,
+     0.55
+    ],
+    "shade": 1.3
+   },
+   {
+    "template": "phrase",
+    "label": "КАК ЭТО ПО-АНГЛИЙСКИ",
+    "phrase": "be with",
+    "meaning": "быть чьим-то клиентом",
+    "examples": [
+     {
+      "en": "Most of my students have been with me for over four years.",
+      "ru": "Большинство учеников\nсо мной уже больше четырёх лет."
+     },
+     {
+      "en": "I've been with the same barber for ten years.",
+      "ru": "Я хожу к одному барберу уже десять лет."
+     }
+    ],
+    "note": "И про работу: I've been with them for years.",
+    "photo": "brand/photos/laptop-video-lesson.jpg",
+    "focus": [
+     0.5,
+     0.4
+    ],
+    "shade": 1.3
+   }
+  ]
  },
  {
   "template": "phrase",

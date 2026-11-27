@@ -30,7 +30,7 @@ class RenderCards(unittest.TestCase):
         specs = []
         for path in sorted(glob.glob(os.path.join(ROOT, "content", "cards", "*.json"))):
             with open(path, encoding="utf-8") as fh:
-                specs.extend(json.load(fh))
+                specs.extend(s for s in json.load(fh) if s["template"] != "reel")  # tests/test_render_reel.py
         self.assertTrue(specs)
         for spec in specs:
             with self.subTest(out=spec["out"]):
@@ -91,8 +91,9 @@ class RenderCards(unittest.TestCase):
         for path in sorted(glob.glob(os.path.join(ROOT, "content", "cards", "*.json"))):
             with open(path, encoding="utf-8") as fh:
                 for spec in json.load(fh):
-                    if spec.get("photo"):
-                        self.assertIn(spec["photo"], listed, spec["out"])
+                    for card in spec.get("slides") or [spec]:  # a reel's slides are cards too
+                        if card.get("photo"):
+                            self.assertIn(card["photo"], listed, spec["out"])
 
     def test_every_template_draws_on_a_photo(self):
         photo = self.photos()[0]["file"]

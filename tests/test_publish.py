@@ -1,5 +1,6 @@
 import json
 import os
+import struct
 import sys
 import tempfile
 import unittest
@@ -180,6 +181,12 @@ class FakeZernioApi:
         self.reply_errors = []
         self.connected = True
         self.created = 0
+        self.uploads = []
+        self.update_media = []
+
+    def upload(self, path, content_type):
+        self.uploads.append((path, content_type))
+        return "https://media.zernio.com/temp/%d-%s" % (len(self.uploads), os.path.basename(path))
 
     def account(self, platform="threads"):
         if not self.connected:
@@ -214,6 +221,7 @@ class FakeZernioApi:
 
     def update_post(self, zid, post, image_url=None, scheduled_for=None):
         self.updates.append(zid)
+        self.update_media.append(image_url)
         self.posts[zid].update(content=post["text"], scheduledFor=scheduled_for)
         return {"post": self.posts[zid]}
 
@@ -541,6 +549,29 @@ class ZernioPublisherTest(Harness):
         self.assertEqual(zpost["image_url"], ["https://raw.example/sha/media/ig/a-1.jpg",
                                               "https://raw.example/sha/media/ig/a-2.jpg"])
 
+    def test_instagram_reel_is_uploaded_once_and_scheduled_with_its_cover(self):
+        reel = {"id": "ig-2026-11-29-calls", "publish_at": "2026-11-29T15:00:00Z", "kind": "lesson",
+                "text": "Caption", "video": "media/ig/2026-11-29-calls.mp4",
+                "cover": "media/ig/2026-11-29-calls-cover.jpg", "alt_text": ["question", "answer"]}
+
+        def run(when, item):
+            pub = ZernioPublisher(self.api, Log(self.log_path), "https://raw.example/sha/", platform="instagram",
+                                  clock=lambda: parse_time(when))
+            with mock.patch.object(publish, "check_post", return_value=[]):
+                return self.outcomes(pub.run([item], parse_time(when)))
+
+        self.assertEqual(run("2026-11-28T12:00:00Z", reel), {reel["id"]: "scheduled"})
+        self.assertEqual(self.api.uploads, [(os.path.join(publish.ROOT, reel["video"]), "video/mp4")])
+        self.assertEqual(self.api.posts["z1"]["image_url"], {
+            "video": "https://media.zernio.com/temp/1-2026-11-29-calls.mp4",
+            "cover": "https://raw.example/sha/media/ig/2026-11-29-calls-cover.jpg"})
+        self.assertEqual(run("2026-11-28T20:00:00Z", reel), {reel["id"]: "scheduled"})  # nothing changed
+        self.assertEqual(run("2026-11-29T09:00:00Z", dict(reel, text="Caption, edited")), {reel["id"]: "scheduled"})
+        self.assertEqual((self.api.updates, self.api.update_media), (["z1"], [None]))  # the caption, not the video
+        self.assertEqual(len(self.api.uploads), 1)
+        self.api.fire("z1")
+        self.assertEqual(run("2026-11-29T16:00:00Z", reel), {reel["id"]: "published"})
+
     def test_polls_are_rejected_before_any_request(self):
         report = self.run_at("2026-11-09T06:05:00Z", [QUIZ])
         self.assertEqual(self.outcomes(report), {"d1-quiz": "failed"})
@@ -571,8 +602,10 @@ class FakeSession:
         self.calls.append(("GET", url, params))
         return self.responses.pop(0)
 
-    def request(self, method, url, json=None, params=None, headers=None, timeout=None):
+    def request(self, method, url, json=None, params=None, headers=None, timeout=None, data=None):
         self.calls.append((method, url, json, params, headers))
+        if data is not None:
+            self.sent = data.read()
         return self.responses.pop(0)
 
 
@@ -611,6 +644,44 @@ class ZernioApiTest(unittest.TestCase):
                                               "platformSpecificData": {"firstComment": "Ответ на 2-м слайде"}}])
         self.assertEqual(body["mediaItems"], [{"type": "image", "url": "https://r/1.jpg", "altText": "question"},
                                               {"type": "image", "url": "https://r/2.jpg", "altText": "answer"}])
+
+    def test_instagram_reel_request(self):
+        session = FakeSession([FakeResponse(201, {"post": {"_id": "z1"}})])
+        api = ZernioApi("sk_test", session=session)
+        reel = {"id": "ig-r", "text": "Caption", "video": "media/ig/r.mp4", "cover": "media/ig/r-cover.jpg",
+                "alt_text": ["question", "answer"]}
+        api.create_post("acc9", reel, {"video": "https://media.zernio.com/temp/r.mp4", "cover": "https://r/r-cover.jpg"},
+                        "ig-r.0", "2026-11-29T15:00:00Z", platform="instagram")
+        body = session.calls[0][2]
+        self.assertEqual(body["mediaItems"], [{"type": "video", "url": "https://media.zernio.com/temp/r.mp4"}])
+        self.assertEqual(body["platforms"], [{"platform": "instagram", "accountId": "acc9", "platformSpecificData": {
+            "shareToFeed": True, "instagramThumbnail": "https://r/r-cover.jpg"}}])
+
+    def test_upload_goes_through_a_presigned_url(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, "r.mp4")
+            with open(path, "wb") as fh:
+                fh.write(b"video bytes")
+            slot = {"uploadUrl": "https://bucket.r2.example/temp/r.mp4?sig=1",
+                    "publicUrl": "https://media.zernio.com/temp/r.mp4", "key": "temp/r.mp4", "expiresIn": 3600}
+            session = FakeSession([FakeResponse(200, slot), FakeResponse(200, {})])
+            self.assertEqual(ZernioApi("sk_test", session=session).upload(path, "video/mp4"), slot["publicUrl"])
+        (m1, url1, body1, _, headers1), (m2, url2, _, _, headers2) = session.calls
+        self.assertEqual((m1, url1), ("POST", "https://zernio.com/api/v1/media/presign"))
+        self.assertEqual(body1, {"filename": "r.mp4", "contentType": "video/mp4", "size": 11})
+        self.assertEqual(headers1["Authorization"], "Bearer sk_test")
+        self.assertEqual((m2, url2, headers2), ("PUT", slot["uploadUrl"], {"Content-Type": "video/mp4"}))
+        self.assertEqual(session.sent, b"video bytes")
+
+    def test_a_refused_upload_is_retried_later_not_an_auth_stop(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, "r.mp4")
+            open(path, "wb").close()
+            slot = {"uploadUrl": "https://bucket.r2.example/x", "publicUrl": "https://media.zernio.com/x"}
+            api = ZernioApi("sk_test", session=FakeSession([FakeResponse(200, slot), FakeResponse(403, {})]))
+            with self.assertRaises(ApiError) as ctx:
+                api.upload(path, "video/mp4")
+        self.assertEqual((ctx.exception.transient, ctx.exception.auth), (True, False))
 
     def test_scheduled_request_and_update(self):
         session = FakeSession([FakeResponse(201, {"post": {"_id": "z1"}}), FakeResponse(200, {"post": {"_id": "z1"}})])
@@ -730,6 +801,76 @@ class InstagramCheckTest(unittest.TestCase):
         for expected, changes in cases.items():
             problems = self.check(**changes)
             self.assertTrue(any(expected in p for p in problems), (expected, problems))
+
+
+def mp4_box(kind, payload=b""):
+    return struct.pack(">I4s", 8 + len(payload), kind.encode("latin-1")) + payload
+
+
+def fake_mp4(size=(1080, 1920), seconds=10, fps=30, sound=True, faststart=True, edit_list=False):
+    """An MP4 with just the boxes QC reads, and no media inside."""
+    def trak(handler, codec, entry, width, height, timescale, samples):
+        tkhd = mp4_box("tkhd", bytes(76) + struct.pack(">II", width << 16, height << 16))
+        mdhd = mp4_box("mdhd", bytes(12) + struct.pack(">II", timescale, seconds * timescale) + bytes(4))
+        hdlr = mp4_box("hdlr", bytes(8) + handler.encode() + bytes(13))
+        stsd = mp4_box("stsd", bytes(4) + struct.pack(">I", 1) + struct.pack(">I4s", 8 + len(entry), codec.encode())
+                       + entry)
+        stts = mp4_box("stts", bytes(4) + struct.pack(">III", 1, samples, seconds * timescale // samples))
+        edts = mp4_box("edts", mp4_box("elst", bytes(8))) if edit_list else b""
+        return mp4_box("trak", tkhd + edts + mp4_box("mdia", mdhd + hdlr + mp4_box("minf", mp4_box("stbl", stsd + stts))))
+
+    video = trak("vide", "avc1", bytes(78), size[0], size[1], 15360, seconds * fps)
+    stereo = bytes(6) + struct.pack(">H", 1) + bytes(8) + struct.pack(">HHHHI", 2, 16, 0, 0, 48000 << 16)
+    audio = trak("soun", "mp4a", stereo, 0, 0, 48000, seconds * 47) if sound else b""
+    moov = mp4_box("moov", mp4_box("mvhd", bytes(12) + struct.pack(">II", 1000, seconds * 1000) + bytes(80))
+                   + video + audio)
+    mdat = mp4_box("mdat", bytes(32))
+    return mp4_box("ftyp", b"isom" + bytes(4) + b"isomavc1") + (moov + mdat if faststart else mdat + moov)
+
+
+class InstagramReelCheckTest(unittest.TestCase):
+    def setUp(self):
+        from PIL import Image
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        Image.new("RGB", (1080, 1920), "white").save(os.path.join(self.tmp.name, "cover.jpg"), "JPEG")
+        Image.new("RGB", (1080, 1350), "white").save(os.path.join(self.tmp.name, "slide.jpg"), "JPEG")
+        self.good = {"id": "ig-2026-11-29-calls", "publish_at": "2026-11-29T15:00:00Z", "kind": "lesson",
+                     "text": "Caption #английский", "video": "reel.mp4", "cover": "cover.jpg",
+                     "alt_text": ["question", "answer"]}
+
+    def check(self, mp4=None, **changes):
+        with open(os.path.join(self.tmp.name, "reel.mp4"), "wb") as fh:
+            fh.write(fake_mp4() if mp4 is None else mp4)
+        return check_post(dict(self.good, **changes), root=self.tmp.name, platform="instagram")
+
+    def test_good_reel_passes(self):
+        self.assertEqual(self.check(), [])
+
+    def test_reel_rules(self):
+        cases = {
+            "faststart": dict(mp4=fake_mp4(faststart=False)),
+            "edit lists": dict(mp4=fake_mp4(edit_list=True)),
+            "muted": dict(mp4=fake_mp4(sound=False)),
+            "a Reel here is 1080x1920": dict(mp4=fake_mp4(size=(720, 1280))),
+            "lasts 2.0 s": dict(mp4=fake_mp4(seconds=2)),
+            "20.0 fps": dict(mp4=fake_mp4(fps=20)),
+            "not a readable MP4": dict(mp4=mp4_box("ftyp") + struct.pack(">I4s", 255, b"moov")),
+            "cover nowhere.jpg not found": dict(cover="nowhere.jpg"),
+            "1080x1920 JPEG": dict(cover="slide.jpg"),
+            "not both": dict(images=["slide.jpg"]),
+            "alt_text": dict(alt_text=[]),
+            "made by tools/render_reel.py": dict(video="reel.mov"),
+        }
+        for expected, changes in cases.items():
+            problems = self.check(**changes)
+            self.assertTrue(any(expected in p for p in problems), (expected, problems))
+
+    def test_a_reel_caption_never_talks_about_slides(self):
+        swipe = dict(self.good, text="Что она предлагает?\n\nЛистай, ответ на втором слайде 👉")
+        self.assertTrue(any("slides or swiping" in e for e in check_queue([swipe], platform="instagram")))
+        watch = dict(self.good, text="Что она предлагает?\n\nОтвет в конце ролика 👀")
+        self.assertFalse(any("slides or swiping" in e for e in check_queue([watch], platform="instagram")))
 
 
 class QueueTest(unittest.TestCase):

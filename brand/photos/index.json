@@ -14,7 +14,8 @@
     ],
     "people": true,
     "faces": "left and right, upper middle",
-    "source": "Canva AI image, generated 2026-11-17"
+    "source": "Canva AI image, generated 2026-11-17",
+    "ai_generated": true
   },
   {
     "file": "brand/photos/dinner-pasta.jpg",
@@ -31,7 +32,8 @@
     ],
     "people": true,
     "faces": "left middle and right top",
-    "source": "Canva AI image, generated 2026-11-17"
+    "source": "Canva AI image, generated 2026-11-17",
+    "ai_generated": true
   },
   {
     "file": "brand/photos/office-coffee.jpg",
@@ -47,7 +49,8 @@
     ],
     "people": true,
     "faces": "left and right, upper third",
-    "source": "Canva AI image, generated 2026-11-17"
+    "source": "Canva AI image, generated 2026-11-17",
+    "ai_generated": true
   },
   {
     "file": "brand/photos/conversation-puzzled.jpg",

@@ -1,6 +1,7 @@
 """Render educational cards (1080x1350) from JSON specs in content/cards/.
 
-Templates: quiz, versus, mistakes, answer, phrase, list, chat, avatar.
+Templates: quiz, versus, mistakes, answer, phrase, list, chat, avatar. A spec with "template": "reel"
+is an Instagram Reel made of these cards, rendered by tools/render_reel.py.
 
 The look lives in brand/brand.json: one colour theme per template (a gradient, soft glows and
 fine grain), Unbounded for titles, Onest for text and Caveat for handwritten notes. A spec can
@@ -91,11 +92,17 @@ def missing_glyphs(spec, brand):
 
 
 class Card:
-    """A canvas in card units (1080x1350); every drawing call takes card units."""
+    """A canvas in card units (1080x1350); every drawing call takes card units.
 
-    def __init__(self, brand, size=None, theme=None, photo=None, focus=None, shade=1.0):
+    box is (top, height) of the card's layout on a taller canvas: a Reel frame (tools/render_reel.py)
+    draws its background at 1080x1920 around a card-sized box. The photo's shading and the theme's
+    glows and rings follow the box, so the slide on top reads as it does on its own card.
+    """
+
+    def __init__(self, brand, size=None, theme=None, photo=None, focus=None, shade=1.0, box=None):
         self.brand = brand
         self.w, self.h = size or brand["size"]
+        self.box = tuple(box) if box else (0, self.h)
         self.m = brand["margin"]
         self.c = brand["colors"]
         themes = brand.get("themes", {})
@@ -364,15 +371,23 @@ class Card:
         top = min(max(0, round(photo.height * fy - height / 2)), photo.height - height)
         photo = photo.crop((left, top, left + width, top + height))
         photo = ImageEnhance.Contrast(ImageEnhance.Color(photo).enhance(1.12)).enhance(1.04)
-        column = bytes(round(255 * min(1.0, self.shade_k * max(max(0.0, 1 - t / 0.34) * 0.62,
-                                                               max(0.0, (t - 0.42) / 0.58) * 0.88)))
-                       for t in (i / 255 for i in range(256)))
+        top, box_h = self.box
+        column = bytes(round(255 * self.shade_at((i / 255 * self.h - top) / box_h)) for i in range(256))
         mask = Image.frombytes("L", (1, 256), column).resize((width, height), Image.BILINEAR)
         photo.paste(Image.new("RGB", (width, height), rgb(PHOTO_SHADE)), (0, 0), mask)
         self.img.paste(photo, (0, 0))
 
+    def shade_at(self, t):
+        """How much of the shade colour covers the photo at height t of the layout box (0 top, 1 bottom).
+        Above the box (a Reel frame) it darkens a little more, under the app's own buttons; below it, it
+        stays as at the box's bottom edge, so the photo still shows under the caption."""
+        top = min(0.80, max(0.0, 1 - t / 0.34) * 0.62)
+        bottom = min(0.88, max(0.0, (t - 0.42) / 0.58) * 0.88)
+        return min(1.0, self.shade_k * max(top, bottom))
+
     def background(self):
-        """The theme's gradient, with soft glows and a fine grain so it doesn't look flat; or the photo."""
+        """The theme's gradient, with soft glows, a fine grain so it doesn't look flat and two thin rings
+        in the top corner; or the photo."""
         if self.photo:
             return self.photo_background()
         size = (self.w * self.s, self.h * self.s)
@@ -381,11 +396,13 @@ class Card:
         small.putdata([rgb(color) for row in grid for color in row])
         bg = small.resize(size, Image.BICUBIC)
 
+        top = self.box[0]
         q = 8  # glows are drawn small and scaled up
         glow = Image.new("RGBA", (self.w // q, self.h // q), (0, 0, 0, 0))
         gd = ImageDraw.Draw(glow)
         for spot in self.theme.get("glow", []):
             x, y, r = spot["at"]
+            y += top
             gd.ellipse([(x - r) / q, (y - r) / q, (x + r) / q, (y + r) / q], fill=rgb(spot["color"], spot.get("alpha", 150)))
         glow = glow.filter(ImageFilter.GaussianBlur(self.theme.get("blur", 120) / q)).resize(size, Image.BICUBIC)
         bg.paste(glow, (0, 0), glow)
@@ -400,6 +417,9 @@ class Card:
         grain = grain.resize(size, Image.NEAREST)
         bg = ImageChops.soft_light(bg, Image.merge("RGB", (grain, grain, grain)))
         self.img.paste(bg, (0, 0))
+        c = self.c
+        self.ellipse([self.w - 260, top - 180, self.w + 180, top + 260], outline=rgb(c["white"], 52), width=3)
+        self.ellipse([self.w - 170, top - 90, self.w + 90, top + 170], outline=rgb(c["white"], 36), width=3)
 
     def frame(self, label):
         """Background, corner decoration, the label sticker and the footer. Returns the y where content starts.
@@ -411,8 +431,6 @@ class Card:
             self.pill(self.w / 2, self.h - m - 50, self.brand["handle"], "bold", 27, fill=c["teal"], ink=c["white"],
                       pad=(30, 13), anchor="m")
             return m - 16 + h + 26
-        self.ellipse([self.w - 260, -180, self.w + 180, 260], outline=rgb(c["white"], 52), width=3)
-        self.ellipse([self.w - 170, -90, self.w + 90, 170], outline=rgb(c["white"], 36), width=3)
         self.sparkle(self.w - m - 30, m + 36, 32, c["sun"])
         self.sparkle(self.w - m - 104, m + 92, 14, c["white"])
         top = m - 8 + self.sticker(m - 2, m - 8, label) + 30
@@ -928,6 +946,9 @@ def render(spec, brand=None):
     missing = missing_glyphs(spec, brand)
     if missing:
         raise ValueError("%s: no font has a glyph for %s" % (spec["out"], " ".join(missing)))
+    if spec["template"] == "reel":
+        import render_reel  # a Reel is made of these cards
+        return render_reel.render(spec, brand)
     card = Card(brand, spec.get("size"), spec.get("theme") or spec["template"], spec.get("photo"), spec.get("focus"),
                 spec.get("shade", 1.0))
     TEMPLATES[spec["template"]](card, spec)

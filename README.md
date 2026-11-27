@@ -14,7 +14,7 @@ The Zernio API key lives only in GitHub Secrets. Claude never sees it, and the r
 
 **Two publishing routes** (`PUBLISH_BACKEND`, a repository variable): `zernio` (default) needs no Meta developer account but can't post polls, so quizzes take answers in the comments. Reveals are replied under their quiz through Zernio's inbox endpoint, which can't schedule: the **Threads answer reveals** cloud routine runs `publish.py --platform threads --replies-only` at 06:15 and 16:15 UTC, and GitHub runs (`--reply-grace 45`) post a reveal only if the routine missed it. `threads` uses Meta's Threads API directly with your own app and token, and adds native polls and reveals as replies. `tools/qc.py` rejects anything the active route can't post.
 
-**Instagram** runs through the same publisher (`--platform instagram`) with its own queue and log. It needs the Instagram account connected in Zernio too (still free: up to 2 accounts).
+**Instagram** runs through the same publisher (`--platform instagram`) with its own queue and log. It needs the Instagram account connected in Zernio too (still free: up to 2 accounts). From 2026-11-28 each day's post is a Reel instead of a carousel: `tools/render_reel.py` plays the slide cards one after another in a 1080x1920 video with its own sound, and the publisher uploads the video to Zernio's storage (GitHub serves `.mp4` files as `application/octet-stream`) and posts it with its cover, on the profile grid too. A queue entry with `images` still goes out as a carousel.
 
 ## Layout
 
@@ -26,12 +26,13 @@ The Zernio API key lives only in GitHub Secrets. Claude never sees it, and the r
 | `strategy/COMMENTS.md` | What the 3×/day comment routine does: reply, escalate or skip each new comment |
 | `brand/` | Colours, fonts, and the profile picture (`avatar.json` → `avatar.png`) |
 | `content/queue/*.json` | Scheduled Threads posts (UTC `publish_at`), including answer reveals |
-| `content/instagram/*.json` | Scheduled Instagram posts: captions plus 1–10 JPEG slides (`images`, `alt_text` lists) |
-| `content/cards/*.json` | Specs for graphics; `tools/render_cards.py` turns them into `media/*.png` |
+| `content/instagram/*.json` | Scheduled Instagram posts: a caption plus a Reel (`video`, `cover`) or 1–10 JPEG slides (`images`), and an `alt_text` list with what each slide says |
+| `content/cards/*.json` | Specs for graphics; `tools/render_cards.py` turns them into `media/*.png`, and a `reel` spec into `media/ig/*.mp4` with its cover |
 | `log/publications.jsonl`, `log/instagram.jsonl` | Append-only record of every publish attempt, retry, failure, skip, per platform |
 | `log/comments.jsonl` | One decision per comment (replied, escalated, skipped): ids and our reply text, never what others wrote |
 | `reports/` | Weekly metrics (`insights-*.json`) and the weekly report (`weekly-*.md`, emailed to you as a GitHub issue) |
-| `tools/qc.py` | Mechanical checks: lengths, route limits, images, reveal linkage, duplicates |
+| `tools/qc.py` | Mechanical checks: lengths, route limits, images, Reel videos, reveal linkage, duplicates |
+| `tools/render_reel.py` | Instagram Reels: slide cards in a 9:16 video with a countdown to the answer and its own sound (needs ffmpeg) |
 | `tools/publish.py` | Publisher with duplicate guard, limited retries, stale-post skipping |
 | `tools/comments.py` | Comment inbox, reply (with checks and a daily cap), escalate, skip |
 
@@ -67,7 +68,7 @@ To use the `threads` route instead, create a Meta app with the *Access the Threa
 ## Operating
 
 ```bash
-python3 tools/render_cards.py content/cards/<file>.json
+python3 tools/render_cards.py content/cards/<file>.json    # a reel spec needs ffmpeg
 python3 tools/qc.py
 python3 tools/publish.py --dry-run --now 2026-11-09T06:05:00Z
 python3 tools/publish.py --platform instagram --dry-run --now 2026-11-11T12:00:00Z

@@ -41,6 +41,15 @@ IG_MAX_CAPTION = 2200
 IG_MAX_HASHTAGS = 30
 IG_MAX_SLIDES = 10
 IG_KINDS = {"quiz", "lesson", "tip", "promo", "intro"}
+# A Reel (from 2026-11-27, tools/render_reel.py): Meta's Reels spec, read 2026-11-24, asks for MP4 with
+# its index (moov) first and no edit lists, H.264 or HEVC, 23-60 fps, AAC at <= 48 kHz in 1-2 channels,
+# 3 s to 15 min, <= 300 MB, and a JPEG cover <= 8 MB, 9:16 recommended. Ours are 1080x1920 and short,
+# with sound (Instagram shows muted reels less), and a file under GitHub's 50 MB warning.
+IG_REEL_SIZE = (1080, 1920)
+IG_REEL_SECONDS = (3, 90)
+IG_REEL_FPS = (23, 60)
+IG_REEL_MAX_BYTES = 50 * 1024 * 1024
+REEL_SWIPE_RE = re.compile(r"листа(й|йте|ть)\b|слайд|свайп", re.I)  # a video has no slides to swipe
 
 MAX_TEXT = 500
 MAX_POLL_OPTION = 25
@@ -145,6 +154,10 @@ def check_instagram_post(post, root=ROOT):
     for field in ("poll", "reply_to", "topic_tag", "image"):
         if post.get(field) is not None:
             errors.append("%s is a Threads field; Instagram posts use images and alt_text lists" % field)
+    if post.get("video") is not None:
+        errors.extend(reel_problems(post, root))
+        errors.extend(student_problems(post))
+        return errors
 
     images, alts = post.get("images") or [], post.get("alt_text") or []
     if not 1 <= len(images) <= IG_MAX_SLIDES:
@@ -169,6 +182,146 @@ def check_instagram_post(post, root=ROOT):
     if len(sizes) > 1:
         errors.append("all slides of a carousel must be the same size")
     errors.extend(student_problems(post))
+    return errors
+
+
+def mp4_boxes(data, start=0, end=None):
+    """(type, payload start, payload end) of each MP4 box between start and end."""
+    end = len(data) if end is None else end
+    pos = start
+    while pos + 8 <= end:
+        size, kind = struct.unpack(">I4s", data[pos:pos + 8])
+        head = 8
+        if size == 1:
+            size, head = struct.unpack(">Q", data[pos + 8:pos + 16])[0], 16
+        elif size == 0:
+            size = end - pos
+        if size < head or pos + size > end:
+            raise ValueError("broken %r box at byte %d" % (kind, pos))
+        yield kind.decode("latin-1"), pos + head, pos + size
+        pos += size
+
+
+def _box(data, start, end, path):
+    """The payload (start, end) of the first box down a path such as "mdia/minf/stbl", or None."""
+    for name in path.split("/"):
+        found = next(((s, e) for kind, s, e in mp4_boxes(data, start, end) if kind == name), None)
+        if found is None:
+            return None
+        start, end = found
+    return start, end
+
+
+def mp4_info(path):
+    """What QC needs from an MP4, read from its boxes: their order, edit lists, the duration, and per
+    track its handler (vide, soun), codec, frame size, frames per second or sample rate and channels."""
+    with open(path, "rb") as fh:
+        data = fh.read()
+    top = [(kind, s, e) for kind, s, e in mp4_boxes(data)]
+    info = {"order": [kind for kind, _, _ in top], "edit_lists": False, "tracks": []}
+    moov = next(((s, e) for kind, s, e in top if kind == "moov"), None)
+    if moov is None:
+        return info
+    mvhd = _box(data, moov[0], moov[1], "mvhd")
+    if mvhd:
+        version = data[mvhd[0]]
+        timescale, duration = (struct.unpack(">IQ", data[mvhd[0] + 20:mvhd[0] + 32]) if version == 1
+                               else struct.unpack(">II", data[mvhd[0] + 12:mvhd[0] + 20]))
+        info["seconds"] = duration / timescale if timescale else 0
+    for kind, s, e in mp4_boxes(data, *moov):
+        if kind != "trak":
+            continue
+        if _box(data, s, e, "edts/elst"):
+            info["edit_lists"] = True
+        track = {}
+        tkhd = _box(data, s, e, "tkhd")
+        if tkhd:
+            width, height = struct.unpack(">II", data[tkhd[1] - 8:tkhd[1]])
+            track["size"] = (width >> 16, height >> 16)
+        hdlr = _box(data, s, e, "mdia/hdlr")
+        track["handler"] = data[hdlr[0] + 8:hdlr[0] + 12].decode("latin-1") if hdlr else None
+        mdhd = _box(data, s, e, "mdia/mdhd")
+        stsd = _box(data, s, e, "mdia/minf/stbl/stsd")
+        stts = _box(data, s, e, "mdia/minf/stbl/stts")
+        if stsd:
+            entry = stsd[0] + 8
+            track["codec"] = data[entry + 4:entry + 8].decode("latin-1")
+            if track["handler"] == "soun":
+                track["channels"] = struct.unpack(">H", data[entry + 24:entry + 26])[0]
+                track["rate"] = struct.unpack(">I", data[entry + 32:entry + 36])[0] >> 16
+        if mdhd and stts and track["handler"] == "vide":
+            version = data[mdhd[0]]
+            timescale, duration = (struct.unpack(">IQ", data[mdhd[0] + 20:mdhd[0] + 32]) if version == 1
+                                   else struct.unpack(">II", data[mdhd[0] + 12:mdhd[0] + 20]))
+            count = struct.unpack(">I", data[stts[0] + 4:stts[0] + 8])[0]
+            frames = sum(struct.unpack(">I", data[stts[0] + 8 + 8 * i:stts[0] + 12 + 8 * i])[0] for i in range(count))
+            track["fps"] = frames * timescale / duration if duration else 0
+        info["tracks"].append(track)
+    return info
+
+
+def reel_problems(post, root=ROOT):
+    """Problems that make an Instagram Reel unpublishable: the video, its cover and the fields."""
+    from PIL import Image
+
+    errors = []
+    if post.get("images"):
+        errors.append("a post is a carousel (images) or a Reel (video), not both")
+    alts = post.get("alt_text")
+    if not isinstance(alts, list) or not alts or not all(isinstance(a, str) and a.strip() for a in alts):
+        errors.append("alt_text must be a list describing each slide of the Reel (QC reads it; "
+                      "Instagram has no alt text for Reels)")
+    video = post.get("video") or ""
+    path = os.path.join(root, video)
+    if not video.endswith(".mp4"):
+        errors.append("video must be an .mp4 made by tools/render_reel.py")
+    elif not os.path.isfile(path):
+        errors.append("video %s not found" % video)
+    elif os.path.getsize(path) > IG_REEL_MAX_BYTES:
+        errors.append("%s is larger than %d MB" % (video, IG_REEL_MAX_BYTES // 2 ** 20))
+    else:
+        try:
+            info = mp4_info(path)
+        except (ValueError, struct.error) as exc:
+            info = None
+            errors.append("%s is not a readable MP4 (%s)" % (video, exc))
+        if info:
+            order = info["order"]
+            if not order or order[0] != "ftyp" or "moov" not in order or "mdat" not in order:
+                errors.append("%s is not an MP4 with ftyp, moov and mdat boxes" % video)
+            elif order.index("moov") > order.index("mdat"):
+                errors.append("%s has its index (moov) after the media; Meta wants it first (faststart)" % video)
+            if info["edit_lists"]:
+                errors.append("%s has edit lists, which Meta's Reels spec rules out" % video)
+            low, high = IG_REEL_SECONDS
+            if not low <= info.get("seconds", 0) <= high:
+                errors.append("%s lasts %.1f s; a Reel here is %d-%d s" % (video, info.get("seconds", 0), low, high))
+            videos = [t for t in info["tracks"] if t.get("handler") == "vide"]
+            sounds = [t for t in info["tracks"] if t.get("handler") == "soun"]
+            if len(videos) != 1 or videos[0].get("codec") not in ("avc1", "hvc1", "hev1"):
+                errors.append("%s needs one H.264 or HEVC video track" % video)
+            else:
+                if videos[0].get("size") != IG_REEL_SIZE:
+                    errors.append("%s is %dx%d; a Reel here is 1080x1920" % ((video,) + tuple(videos[0].get("size") or (0, 0))))
+                fps = videos[0].get("fps", 0)
+                if not IG_REEL_FPS[0] <= fps <= IG_REEL_FPS[1]:
+                    errors.append("%s runs at %.1f fps; Meta takes 23-60" % (video, fps))
+            if len(sounds) != 1 or sounds[0].get("codec") != "mp4a":
+                errors.append("%s needs one AAC sound track (Instagram shows muted reels less)" % video)
+            elif sounds[0].get("rate", 0) > 48000 or sounds[0].get("channels") not in (1, 2):
+                errors.append("%s sound must be at most 48 kHz, mono or stereo" % video)
+    cover = post.get("cover") or ""
+    cover_path = os.path.join(root, cover)
+    if not cover:
+        errors.append("a Reel needs a cover (the JPEG tools/render_reel.py writes next to the video)")
+    elif not os.path.isfile(cover_path):
+        errors.append("cover %s not found" % cover)
+    else:
+        with Image.open(cover_path) as im:
+            if im.format != "JPEG" or im.size != IG_REEL_SIZE:
+                errors.append("cover %s must be a 1080x1920 JPEG" % cover)
+        if os.path.getsize(cover_path) > MAX_IMAGE_BYTES:
+            errors.append("cover %s is larger than 8 MB" % cover)
     return errors
 
 
@@ -375,6 +528,9 @@ def check_queue(posts, published=None, backend=None, platform="threads"):
         if isinstance(when, str) and when >= STYLE_FROM:
             for problem in style_problems(post.get("text")):
                 errors.append("%s: %s" % (pid, problem))
+        if post.get("video") is not None and REEL_SWIPE_RE.search(post.get("text") or ""):
+            errors.append("%s: the caption of a Reel talks about slides or swiping; say the answer comes at "
+                          "the end of the video" % pid)
         if pid in by_id:
             errors.append("%s: duplicate id" % pid)
         by_id[pid] = post
